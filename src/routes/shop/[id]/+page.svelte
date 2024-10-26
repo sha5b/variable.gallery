@@ -151,6 +151,11 @@
 			width: 100%;
 		}
 
+		.thumbnail-slider-container {
+			overflow-y: auto; /* Enable vertical scrolling */
+			max-height: 60vh; /* Set a max height for scrolling */
+		}
+
 		.thumbnail-slider {
 			flex-direction: column; /* Stack images vertically on mobile */
 		}
