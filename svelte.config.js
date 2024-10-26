@@ -4,7 +4,6 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const config = {
   kit: {
     adapter: adapter(),
-    outDir: 'build' // Ensures the output is in /build
   },
   preprocess: vitePreprocess()
 };

@@ -1,12 +1,9 @@
 [phases.install]
 cmd = "npm install"
 
-[phases.setup]
-nixpkgs_inputs = ["nodejs-20_x"]
-
 [phases.build]
 cmd = "npm run build"
 
 [phases.start]
-cmd = "node build/index.js" # Adjust to your start command
+cmd = "vite preview" # Adjust to your start command
 
