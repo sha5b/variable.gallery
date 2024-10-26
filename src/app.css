@@ -3,10 +3,31 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* CSS Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--font-primary);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* CSS Variables for Global Styles */
 :root {
   /* Colors */
-  --primary-color: #6b46c1;
+  --primary-color: #0a0a1a; /* Bluish black */
   --secondary-color: #4c51bf;
   --background-color: #ffffff;
   --text-color: #333333;
@@ -24,32 +45,20 @@
   --font-heading: 'Montserrat', sans-serif;
 
   /* Spacing */
-  --page-padding: 1rem;       /* Default padding for mobile */
-  --page-padding-md: 4rem;    /* Padding for medium and larger screens */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --page-padding: var(--spacing-md);       /* Default padding for mobile */
+  --page-padding-md: var(--spacing-lg);    /* Padding for medium and larger screens */
 }
 
-/* Global Reset */
-*,
-*::before,
-*::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-/* Body and HTML styles */
-html, body {
-  height: 100%;
-  font-family: var(--font-primary);
-  background-color: var(--background-color);
-  color: var(--text-color);
-}
-
-/* Container with centralized layout and padding */
+/* Responsive Container with padding */
 .container {
-  padding: var(--page-padding);
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md); /* Ensure consistent gap */
 }
 
 @media (min-width: 768px) {
@@ -58,7 +67,7 @@ html, body {
   }
 }
 
-/* Navigation bar with consistent padding */
+/* Navigation Padding */
 nav {
   padding: var(--page-padding);
 }
@@ -73,26 +82,34 @@ nav {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 900;
-  margin-bottom: 1rem;
+  margin-bottom: var(--spacing-md);
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Utility for centralized flex containers */
+/* Utility for Centralized Flex Containers */
 .flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Example Usage of Primary Button */
+/* Spacing Utility Classes */
+.margin-xs { margin: var(--spacing-xs); }
+.margin-sm { margin: var(--spacing-sm); }
+.margin-md { margin: var(--spacing-md); }
+.margin-lg { margin: var(--spacing-lg); }
+.margin-xl { margin: var(--spacing-xl); }
+
+.padding-xs { padding: var(--spacing-xs); }
+.padding-sm { padding: var(--spacing-sm); }
+.padding-md { padding: var(--spacing-md); }
+.padding-lg { padding: var(--spacing-lg); }
+.padding-xl { padding: var(--spacing-xl); }
+
+/* Example Primary Button */
 .button-primary {
   background-color: var(--primary-color);
-  color: #ffffff;
-  padding: 0.5rem 1rem;
+  color: var(--background-color);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 0.25rem;
   transition: background-color 0.3s ease;
 }

@@ -14,10 +14,10 @@
   </div>
 
   <!-- Text Section aligned to top left -->
-  <div class="md:w-1/4 w-full flex flex-col justify-start items-start p-6 bg-gray-50 rounded-lg">
-    <h2 class="text-2xl font-bold mb-4 text-gray-800">{name}</h2>
-    <p class="text-gray-700 mb-4">{description}</p>
-    <a href={buttonLink} class="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+  <div class="md:w-1/4 w-full flex flex-col justify-start items-start p-6 bg-[var(--background-color)] rounded-lg">
+    <h2 class="text-2xl font-bold mb-4 text-[var(--text-color)]">{name}</h2>
+    <p class="text-[var(--text-color)] mb-4">{description}</p>
+    <a href={buttonLink} class="bg-[var(--primary-color)] text-[var(--background-color)] py-2 px-4 rounded-md hover:bg-[var(--secondary-color)] transition-colors">
       {buttonText}
     </a>
   </div>

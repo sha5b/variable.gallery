@@ -26,12 +26,12 @@
 
 <div class="w-full p-4 pt-16">
   {#if error}
-    <p class="text-red-500">{error}</p>
+    <p class="text-[var(--error-color)]">{error}</p>
   {:else}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
       {#each Object.keys(productsByCategory) as categoryName}
         <div class="category-container w-full">
-          <h2 class="text-2xl font-semibold my-4">{categoryName}</h2>
+          <h2 class="text-2xl font-semibold my-4 text-[var(--text-color)]">{categoryName}</h2>
           
           <!-- Use FeaturedSlider for each category's products -->
           <FeaturedSlider products={productsByCategory[categoryName]} />
@@ -43,11 +43,11 @@
 </div>
 
 <style>
-.category-container {
+  .category-container {
     position: relative;
     overflow: hidden;
     padding: 1rem;
     box-sizing: border-box;
-    background-color: #f9f9f9;
-}
+    background-color: var(--background-color);
+  }
 </style>

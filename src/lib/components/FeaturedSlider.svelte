@@ -124,8 +124,8 @@
 	}
 
 	.tag {
-		background-color: #6b46c1; /* Purple color */
-		color: #ffffff;
+		background-color: var(--primary-color); /* Purple color updated to primary color */
+		color: var(--background-color);
 		padding: 0.25rem 0.5rem;
 		border-radius: 9999px;
 		font-size: 0.75rem;

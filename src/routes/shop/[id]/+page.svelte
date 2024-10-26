@@ -55,14 +55,14 @@
 {#if product}
 	<div class="product-container flex h-screen w-full">
 		<!-- Details Section (Reordered on Mobile) -->
-		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-white p-8">
-			<h1 class="text-4xl font-bold">{product.name}</h1>
-			<p class="text-lg text-gray-700">{product.short_description || product.description}</p>
+		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-[var(--background-color)] p-8">
+			<h1 class="text-4xl font-bold text-[var(--text-color)]">{product.name}</h1>
+			<p class="text-lg text-[var(--text-color)]">{product.short_description || product.description}</p>
 
 			<!-- Price Display Logic -->
 			<p class="text-2xl font-semibold">
 				{#if product.sale_price && product.sale_price !== ''}
-					<span class="text-gray-500 line-through">€{product.regular_price}</span>
+					<span class="text-[var(--secondary-color)] line-through">€{product.regular_price}</span>
 					€{product.sale_price}
 				{:else if product.regular_price}
 					€{product.regular_price}
@@ -73,7 +73,7 @@
 
 			<button
 				on:click={addToCart}
-				class="rounded-md bg-purple-500 px-4 py-2 font-semibold text-white transition duration-300 hover:bg-purple-700"
+				class="rounded-md bg-[var(--primary-color)] px-4 py-2 font-semibold text-[var(--background-color)] transition duration-300 hover:bg-[var(--secondary-color)]"
 			>
 				Add to Cart
 			</button>
@@ -95,7 +95,6 @@
 {/if}
 
 <style>
-	/* Original layout for larger screens */
 	.product-container {
 		display: flex;
 	}
@@ -136,14 +135,13 @@
 		border-radius: 10px;
 	}
 
-	/* Mobile-only styles */
 	@media (max-width: 768px) {
 		.product-container {
 			flex-direction: column;
 		}
 
 		.product-details {
-			order: -1; /* Show title and button first on mobile */
+			order: -1;
 			width: 100%;
 		}
 
@@ -152,12 +150,12 @@
 		}
 
 		.thumbnail-slider-container {
-			overflow-y: auto; /* Enable vertical scrolling */
-			max-height: 60vh; /* Set a max height for scrolling */
+			overflow-y: auto;
+			max-height: 60vh;
 		}
 
 		.thumbnail-slider {
-			flex-direction: column; /* Stack images vertically on mobile */
+			flex-direction: column;
 		}
 
 		.featured-card {

@@ -12,11 +12,11 @@
   }
 </script>
   
-<div class="w-full my-8 p-6 bg-gray-100 rounded-lg text-left flex flex-col h-full justify-end items-start">
-  <button class="bg-purple-500 text-white px-6 py-2 rounded-md text-xl transition-colors hover:bg-purple-700" on:click={handleButtonClick}>
+<div class="w-full my-8 p-6 rounded-lg text-left flex flex-col h-full justify-end items-start">
+  <button class="bg-[var(--primary-color)] text-[var(--background-color)] px-6 py-2 rounded-md text-xl transition-colors hover:bg-[var(--secondary-color)]" on:click={handleButtonClick}>
     Contact Us
   </button>
-  <p class="text-gray-700 text-lg mt-4 text-left">
+  <p class="text-[var(--text-color)] text-lg mt-4 text-left">
     If you have any questions or inquiries, feel free to reach out to us!
   </p>
 </div>
