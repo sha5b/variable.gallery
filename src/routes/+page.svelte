@@ -6,7 +6,7 @@
 	// Import components
 	import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
 	import Contact from '$lib/components/Contact.svelte';
-	import TypeDisplay from '$lib/components/TypeDisplay.svelte';
+	import TagDisplay from '$lib/components/TagDisplay.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
 
@@ -70,7 +70,7 @@
 			buttonLink={latestProduct.permalink}
 		/>
 	{/if}
-	<TypeDisplay {products} />
+	<TagDisplay {products} />
 </div>
 
 <style>

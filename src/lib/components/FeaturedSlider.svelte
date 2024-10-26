@@ -42,9 +42,13 @@
 	<div class="featured-slider">
 		{#each limitedProducts as product}
 			<div class="featured-card">
-				<!-- Display Product Type Above the Image -->
-				<div class="type-container absolute top-2 left-2 z-10 bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
-					{product.type}
+				<!-- Display Product Tags Above the Image -->
+				<div class="tag-container absolute top-2 left-2 z-10 flex gap-1 flex-wrap">
+					{#each product.tags as tag}
+						<span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
+							{tag.name}
+						</span>
+					{/each}
 				</div>
 				
 				<!-- Product Image and Click Event to Navigate to Product Page -->
@@ -94,9 +98,12 @@
 		border-radius: 10px;
 	}
 
-	.type-container {
-		/* Position the product type above the image */
+	.tag-container {
+		/* Position tags above the image */
 		padding: 0.5rem;
 		border-radius: 0.5rem;
+		display: flex;
+		gap: 0.25rem;
+		flex-wrap: wrap;
 	}
 </style>

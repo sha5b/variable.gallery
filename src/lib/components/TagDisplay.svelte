@@ -3,33 +3,33 @@
   import { fade, fly } from 'svelte/transition';
 
   export let products;
-  let selectedType = null;
+  let selectedTag = null;
 
-  // Filter products based on selected type
-  $: filteredProducts = selectedType
-    ? products.filter(product => product.type === selectedType)
+  // Filter products based on selected tag
+  $: filteredProducts = selectedTag
+    ? products.filter(product => product.tags.some(tag => tag.name === selectedTag))
     : products;
 
-  function handleTypeClick(type) {
-    selectedType = selectedType === type ? null : type;
+  function handleTagClick(tag) {
+    selectedTag = selectedTag === tag ? null : tag;
   }
 
-  // Extract unique types from products
-  let uniqueTypes = [...new Set(products.map(product => product.type))];
+  // Extract unique tags from products
+  let uniqueTags = [...new Set(products.flatMap(product => product.tags.map(tag => tag.name)))];
 </script>
 
 <div class="w-full h-full space-y-8">
-  <!-- Type Pills -->
+  <!-- Tag Pills -->
   <div class="flex w-full gap-6">
     <div class="bg-purple-600 p-4 flex gap-4 flex-wrap rounded-lg" style="width: fit-content;">
-      {#each uniqueTypes as type}
+      {#each uniqueTags as tag}
         <span
-          on:click={() => handleTypeClick(type)}
+          on:click={() => handleTagClick(tag)}
           class={`px-4 py-2 rounded-full cursor-pointer ${
-            selectedType === type ? 'bg-purple-700 text-white' : 'bg-gray-50 text-gray-600'
+            selectedTag === tag ? 'bg-purple-700 text-white' : 'bg-gray-50 text-gray-600'
           }`}
         >
-          {type}
+          {tag}
         </span>
       {/each}
     </div>
@@ -47,12 +47,16 @@
           style="cursor: pointer;"
         >
           <img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover" />
-          <!-- Overlay with Product Title and Type -->
+          <!-- Overlay with Product Title and Tags -->
           <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center items-center text-center p-4">
             <h3 class="text-lg font-bold text-white mb-2">{product.name}</h3>
-            <span class="bg-purple-600 text-white px-3 py-2 rounded-full text-sm">
-              {product.type}
-            </span>
+            <div class="flex gap-2 flex-wrap justify-center">
+              {#each product.tags as tag}
+                <span class="bg-purple-600 text-white px-3 py-2 rounded-full text-sm">
+                  {tag.name}
+                </span>
+              {/each}
+            </div>
           </div>
         </div>
       </div>
