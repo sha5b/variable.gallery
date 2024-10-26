@@ -58,7 +58,7 @@
           {#each $cart as item (item.id)}
             <li class="flex items-start">
               <!-- Use product's main thumbnail from WooCommerce data -->
-              <img src={item.images[0]?.src} alt={item.name} class="w-20 h-20 object-cover rounded-lg mr-4" />
+              <img src={item.images?.[0]?.src || '/path/to/placeholder.jpg'} alt={item.name} class="w-20 h-20 object-cover rounded-lg mr-4" />
               <div class="flex-1">
                 <!-- Product Title -->
                 <h3 class="text-lg font-semibold mb-2">{item.name}</h3>
