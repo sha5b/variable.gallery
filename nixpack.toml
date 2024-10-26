@@ -1,0 +1,5 @@
+[phases.build]
+cmd = "npm run build"
+
+[phases.start]
+cmd = "node build/index.js"
