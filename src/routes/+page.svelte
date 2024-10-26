@@ -38,7 +38,7 @@
 	getRandomTypeAndThumbnail();
 </script>
 
-<div class="grid min-h-screen grid-rows-[auto_1fr] space-y-8 px-16 pt-16">
+<div class="grid min-h-screen grid-rows-[auto_1fr] space-y-8 px-4 md:px-16 pt-16">
 	<div>
 		<!-- Top Featured Slider -->
 		<div class="row-start-1 mb-8">
@@ -46,13 +46,13 @@
 		</div>
 
 		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="row-start-2 flex gap-4">
+		<div class="row-start-2 flex flex-col md:flex-row gap-4">
 			<!-- Product Banner with Random Tag and Thumbnail -->
 			<div class="flex-1 rounded-lg bg-gray-50 p-8">
 				<Header />
 			</div>
 			<!-- Category Display and Contact -->
-			<div class="flex flex-1 flex-col justify-between space-y-4">
+			<div class="flex flex-1 flex-col space-y-4">
 				<div class="rounded-lg bg-gray-50 p-8"></div>
 				<div class="rounded-lg bg-gray-100 p-8">
 					<Contact />

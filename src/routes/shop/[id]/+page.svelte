@@ -11,14 +11,8 @@
 	let currentImageIndex = 0;
 	let gallery = [];
 
-	console.log(products); // Check if products data is loaded as expected
-	console.log($page.params.id); // Confirm that id is being passed correctly
-	// Find the product by ID
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
 
-	console.log(product);
-
-	// Set up the gallery if the product exists
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
 	}
@@ -30,7 +24,6 @@
 		}
 	}
 
-	// Image modal handling
 	function openModal(index) {
 		currentImageIndex = index;
 		modalOpen = true;
@@ -60,20 +53,9 @@
 <Modal images={gallery} bind:open={modalOpen} bind:currentIndex={currentImageIndex} />
 
 {#if product}
-	<div class="flex h-screen w-full">
-		<div class="flex h-full w-3/4 flex-col">
-			<div class="thumbnail-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
-				<div class="thumbnail-slider">
-					{#each gallery as image, index}
-						<div class="featured-card" on:click={() => openModal(index)}>
-							<img src={image} alt="Gallery image" class="product-image" />
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-
-		<div class="flex h-full w-1/4 flex-col justify-end space-y-4 bg-white p-8">
+	<div class="product-container flex h-screen w-full">
+		<!-- Details Section (Reordered on Mobile) -->
+		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-white p-8">
 			<h1 class="text-4xl font-bold">{product.name}</h1>
 			<p class="text-lg text-gray-700">{product.short_description || product.description}</p>
 
@@ -96,10 +78,28 @@
 				Add to Cart
 			</button>
 		</div>
+
+		<!-- Image Gallery Section -->
+		<div class="image-gallery flex h-full w-full md:w-3/4 flex-col">
+			<div class="thumbnail-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
+				<div class="thumbnail-slider">
+					{#each gallery as image, index}
+						<div class="featured-card" on:click={() => openModal(index)}>
+							<img src={image} alt="Gallery image" class="product-image" />
+						</div>
+					{/each}
+				</div>
+			</div>
+		</div>
 	</div>
 {/if}
 
 <style>
+	/* Original layout for larger screens */
+	.product-container {
+		display: flex;
+	}
+
 	.thumbnail-slider-container {
 		width: 100%;
 		overflow: hidden;
@@ -134,5 +134,31 @@
 		height: 100%;
 		object-fit: cover;
 		border-radius: 10px;
+	}
+
+	/* Mobile-only styles */
+	@media (max-width: 768px) {
+		.product-container {
+			flex-direction: column;
+		}
+
+		.product-details {
+			order: -1; /* Show title and button first on mobile */
+			width: 100%;
+		}
+
+		.image-gallery {
+			width: 100%;
+		}
+
+		.thumbnail-slider {
+			flex-direction: column; /* Stack images vertically on mobile */
+		}
+
+		.featured-card {
+			flex: 1 0 auto;
+			height: auto;
+			width: 100%;
+		}
 	}
 </style>

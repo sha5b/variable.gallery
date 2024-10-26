@@ -28,14 +28,14 @@
 	`;
   
 	const googleMapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509486!2d144.95373531531732!3d-37.81720997975154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d43f1f0d183%3A0x5045675218cee7e0!2sMelbourne%20VIC%2C%20Australia!5e0!3m2!1sen!2sus!4v1632945465837!5m2!1sen!2sus";
-  </script>
+</script>
   
-  <div class="about-container w-full px-12 pt-24">
-	<!-- Main Flex Container to Arrange Items Left to Right -->
-	<div class="flex gap-16 items-start">
+<div class="about-container w-full px-4 md:px-12 pt-24">
+	<!-- Main Flex Container to Arrange Items -->
+	<div class="flex flex-col md:flex-row gap-16 items-start">
 	  
 	  <!-- Left Column: Company Information and Legal Information -->
-	  <div class="w-1/2 space-y-8">
+	  <div class="w-full md:w-1/2 space-y-8">
 		<!-- Company Overview -->
 		<section class="space-y-4">
 		  <h1 class="text-4xl font-bold">About {companyInfo.name}</h1>
@@ -63,7 +63,7 @@
 	  </div>
   
 	  <!-- Right Column: Map -->
-	  <div class="w-1/2">
+	  <div class="w-full md:w-1/2">
 		<section class="space-y-4">
 		  <h2 class="text-2xl font-semibold">Our Location</h2>
 		  <iframe
@@ -79,23 +79,15 @@
 	  </div>
   
 	</div>
-  </div>
+</div>
   
-  <style>
+<style>
 	.about-container {
-	  max-width: 100%; /* Full-width container */
-	  line-height: 1.75;
+		max-width: 100%; /* Full-width container */
+		line-height: 1.75;
 	}
   
 	iframe {
-	  border: none;
+		border: none;
 	}
-  
-	/* Responsive Layout */
-	@media (max-width: 768px) {
-	  .flex {
-		flex-direction: column;
-	  }
-	}
-  </style>
-  
+</style>

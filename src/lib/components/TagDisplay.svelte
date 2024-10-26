@@ -33,7 +33,8 @@
         </span>
       {/each}
     </div>
-    <div class="flex-grow bg-gray-100 rounded-lg"></div>
+    <!-- Right Box Hidden on Mobile -->
+    <div class="hidden md:flex flex-grow bg-gray-100 rounded-lg"></div>
   </div>
 
   <!-- Product Grid -->
@@ -63,6 +64,7 @@
     {/each}
   </div>
 </div>
+
 
 <style>
   .featured-card {
