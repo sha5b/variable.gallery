@@ -37,7 +37,7 @@
 	});
 </script>
 
-<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center p-4 bg-white border-b border-gray-200 px-16">
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center bg-white border-b border-gray-200 px-4 md:px-16 py-4">
 	<!-- Logo -->
 	<div class="text-sm font-semibold">
 		<a href="/" class="text-gray-800 hover:text-purple-500">
@@ -55,7 +55,7 @@
 	<!-- Cart and Hamburger Menu -->
 	<div class="flex items-center relative">
 		<!-- Cart Icon (hidden on mobile) -->
-		<button class="hidden md:block text-2xl ml-4 transition-colors" on:click={handleCartIconClick}>
+		<button class="hidden md:block text-2xl transition-colors" on:click={handleCartIconClick}>
 			🛒
 			{#if totalItems > 0}
 				<span class="absolute -top-1 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -65,7 +65,7 @@
 		</button>
 
 		<!-- Hamburger Menu (visible on mobile) -->
-		<div class="burger-icon md:hidden flex flex-col gap-1 cursor-pointer" on:click={toggleMenu}>
+		<div class="burger-icon md:hidden flex flex-col gap-1 cursor-pointer ml-4" on:click={toggleMenu}>
 			<div class="w-6 h-[2px] bg-gray-800"></div>
 			<div class="w-6 h-[2px] bg-gray-800"></div>
 			<div class="w-6 h-[2px] bg-gray-800"></div>
@@ -75,7 +75,7 @@
 	<!-- Mobile Menu -->
 	{#if isMenuOpen}
 		<div class="menu-container absolute top-full right-4 mt-2 w-48 bg-white border rounded-md shadow-lg flex flex-col items-start p-4 md:hidden">
-			<ul class="flex flex-col gap-4 list-none text-right w-full">
+			<ul class="flex flex-col gap-4 list-none w-full text-left">
 				<li><a href="/shop" class="text-gray-800 hover:text-purple-500">Shop</a></li>
 				<li><a href="/about" class="text-gray-800 hover:text-purple-500">About</a></li>
 				<li><a href="/profile" class="text-gray-800 hover:text-purple-500">Profile</a></li>
@@ -92,3 +92,4 @@
 		</div>
 	{/if}
 </nav>
+

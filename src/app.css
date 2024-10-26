@@ -1,29 +1,102 @@
+/* Import Tailwind base, components, and utilities */
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Global CSS Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* CSS Variables for Global Styles */
+:root {
+  /* Colors */
+  --primary-color: #6b46c1;
+  --secondary-color: #4c51bf;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --accent-color: #f687b3;
+  --error-color: #e53e3e;
+
+  /* Font Sizes */
+  --font-size-small: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-large: 1.25rem;
+  --font-size-xlarge: 2rem;
+
+  /* Font Families */
+  --font-primary: 'Work Sans', sans-serif;
+  --font-heading: 'Montserrat', sans-serif;
+
+  /* Spacing */
+  --page-padding: 1rem;       /* Default padding for mobile */
+  --page-padding-md: 4rem;    /* Padding for medium and larger screens */
+}
+
+/* Global Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body and HTML styles */
+html, body {
+  height: 100%;
+  font-family: var(--font-primary);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+/* Container with centralized layout and padding */
+.container {
+  padding: var(--page-padding);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: var(--page-padding-md);
   }
-  
-  html, body {
-    height: 100%;
-    font-family: 'Work Sans', sans-serif;
-    background-color: #ffffff;
-    color: #333;
+}
+
+/* Navigation bar with consistent padding */
+nav {
+  padding: var(--page-padding);
+}
+
+@media (min-width: 768px) {
+  nav {
+    padding: var(--page-padding-md);
   }
-  
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    margin-bottom: 1rem;
-  }
-  
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-  
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  margin-bottom: 1rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Utility for centralized flex containers */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Example Usage of Primary Button */
+.button-primary {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.3s ease;
+}
+
+.button-primary:hover {
+  background-color: var(--secondary-color);
+}
