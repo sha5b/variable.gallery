@@ -46,11 +46,9 @@
 		{#each limitedProducts as product}
 			<div class="featured-card" on:click={() => handleProductClick(product.id)}>
 				<!-- Display Product Tags Above the Image -->
-				<div class="tag-container absolute top-2 left-2 z-10 flex gap-1 flex-wrap">
+				<div class="tag-container">
 					{#each product.tags as tag}
-						<span class="bg-purple-500 text-gray-200 px-2 py-1 rounded-full text-xs font-semibold">
-							{tag.name}
-						</span>
+						<span class="tag">{tag.name}</span>
 					{/each}
 				</div>
 				
@@ -82,7 +80,7 @@
 		.featured-card {
 			flex: 0 0 80%; /* Take up 80% of the container width */
 			scroll-snap-align: start;
-			transition: none; /* Disable hover scaling on mobile */
+			position: relative;
 		}
 	}
 
@@ -116,10 +114,21 @@
 	}
 
 	.tag-container {
-		padding: 0.5rem;
-		border-radius: 0.5rem;
+		position: absolute;
+		top: 8px;
+		left: 8px;
 		display: flex;
 		gap: 0.25rem;
 		flex-wrap: wrap;
+		z-index: 10;
+	}
+
+	.tag {
+		background-color: #6b46c1; /* Purple color */
+		color: #ffffff;
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
 	}
 </style>
