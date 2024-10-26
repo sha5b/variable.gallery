@@ -67,7 +67,7 @@
 			imageSrc={latestProduct.images[0]?.src}
 			name={latestProduct.name}
 			description={latestProduct.short_description}
-			buttonLink={latestProduct.permalink}
+			buttonLink={`/shop/${latestProduct.id}`} 
 		/>
 	{/if}
 	<TagDisplay {products} />

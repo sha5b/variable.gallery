@@ -34,6 +34,11 @@
     closeCart();
     goto('/checkout');
   }
+
+  function viewCart() {
+    closeCart();
+    goto('/cart');
+  }
 </script>
 
 <!-- Cart Slider -->
@@ -74,7 +79,6 @@
                   {/if}
                 </div>
 
-
                 <!-- Remove Button -->
                 <button on:click={() => removeItem(item.id)} class="bg-red-500 text-white rounded-md w-full py-2 mt-2 font-semibold hover:bg-red-600">Remove</button>
               </div>
@@ -85,8 +89,9 @@
     </div>
   </div>
 
-  <!-- Fixed Checkout Button -->
-  <div class="p-6">
+  <!-- Fixed Checkout and View Cart Buttons -->
+  <div class="p-6 space-y-4">
+    <button on:click={viewCart} class="bg-white text-purple-500 w-full py-3 rounded-md font-semibold hover:bg-purple-100">View Cart</button>
     <button on:click={handleCheckout} class="bg-white text-purple-500 w-full py-3 rounded-md font-semibold hover:bg-purple-100">Checkout</button>
   </div>
 </div>

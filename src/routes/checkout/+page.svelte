@@ -1,130 +1,139 @@
 <script>
-  import { cart, addItem, removeItem } from '$lib/stores/cartStore'; // Cart items store with functions
-  import { userInfo } from '$lib/stores/userInfoStore'; // New store for user information
+	import { cart } from '$lib/stores/cartStore'; // Import your cart store
+	import { goto } from '$app/navigation';
 
-  // Calculate total price
-  $: total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0); // Assuming item.price is in cents
+	let userInfo = {
+		email: '',
+		firstName: '',
+		lastName: '',
+		address: '',
+		apartment: '',
+		postalCode: '',
+		city: '',
+		phone: '',
+		country: 'Austria'
+	};
 
-  // Format price (assumes price is in cents)
-  function formatPrice(price) {
-    return `€${(price / 1).toFixed(2)}`;
-  }
+	let savePaymentInfo = false;
+	let addOrderNote = false;
 
-  // Function to update user information
-  function handleInputChange(event) {
-    userInfo.update((info) => ({
-      ...info,
-      [event.target.name]: event.target.value,
-    }));
-  }
+	function placeOrder() {
+		// Handle the order placement logic here
+		goto('/order-confirmation'); // Example route after order is placed
+	}
 
-  // Increase quantity of an item
-  function increaseQuantity(item) {
-    addItem(item);
-  }
+	// Calculate the total price
+	let total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
-  // Decrease quantity of an item or remove if quantity is 1
-  function decreaseQuantity(item) {
-    cart.update((items) => {
-      const existingItem = items.find((i) => i.id === item.id);
-      if (existingItem.quantity > 1) {
-        existingItem.quantity -= 1;
-      } else {
-        return items.filter((i) => i.id !== item.id);
-      }
-      return [...items];
-    });
-  }
-
-  // Remove item from cart completely
-  function removeItemFromCart(itemId) {
-    removeItem(itemId);
-  }
+	// Format price function
+	function formatPrice(price) {
+		return `€${(price / 100).toFixed(2)}`;
+	}
 </script>
 
-<div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-  <!-- Left Column: Cart Items and Total -->
-  <div>
-    <h1 class="text-3xl font-bold mb-6">Your Cart</h1>
-    {#if $cart.length === 0}
-      <p>Your cart is empty.</p>
-    {:else}
-      <div class="grid gap-4">
-        {#each $cart as item}
-          <div class="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
-            <div class="flex items-center">
-              <!-- WooCommerce uses images array for product images -->
-              <img src={item.images[0]?.src} alt={item.name} class="w-16 h-16 rounded-lg mr-4" />
-              <div>
-                <h3 class="text-lg font-semibold">{item.name}</h3>
-                {#if item.variation}
-                  <p class="text-sm text-gray-600">Variation: {item.variation}</p>
-                {/if}
-                <!-- Display the price per item -->
-                <p class="text-sm text-gray-600">Price: {formatPrice(item.price)}</p>
-              </div>
-            </div>
+<div class="checkout-container mx-auto my-10 p-6 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+	<!-- Left Column: Contact and Billing Information -->
+	<div class="col-span-2 space-y-6">
+		<h1 class="text-4xl font-bold">Checkout</h1>
 
-            <div class="flex items-center">
-              <!-- Quantity Controls -->
-              <button on:click={() => decreaseQuantity(item)} class="bg-white text-purple-500 rounded-md px-2 py-1 font-semibold hover:bg-purple-100">-</button>
-              <span class="mx-2">{item.quantity}</span>
-              <button on:click={() => increaseQuantity(item)} class="bg-white text-purple-500 rounded-md px-2 py-1 font-semibold hover:bg-purple-100">+</button>
-            </div>
+		<!-- Contact Information -->
+		<div>
+			<h2 class="text-lg font-semibold">Contact information</h2>
+			<p class="text-gray-500 mb-2">We'll use this email to send you details and updates about your order.</p>
+			<input type="email" bind:value={userInfo.email} placeholder="Email address" class="w-full border border-gray-300 p-2 rounded mb-4" />
+		</div>
 
-            <!-- Remove Button -->
-            <button on:click={() => removeItemFromCart(item.id)} class="bg-red-500 text-white rounded-md px-4 py-2 font-semibold hover:bg-red-600">
-              Remove
-            </button>
-          </div>
-        {/each}
-      </div>
+		<!-- Billing Address -->
+		<div>
+			<h2 class="text-lg font-semibold">Billing address</h2>
+			<p class="text-gray-500 mb-2">Enter the billing address that matches your payment method.</p>
 
-      <!-- Total Price -->
-      <div class="mt-6 text-right">
-        <h2 class="text-2xl font-bold">Total: {formatPrice(total)}</h2>
-      </div>
-    {/if}
-  </div>
+			<select bind:value={userInfo.country} class="w-full border border-gray-300 p-2 rounded mb-4">
+				<option value="Austria">Austria</option>
+				<option value="Germany">Germany</option>
+				<option value="Switzerland">Switzerland</option>
+			</select>
 
-  <!-- Right Column: User Information Form -->
-  <div>
-    <h1 class="text-3xl font-bold mb-6">Your Information</h1>
-    <form class="grid gap-4">
-      <label class="block">
-        <span class="text-gray-700">Name</span>
-        <input type="text" name="name" class="mt-1 block w-full p-2 border rounded" on:input={handleInputChange} placeholder="John Doe" />
-      </label>
+			<div class="grid grid-cols-2 gap-4">
+				<input type="text" bind:value={userInfo.firstName} placeholder="First name" class="w-full border border-gray-300 p-2 rounded" />
+				<input type="text" bind:value={userInfo.lastName} placeholder="Last name" class="w-full border border-gray-300 p-2 rounded" />
+			</div>
+			<input type="text" bind:value={userInfo.address} placeholder="Address" class="w-full border border-gray-300 p-2 rounded my-4" />
+			<input type="text" bind:value={userInfo.apartment} placeholder="Add apartment, suite, etc." class="w-full border border-gray-300 p-2 rounded mb-4" />
 
-      <label class="block">
-        <span class="text-gray-700">Email</span>
-        <input type="email" name="email" class="mt-1 block w-full p-2 border rounded" on:input={handleInputChange} placeholder="example@mail.com" />
-      </label>
+			<div class="grid grid-cols-2 gap-4">
+				<input type="text" bind:value={userInfo.postalCode} placeholder="Postal code" class="w-full border border-gray-300 p-2 rounded" />
+				<input type="text" bind:value={userInfo.city} placeholder="City" class="w-full border border-gray-300 p-2 rounded" />
+			</div>
+			<input type="tel" bind:value={userInfo.phone} placeholder="Phone (optional)" class="w-full border border-gray-300 p-2 rounded my-4" />
+		</div>
 
-      <label class="block">
-        <span class="text-gray-700">Address</span>
-        <input type="text" name="address" class="mt-1 block w-full p-2 border rounded" on:input={handleInputChange} placeholder="123 Main St" />
-      </label>
+		<!-- Payment Options -->
+		<div>
+			<h2 class="text-lg font-semibold">Payment options</h2>
+			<div class="border border-gray-300 rounded p-4">
+				<p class="font-semibold mb-2">Credit card / debit card</p>
+				<div class="flex gap-2 mb-4">
+					<input type="text" placeholder="Card number" class="w-full border border-gray-300 p-2 rounded" />
+					<input type="text" placeholder="Expiration date" class="w-full border border-gray-300 p-2 rounded" />
+					<input type="text" placeholder="Security code" class="w-full border border-gray-300 p-2 rounded" />
+				</div>
+				<div class="flex items-center">
+					<input type="checkbox" bind:checked={savePaymentInfo} class="mr-2" />
+					<label>Save payment information to my account for future purchases.</label>
+				</div>
+			</div>
+		</div>
 
-      <label class="block">
-        <span class="text-gray-700">Phone</span>
-        <input type="tel" name="phone" class="mt-1 block w-full p-2 border rounded" on:input={handleInputChange} placeholder="123-456-7890" />
-      </label>
-    </form>
+		<!-- Additional Options -->
+		<div class="flex items-center">
+			<input type="checkbox" bind:checked={addOrderNote} class="mr-2" />
+			<label>Add a note to your order</label>
+		</div>
+	</div>
 
-    <!-- Proceed Button -->
-    {#if $cart.length > 0}
-      <div class="mt-6">
-        <button class="bg-purple-500 text-white py-2 px-4 rounded-md hover:bg-purple-700">
-          Proceed to Payment
-        </button>
-      </div>
-    {/if}
-  </div>
+	<!-- Right Column: Order Summary -->
+	<div class="bg-gray-100 p-6 rounded-lg ">
+		<h2 class="text-2xl font-bold mb-6">Order summary</h2>
+		{#each $cart as item}
+			<div class="flex justify-between mb-4">
+				<div class="flex items-center">
+					<img src={item.images[0]?.src} alt={item.name} class="h-16 w-16 rounded-md object-cover mr-4" />
+					<div>
+						<p class="font-semibold">{item.name}</p>
+						<p class="text-gray-600">{formatPrice(item.price)}</p>
+					</div>
+				</div>
+				<p class="font-semibold">{formatPrice(item.quantity * item.price)}</p>
+			</div>
+		{/each}
+
+		<!-- Coupon and Totals -->
+		<div class="mb-4">
+			<label class="block font-semibold mb-2">Add a coupon</label>
+			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-2 rounded" />
+		</div>
+		<div class="flex justify-between text-lg font-semibold">
+			<span>Subtotal</span>
+			<span>{formatPrice(total)}</span>
+		</div>
+		<hr class="my-4" />
+		<div class="flex justify-between text-2xl font-bold">
+			<span>Total</span>
+			<span>{formatPrice(total)} EUR</span>
+		</div>
+
+		<button on:click={placeOrder} class="w-full mt-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition">
+			Place Order
+		</button>
+	</div>
 </div>
 
 <style>
-  .container {
-    max-width: 1200px;
-  }
+	.checkout-container {
+		max-width: 1200px;
+	}
+	.object-cover {
+		object-fit: cover;
+	}
 </style>

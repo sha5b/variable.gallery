@@ -45,7 +45,7 @@
 				<!-- Display Product Tags Above the Image -->
 				<div class="tag-container absolute top-2 left-2 z-10 flex gap-1 flex-wrap">
 					{#each product.tags as tag}
-						<span class="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
+						<span class="bg-purple-500 text-gray-200 px-2 py-1 rounded-full text-xs font-semibold">
 							{tag.name}
 						</span>
 					{/each}
@@ -62,7 +62,6 @@
 	.featured-slider-container {
 		width: 100%;
 		overflow: hidden;
-		margin: 2rem 0;
 		transition: all 0.3s ease;
 	}
 
