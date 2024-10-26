@@ -1,5 +1,8 @@
 [phases.install]
 cmd = "npm install"
 
+[phases.start]
+cmd = "vite preview"
+
 [phases.build]
 cmd = "npm run build && ls -la build"
