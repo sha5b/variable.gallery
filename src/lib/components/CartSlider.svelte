@@ -89,14 +89,14 @@
   <div class="p-[var(--page-padding)] bg-[var(--primary-color)] flex flex-col items-center gap-4 rounded-b-lg">
     <button 
       on:click={viewCart} 
-      class="bg-[var(--secondary-color)] text-[var(--background-color)] w-full py-3 rounded-md font-semibold hover:bg-[var(--accent-color)] transition-transform transform hover:scale-105"
+      class="bg-[var(--secondary-color)] text-[var(--background-color)] w-full py-3 rounded-md font-semibold hover:bg-[var(--accent-color)] transition-transform transform "
 
     >
       View Cart
     </button>
     <button 
       on:click={handleCheckout} 
-      class="bg-[var(--secondary-color)] text-[var(--background-color)] w-full py-3 rounded-md font-semibold hover:bg-[var(--accent-color)] transition-transform transform hover:scale-105"
+      class="bg-[var(--secondary-color)] text-[var(--background-color)] w-full py-3 rounded-md font-semibold hover:bg-[var(--accent-color)] transition-transform transform "
     >
       Checkout
     </button>

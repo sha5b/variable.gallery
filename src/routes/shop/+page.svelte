@@ -24,14 +24,16 @@
   }
 </script>
 
-<div class="w-full p-4 pt-16">
+<div class="shop-container w-full px-[var(--page-padding)] pt-[var(--spacing-xl)]">
   {#if error}
     <p class="text-[var(--error-color)]">{error}</p>
   {:else}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+    <div class="grid grid-cols-1 gap-[var(--spacing-md)] md:grid-cols-2">
       {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full">
-          <h2 class="text-2xl font-semibold my-4 text-[var(--text-color)]">{categoryName}</h2>
+        <div class="category-container w-full p-[var(--spacing-md)] bg-[var(--background-color-alt)] rounded-lg">
+          <h2 class="text-[var(--font-size-large)] font-semibold my-[var(--spacing-sm)] text-[var(--text-color)]">
+            {categoryName}
+          </h2>
           
           <!-- Use FeaturedSlider for each category's products -->
           <FeaturedSlider products={productsByCategory[categoryName]} />
@@ -43,11 +45,13 @@
 </div>
 
 <style>
+  .shop-container {
+    background-color: var(--background-color);
+  }
+  
   .category-container {
     position: relative;
     overflow: hidden;
-    padding: 1rem;
     box-sizing: border-box;
-    background-color: var(--background-color);
   }
 </style>

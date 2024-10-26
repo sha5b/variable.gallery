@@ -28,7 +28,6 @@
 		const uniqueTypes = [...new Set(products.map((product) => product.type))];
 		if (uniqueTypes.length > 0) {
 			randomType = uniqueTypes[Math.floor(Math.random() * uniqueTypes.length)];
-			// Find the latest product of the selected type
 			const latestProductWithType = products.find((product) => product.type === randomType);
 			thumbnail = latestProductWithType ? latestProductWithType.images[0]?.src : '';
 		}
@@ -38,27 +37,31 @@
 	getRandomTypeAndThumbnail();
 </script>
 
-<div class="grid min-h-screen grid-rows-[auto_1fr] space-y-8 px-4 md:px-16 pt-16">
+<div class="landing-container min-h-screen grid grid-rows-[auto_1fr] space-y-[var(--spacing-lg)] px-[var(--page-padding)] pt-[var(--spacing-xl)] md:px-[var(--page-padding-md)]">
 	<div>
 		<!-- Top Featured Slider -->
-		<div class="row-start-1 mb-8">
+		<div class="row-start-1 mb-[var(--spacing-lg)]">
 			<FeaturedSlider {products} />
 		</div>
 
 		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="row-start-2 flex flex-col md:flex-row gap-4">
+		<div class="row-start-2 flex flex-col gap-[var(--spacing-md)] md:flex-row">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="flex-1 rounded-lg bg-gray-50 p-8">
+			<div class="flex-1 rounded-lg bg-[var(--background-color-alt)] p-[var(--spacing-lg)]">
 				<Header />
 			</div>
+			
 			<!-- Category Display and Contact -->
-			<div class="flex flex-1 flex-col space-y-4">
-				<div class="rounded-lg bg-gray-50 p-8"></div>
-				<div class="rounded-lg bg-gray-100 p-8">
+			<div class="flex flex-1 flex-col space-y-[var(--spacing-md)]">
+				<div class="rounded-lg bg-[var(--background-color-alt)] p-[var(--spacing-lg)]">
+
+				</div>
+				<div class="rounded-lg bg-[var(--background-color)] p-[var(--spacing-lg)]">
 					<Contact />
 				</div>
 			</div>
 		</div>
+		
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
@@ -74,5 +77,9 @@
 </div>
 
 <style>
-	/* Additional styling if needed */
+	.landing-container {
+		padding-top: 4rem;
+		background-color: var(--background-color);
+		color: var(--text-color);
+	}
 </style>

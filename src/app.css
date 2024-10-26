@@ -57,7 +57,7 @@ a {
 /* Responsive Container with padding */
 .container {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: var(--spacing-md); /* Ensure consistent gap */
 }
 
