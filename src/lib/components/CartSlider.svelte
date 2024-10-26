@@ -4,7 +4,7 @@
   import { goto } from '$app/navigation';
   
   let isOpen;
-  
+
   // Subscribe to the store's value
   $: isCartSliderOpen.subscribe(value => {
     isOpen = value;
@@ -42,7 +42,7 @@
 </script>
 
 <!-- Cart Slider -->
-<div class={`fixed top-0 right-0 h-full w-[350px] bg-purple-500 text-white shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
+<div class={`fixed top-0 right-0 h-screen w-[350px] bg-purple-500 text-white shadow-lg transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
   <div class="p-6">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl font-bold">Your Cart</h2>
@@ -50,7 +50,7 @@
     </div>
     
     <!-- Cart Content (Scrollable) -->
-    <div class="cart-content flex-grow overflow-y-auto">
+    <div class="cart-content overflow-y-auto">
       {#if $cart.length === 0}
         <p>Your cart is empty</p>
       {:else}
@@ -90,14 +90,26 @@
   </div>
 
   <!-- Fixed Checkout and View Cart Buttons -->
-  <div class="p-6 space-y-4">
-    <button on:click={viewCart} class="bg-white text-purple-500 w-full py-3 rounded-md font-semibold hover:bg-purple-100">View Cart</button>
-    <button on:click={handleCheckout} class="bg-white text-purple-500 w-full py-3 rounded-md font-semibold hover:bg-purple-100">Checkout</button>
+  <div class="p-6 bg-purple-600 flex flex-col items-center gap-4 shadow-lg rounded-b-lg ">
+    <button 
+      on:click={viewCart} 
+      class="bg-white text-purple-600 w-full py-3 rounded-md font-semibold hover:bg-purple-200 shadow-md transition-transform transform hover:scale-105"
+    >
+      View Cart
+    </button>
+    <button 
+      on:click={handleCheckout} 
+      class="bg-purple-800 text-white w-full py-3 rounded-md font-semibold hover:bg-purple-700 shadow-md transition-transform transform hover:scale-105"
+    >
+      Checkout
+    </button>
   </div>
-</div>
+  </div>
+  
 
 <style>
+  /* Make the cart slider take the full viewport height */
   .cart-content {
-    max-height: calc(100vh - 160px);
+    max-height: calc(100vh - 240px); /* 240px accounts for top padding, header, and buttons area */
   }
 </style>
