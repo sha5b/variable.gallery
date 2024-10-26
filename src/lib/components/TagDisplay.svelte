@@ -18,7 +18,7 @@
   let uniqueTags = [...new Set(products.flatMap(product => product.tags.map(tag => tag.name)))];
 </script>
 
-<div class="w-full h-full space-y-8">
+<div class="w-full h-full space-y-8 pb-8">
   <!-- Tag Pills -->
   <div class="flex w-full gap-6">
     <div class="bg-purple-600 p-4 flex gap-4 flex-wrap rounded-lg" style="width: fit-content;">

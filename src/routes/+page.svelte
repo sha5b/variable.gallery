@@ -38,7 +38,7 @@
 	getRandomTypeAndThumbnail();
 </script>
 
-<div class="grid h-screen grid-rows-[auto_1fr] space-y-8 px-16 pt-16">
+<div class="grid min-h-screen grid-rows-[auto_1fr] space-y-8 px-16 pt-16">
 	<div>
 		<!-- Top Featured Slider -->
 		<div class="row-start-1 mb-8">
