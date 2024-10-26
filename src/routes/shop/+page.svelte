@@ -46,6 +46,7 @@
     .container {
       max-width: 100%;
       padding: 1rem;
+      padding-top:4rem;
     }
   
     .grid-container {
