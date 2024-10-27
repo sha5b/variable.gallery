@@ -77,21 +77,26 @@
 			
 			<!-- Additional Product Details -->
 			{#if product.dimensions}
-				<p class="text-sm text-[var(--text-color)]">
-					<strong>Dimensions:</strong> {product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
-				</p>
-			{/if}
-			{#if product.weight}
-				<p class="text-sm text-[var(--text-color)]"><strong>Weight:</strong> {product.weight || 'N/A'} kg</p>
-			{/if}
-
-			{#if product.categories.length > 0}
-				<p class="text-sm text-[var(--text-color)]"><strong>Categories:</strong> {#each product.categories as category} {category.name}{#if category !== product.categories[product.categories.length - 1]}, {/if} {/each}</p>
-			{/if}
-
-			{#if product.tags.length > 0}
-				<p class="text-sm text-[var(--text-color)]"><strong>Tags:</strong> {#each product.tags as tag} {tag.name}{#if tag !== product.tags[product.tags.length - 1]}, {/if} {/each}</p>
-			{/if}
+			<p class="text-sm text-[var(--text-color)] mb-2">
+			  <strong>Dimensions:</strong> {product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+			</p>
+		  {/if}
+		  {#if product.weight}
+			<p class="text-sm text-[var(--text-color)] mb-2"><strong>Weight:</strong> {product.weight || 'N/A'} kg</p>
+		  {/if}
+	
+		  <!-- Display Categories and Tags -->
+		  {#if product.categories.length > 0}
+			<p class="text-sm text-[var(--text-color)] mb-2">
+			  <strong>Categories:</strong> {#each product.categories as category}{category.name}{#if category !== product.categories[product.categories.length - 1]}, {/if}{/each}
+			</p>
+		  {/if}
+	
+		  {#if product.tags.length > 0}
+			<p class="text-sm text-[var(--text-color)] mb-2">
+			  <strong>Tags:</strong> {#each product.tags as tag}{tag.name}{#if tag !== product.tags[product.tags.length - 1]}, {/if}{/each}
+			</p>
+		  {/if}
 
 			<!-- Add to Cart Button -->
 			<button
