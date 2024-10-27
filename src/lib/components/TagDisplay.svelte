@@ -70,7 +70,7 @@
       </div>
   
       <!-- Min-Max Price Slider -->
-      <h2 class="font-bold mb-[var(--spacing-sm)] text-[var(--font-size-large)]">Filter by Price (€{minPrice} - €{maxPrice})</h2>
+      <h2 class="font-bold mb-[var(--spacing-sm)] text-[var(--font-size-large)] pt-4 pb-4">Price (€{minPrice} - €{maxPrice})</h2>
       <div class="relative flex items-center w-full">
         <input 
           type="range" 
