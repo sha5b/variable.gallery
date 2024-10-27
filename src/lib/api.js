@@ -1,18 +1,29 @@
-// src/lib/api.js
-export async function fetchWooCommerceData(endpoint) {
+export async function fetchWooCommerceData(endpoint, options = {}) {
     const apiUrl = import.meta.env.VITE_WP_API_URL;
     const consumerKey = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_KEY;
     const consumerSecret = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_SECRET;
+    const url = `${apiUrl}/${endpoint}`;
+    console.log(`Requesting URL: ${url}`);
 
-    const response = await fetch(`${apiUrl}/wc/v3/${endpoint}`, {
-        headers: {
-            'Authorization': 'Basic ' + btoa(`${consumerKey}:${consumerSecret}`)
+    try {
+        const response = await fetch(url, {
+            method: options.method || 'GET',
+            headers: {
+                'Authorization': 'Basic ' + btoa(`${consumerKey}:${consumerSecret}`),
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            body: options.body || null
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);
         }
-    });
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch data from ${endpoint}`);
+        return await response.json();
+    } catch (error) {
+        console.error(`Error fetching data from ${endpoint}:`, error);
+        throw error;
     }
-
-    return await response.json();
 }
