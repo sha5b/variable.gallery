@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
+  import TagDisplay from '$lib/components/TagDisplay.svelte';
 
   export let data;
   const { products, error } = data;
@@ -42,7 +43,9 @@
       {/each}
     </div>
   {/if}
+  <TagDisplay {products} />
 </div>
+
 
 <style>
   .shop-container {

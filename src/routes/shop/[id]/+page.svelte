@@ -58,7 +58,11 @@
 		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-[var(--background-color)] p-8">
 			<h1 class="text-4xl font-bold text-[var(--text-color)]">{product.name}</h1>
 			<p class="text-lg text-[var(--text-color)]">{product.short_description || product.description}</p>
-
+			
+			<!-- Relevant product information -->
+			<p class="text-sm text-[var(--text-color)]"><strong>SKU:</strong> {product.sku || 'N/A'}</p>
+			<p class="text-sm text-[var(--text-color)]"><strong>Stock Status:</strong> {product.stock_status || 'N/A'}</p>
+			
 			<!-- Price Display Logic -->
 			<p class="text-2xl font-semibold">
 				{#if product.sale_price && product.sale_price !== ''}
@@ -70,7 +74,26 @@
 					Price not available
 				{/if}
 			</p>
+			
+			<!-- Additional Product Details -->
+			{#if product.dimensions}
+				<p class="text-sm text-[var(--text-color)]">
+					<strong>Dimensions:</strong> {product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+				</p>
+			{/if}
+			{#if product.weight}
+				<p class="text-sm text-[var(--text-color)]"><strong>Weight:</strong> {product.weight || 'N/A'} kg</p>
+			{/if}
 
+			{#if product.categories.length > 0}
+				<p class="text-sm text-[var(--text-color)]"><strong>Categories:</strong> {#each product.categories as category} {category.name}{#if category !== product.categories[product.categories.length - 1]}, {/if} {/each}</p>
+			{/if}
+
+			{#if product.tags.length > 0}
+				<p class="text-sm text-[var(--text-color)]"><strong>Tags:</strong> {#each product.tags as tag} {tag.name}{#if tag !== product.tags[product.tags.length - 1]}, {/if} {/each}</p>
+			{/if}
+
+			<!-- Add to Cart Button -->
 			<button
 				on:click={addToCart}
 				class="rounded-md bg-[var(--primary-color)] px-4 py-2 font-semibold text-[var(--background-color)] transition duration-300 hover:bg-[var(--secondary-color)]"
@@ -97,6 +120,7 @@
 <style>
 	.product-container {
 		display: flex;
+		padding-top: 4rem;
 	}
 
 	.thumbnail-slider-container {
@@ -135,6 +159,7 @@
 		border-radius: 10px;
 	}
 
+	/* Mobile-specific adjustments */
 	@media (max-width: 768px) {
 		.product-container {
 			flex-direction: column;
@@ -147,21 +172,36 @@
 
 		.image-gallery {
 			width: 100%;
+			overflow: hidden;
 		}
 
 		.thumbnail-slider-container {
-			overflow-y: auto;
+			overflow-x: auto;
+			overflow-y: hidden;
 			max-height: 60vh;
+			display: flex;
+			align-items: center;
 		}
 
 		.thumbnail-slider {
-			flex-direction: column;
+			flex-direction: row;
+			gap: 1rem;
 		}
 
 		.featured-card {
-			flex: 1 0 auto;
+			flex: 0 0 80%;
 			height: auto;
 			width: 100%;
+			max-height: 300px; /* Set a max-height to prevent overflow */
+			cursor: pointer;
+		}
+
+		.product-image {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			max-height: 300px; /* Set max-height to ensure images don't overflow */
 		}
 	}
 </style>
+
