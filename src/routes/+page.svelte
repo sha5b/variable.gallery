@@ -3,6 +3,7 @@
 	export let data;
 	const { products } = data;
 
+	
 	// Import components
 	import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
 	import Contact from '$lib/components/Contact.svelte';
@@ -35,8 +36,10 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
+	
 </script>
 
+{console.log(products)}
 <div class="landing-container min-h-screen grid grid-rows-[auto_1fr] space-y-[var(--spacing-lg)] px-[var(--page-padding)] pt-[var(--spacing-xl)] md:px-[var(--page-padding-md)]">
 	<div>
 		<!-- Top Featured Slider -->

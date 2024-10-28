@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { addItem } from '$lib/stores/cartStore';
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
+	import CategorySlider from '$lib/components/CategorySlider.svelte';
 
 	export let data;
 	const { products } = data;
@@ -10,11 +11,20 @@
 	let modalOpen = false;
 	let currentImageIndex = 0;
 	let gallery = [];
+	let primaryCategory = '';
 
+	// Get the current product based on the page params
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
+	console.log("Current Product:", product); // Debugging: Check the current product
 
+	// If the product exists, set up gallery images and primary category
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
+		console.log("Product Categories:", product.categories); // Debugging: Check product categories
+		
+		// Choose the primary category (e.g., the first one in the categories array)
+		primaryCategory = product.categories && product.categories.length > 0 ? product.categories[0].name : '';
+		console.log("Primary Category:", primaryCategory); // Debugging: Check primary category value
 	}
 
 	function addToCart() {
@@ -108,7 +118,7 @@
 		</div>
 
 		<!-- Image Gallery Section -->
-		<div class="image-gallery flex h-full w-full md:w-3/4 flex-col">
+		<div class="image-gallery flex h-full w-full md:w-full flex-col">
 			<div class="thumbnail-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
 				<div class="thumbnail-slider">
 					{#each gallery as image, index}
@@ -121,6 +131,9 @@
 		</div>
 	</div>
 {/if}
+
+<!-- CategorySlider component with category passed as prop -->
+<CategorySlider {products} category={primaryCategory} />
 
 <style>
 	.product-container {
@@ -197,7 +210,7 @@
 			flex: 0 0 80%;
 			height: auto;
 			width: 100%;
-			max-height: 300px; /* Set a max-height to prevent overflow */
+			max-height: 300px;
 			cursor: pointer;
 		}
 
@@ -205,8 +218,7 @@
 			width: 100%;
 			height: 100%;
 			object-fit: cover;
-			max-height: 300px; /* Set max-height to ensure images don't overflow */
+			max-height: 300px;
 		}
 	}
 </style>
-
