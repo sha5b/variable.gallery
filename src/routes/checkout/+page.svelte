@@ -1,7 +1,7 @@
 <script>
 	import { cart } from '$lib/stores/cartStore';
 	import { goto } from '$app/navigation';
-	import { fetchWooCommerceData } from '$lib/api'; // Ensure this is for the V3 API
+	import { fetchWooCommerceData } from '$lib/api';
 
 	let userInfo = {
 		email: '',
@@ -14,69 +14,121 @@
 		phone: '',
 		country: 'Austria'
 	};
-
 	let savePaymentInfo = false;
 	let addOrderNote = false;
 
-async function placeOrder() {
-    if (!userInfo.email || !validateEmail(userInfo.email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
+	async function placeOrder() {
+		console.log('Starting order placement...');
 
-    const lineItems = $cart.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity
-    }));
+		// Validate email format before proceeding
+		if (!userInfo.email || !validateEmail(userInfo.email)) {
+			alert('Please enter a valid email address.');
+			return;
+		}
 
-    const orderData = {
-        payment_method: 'bacs',
-        payment_method_title: 'Direct Bank Transfer',
-        set_paid: false,
-        billing: {
-            first_name: userInfo.firstName,
-            last_name: userInfo.lastName,
-            address_1: userInfo.address,
-            city: userInfo.city,
-            postcode: userInfo.postalCode,
-            country: userInfo.country,
-            email: userInfo.email,
-            phone: userInfo.phone
-        },
-        line_items: lineItems,
-        customer_note: addOrderNote ? 'Customer added a note' : ''
-    };
+		// Format cart items for WooCommerce
+		const lineItems = $cart.map((item) => ({
+			product_id: item.id,
+			quantity: item.quantity
+		}));
 
-    try {
-        const response = await fetchWooCommerceData('orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
+		console.log('Line items:', lineItems);
 
-        if (response && response.id) {
-            console.log('Order created:', response);
-            goto(`/order-confirmation/${response.id}`);
-        } else {
-            console.error('Order creation failed:', response);
-            alert('Order creation failed. Please check WooCommerce logs.');
-        }
-    } catch (error) {
-        console.error('Error creating order:', error);
-        alert('Error creating order. Please try again.');
-    }
-}
+		// Order data
+		const orderData = {
+			payment_method: 'bacs', // Example payment method ID; replace with your preferred method
+			payment_method_title: 'Direct Bank Transfer',
+			set_paid: false,
+			billing: {
+				first_name: userInfo.firstName,
+				last_name: userInfo.lastName,
+				address_1: userInfo.address,
+				address_2: userInfo.apartment,
+				city: userInfo.city,
+				postcode: userInfo.postalCode,
+				country: userInfo.country,
+				email: userInfo.email,
+				phone: userInfo.phone
+			},
+			line_items: lineItems,
+			customer_note: addOrderNote ? 'Customer added a note' : ''
+		};
 
-// Email validation helper
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
+		console.log('Order data being sent:', orderData);
 
+		try {
+			// Create order through WooCommerce API
+			const response = await fetchWooCommerceData('orders', {
+				method: 'POST',
+				body: JSON.stringify(orderData)
+			});
 
-	// Calculate total price from cart
+			console.log('Order response:', response);
+
+			if (response && response.id) {
+				console.log('Order created successfully with ID:', response.id);
+				// Proceed with payment if order is created
+				await processPayment(response.id, response.total);
+			} else {
+				console.error('Order creation failed:', response);
+				alert('Order creation failed. Please check WooCommerce logs.');
+			}
+		} catch (error) {
+			console.error('Error creating order:', error);
+			alert('Error creating order. Please try again.');
+		}
+	}
+
+	async function processPayment(orderId, amount) {
+		console.log('Starting payment process for order ID:', orderId, 'with amount:', amount);
+
+		try {
+			const paymentResponse = await fetchWooCommerceData('payments/payment-intent', {
+				method: 'POST',
+				body: JSON.stringify({
+					order_id: orderId,
+					amount: amount
+				})
+			});
+
+			console.log('Payment intent response:', paymentResponse);
+
+			if (!paymentResponse.ok) {
+				const errorText = await paymentResponse.text();
+				console.error('Error in payment intent response:', errorText);
+				throw new Error('Failed to create payment intent');
+			}
+
+			const { client_secret } = await paymentResponse.json();
+			console.log('Received client secret:', client_secret);
+
+			// Initialize Stripe and confirm payment
+			const stripe = Stripe('your-publishable-key'); // Replace with actual Stripe key
+			const { error } = await stripe.confirmCardPayment(client_secret, {
+				payment_method: {
+					card: { token: 'payment-method-token' } // Replace 'payment-method-token' with actual token
+				}
+			});
+
+			if (error) {
+				console.error('Stripe payment error:', error.message);
+				alert('Payment failed: ' + error.message);
+			} else {
+				console.log('Payment successful, redirecting to order confirmation.');
+				goto(`/order-confirmation/${orderId}`);
+			}
+		} catch (error) {
+			console.error('Error processing payment:', error);
+			alert('Payment processing failed. Please try again.');
+		}
+	}
+
+	function validateEmail(email) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
+
 	let total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
-
-	// Format price function
 	function formatPrice(price) {
 		return `€${(price / 1).toFixed(2)}`;
 	}
