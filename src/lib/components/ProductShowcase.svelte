@@ -20,7 +20,7 @@
   </div>
 
   <!-- Text Section aligned to top left -->
-  <div class="md:w-1/4 w-full flex flex-col justify-start items-start p-6 bg-[var(--background-color)] rounded-lg">
+  <div class="md:w-1/4 w-full flex flex-col justify-start items-start bg-[var(--background-color)] rounded-lg">
     <h2 class="text-2xl font-bold mb-4 text-[var(--text-color)]">{name}</h2>
     <p class="text-[var(--text-color)] mb-4">{description}</p>
     

@@ -65,7 +65,7 @@
 {#if product}
 	<div class="product-container flex h-screen w-full">
 		<!-- Details Section (Reordered on Mobile) -->
-		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-[var(--background-color)] p-8">
+		<div class="product-details flex h-full w-full md:w-1/4 flex-col justify-end space-y-4 bg-[var(--background-color)] p-4">
 			<h1 class="text-4xl font-bold text-[var(--text-color)]">{product.name}</h1>
 			<p class="text-lg text-[var(--text-color)]">{product.short_description || product.description}</p>
 			

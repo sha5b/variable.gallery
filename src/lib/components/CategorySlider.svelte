@@ -16,6 +16,10 @@
 		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
 		.slice(0, 20);
 
+	// Get the tags of the current product being displayed in this category
+	let currentProduct = limitedProducts[0]; // Assuming the first product is the "current" product
+	let currentProductTags = currentProduct ? currentProduct.tags.map(tag => tag.name) : [];
+
 	// Reference to slider element
 	let slider;
 
@@ -41,13 +45,23 @@
 	}
 </script>
 
+<div class="category-header pl-4 ">
+	<h1 class="category-title">{category}</h1>
+	<!-- Display current product tags as pills next to the category name -->
+	<div class="tag-container">
+		{#each currentProductTags as tag}
+			<span class="tag-pill">{tag}</span>
+		{/each}
+	</div>
+</div>
+
 <div class="category-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
-	<h1>{category}</h1>
+
 	<div class="category-slider">
 		{#each limitedProducts as product}
 			<div class="category-card" on:click={() => handleProductClick(product.id)}>
-				<!-- Display Product Tags Above the Image -->
-				<div class="tag-container">
+				<!-- Product-specific tags above the image -->
+				<div class="product-tag-container">
 					{#each product.tags as tag}
 						<span class="tag">{tag.name}</span>
 					{/each}
@@ -64,12 +78,37 @@
 	.category-slider-container {
 		width: 100%;
 		overflow: hidden;
-
-		padding-left: 2rem;
+		padding-left: 1rem;
 		padding-bottom: 2rem;
 		transition: all 0.3s ease;
 	}
 
+	.category-header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+
+	}
+
+	.category-title {
+		font-size: 2rem;
+		font-weight: bold;
+	}
+
+	.tag-container {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tag-pill {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: 0.25rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+	}
 
 	/* Horizontal scrolling for mobile */
 	@media (max-width: 767px) {
@@ -77,18 +116,16 @@
 			overflow-x: auto;
 			scroll-snap-type: x mandatory;
 			-webkit-overflow-scrolling: touch;
-			
+			padding-left: 1rem;
 		}
 		.category-slider {
 			display: flex;
 			gap: 1rem;
-			
 		}
 		.category-card {
-			flex: 0 0 80%; /* Take up 80% of the container width */
+			flex: 0 0 80%;
 			scroll-snap-align: start;
 			position: relative;
-			
 		}
 	}
 
@@ -97,9 +134,7 @@
 		.category-slider {
 			display: flex;
 			gap: 1rem;
-			
 		}
-
 		.category-card {
 			flex: 0 0 300px;
 			height: 300px;
@@ -108,9 +143,7 @@
 			border-radius: 10px;
 			transition: flex 0.9s ease;
 			cursor: pointer;
-			
 		}
-
 		.category-card:hover {
 			flex: 0 0 600px;
 		}
@@ -123,7 +156,7 @@
 		border-radius: 10px;
 	}
 
-	.tag-container {
+	.product-tag-container {
 		position: absolute;
 		top: 8px;
 		left: 8px;
@@ -134,14 +167,11 @@
 	}
 
 	.tag {
-		background-color: var(--primary-color); /* Update to primary color */
+		background-color: var(--primary-color);
 		color: var(--background-color);
 		padding: 0.25rem 0.5rem;
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 600;
-	}
-	h1{
-		font-size: 4rem;
 	}
 </style>

@@ -12,7 +12,7 @@
   }
 </script>
   
-<div class="w-full my-8 p-6 rounded-lg text-left flex flex-col h-full justify-end items-start">
+<div class="w-full my-8  rounded-lg text-left flex flex-col h-full justify-end items-start">
   <button class="bg-[var(--primary-color)] text-[var(--background-color)] px-6 py-2 rounded-md text-xl transition-colors hover:bg-[var(--secondary-color)]" on:click={handleButtonClick}>
     Contact Us
   </button>

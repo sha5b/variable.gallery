@@ -50,7 +50,7 @@
 		<!-- Bottom Row with Product Banner and Category Grid -->
 		<div class="row-start-2 flex flex-col gap-[var(--spacing-md)] md:flex-row">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="flex-1 rounded-lg bg-[var(--background-color-alt)] p-[var(--spacing-lg)]">
+			<div class="flex-1 rounded-lg bg-[var(--background-color-alt)] ">
 				<Header />
 			</div>
 			
@@ -59,7 +59,7 @@
 				<div class="rounded-lg bg-[var(--background-color-alt)] p-[var(--spacing-lg)]">
 
 				</div>
-				<div class="rounded-lg bg-[var(--background-color)] p-[var(--spacing-lg)]">
+				<div class="rounded-lg bg-[var(--background-color)] ">
 					<Contact />
 				</div>
 			</div>
