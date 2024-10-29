@@ -13,6 +13,9 @@
 
 	let slider;
 	let isCartOpen = false;
+	let scrollTarget = 0;
+	let currentScroll = 0;
+	let isAnimating = false;
 
 	// Subscribe to the cart slider state
 	$: isCartSliderOpen.subscribe((value) => {
@@ -32,11 +35,28 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			const scrollPosition = (maxScroll * offsetX) / middleX / 2;
-			slider.scrollBy({
-				left: scrollPosition,
-				behavior: 'smooth',
-			});
+			scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjust for smooth movement
+
+			if (!isAnimating) {
+				isAnimating = true;
+				animateScroll();
+			}
+		}
+	}
+
+	function animateScroll() {
+		// Apply easing effect
+		const easing = 0.1; // Adjust this for smoother movement
+		const distance = scrollTarget - currentScroll;
+		currentScroll += distance * easing;
+
+		slider.scrollLeft = currentScroll;
+
+		// Continue the animation if not reached the target
+		if (Math.abs(distance) > 0.5) {
+			requestAnimationFrame(animateScroll);
+		} else {
+			isAnimating = false; // Stop animating when close to the target
 		}
 	}
 </script>
@@ -78,7 +98,7 @@
 			gap: 1rem;
 		}
 		.featured-card {
-			flex: 0 0 80%; /* Take up 80% of the container width */
+			flex: 0 0 80%;
 			scroll-snap-align: start;
 			position: relative;
 		}
@@ -124,7 +144,7 @@
 	}
 
 	.tag {
-		background-color: var(--primary-color); /* Purple color updated to primary color */
+		background-color: var(--primary-color);
 		color: var(--background-color);
 		padding: 0.25rem 0.5rem;
 		border-radius: 9999px;
