@@ -28,14 +28,14 @@
 <div class="mx-auto space-y-[var(--spacing-md)] py-[var(--spacing-lg)]">
   <div class="flex flex-col md:flex-row items-stretch gap-[var(--spacing-lg)]">
     <!-- Sidebar Filter Section -->
-    <aside class="filter-container p-[var(--spacing-md)] rounded-lg w-full md:w-1/4">
+    <aside class="bg-[var(--primary-color)] p-[var(--spacing-md)] rounded-lg text-[var(--background-color)] w-full md:w-1/4">
       <h2 class="font-bold mb-[var(--spacing-sm)] text-[var(--font-size-large)]">Filter by Category</h2>
       <div class="flex flex-wrap gap-[var(--spacing-sm)] mb-[var(--spacing-md)]">
         {#each uniqueCategories as category}
           <span
             on:click={() => handleCategoryClick(category)}
-            class={`pill-button ${
-              selectedCategory === category ? 'pill-selected' : 'pill-default'
+            class={`px-[var(--spacing-md)] py-[var(--spacing-xs)] rounded-full cursor-pointer text-[var(--font-size-small)] ${
+              selectedCategory === category ? 'bg-[var(--accent-color)] text-[var(--primary-color)]' : 'bg-[var(--background-color)] text-[var(--text-color)]'
             }`}
           >
             {category}
@@ -48,8 +48,8 @@
         {#each uniqueTags as tag}
           <span
             on:click={() => handleTagClick(tag)}
-            class={`pill-button ${
-              selectedTag === tag ? 'pill-selected' : 'pill-default'
+            class={`px-[var(--spacing-md)] py-[var(--spacing-xs)] rounded-full cursor-pointer text-[var(--font-size-small)] ${
+              selectedTag === tag ? 'bg-[var(--accent-color)] text-[var(--primary-color)]' : 'bg-[var(--background-color)] text-[var(--text-color)]'
             }`}
           >
             {tag}
@@ -87,31 +87,6 @@
 </div>
 
 <style>
-  /* Filter Container Styling */
-  .filter-container {
-    background-color: var(--background-color);
-    color: var(--text-color);
-  }
-
-  /* Pill Button Styling */
-  .pill-button {
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 9999px;
-    font-size: var(--font-size-small);
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  .pill-default {
-    background-color: var(--background-color);
-    color: var(--primary-color);
-  }
-
-  .pill-selected {
-    background-color: var(--primary-color);
-    color: var(--background-color);
-  }
-
   .featured-card {
     flex: 0 0 300px;
     height: 50vh;
