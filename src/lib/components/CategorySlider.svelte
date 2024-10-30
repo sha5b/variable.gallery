@@ -18,9 +18,6 @@
 	$: currentProductTags = currentProduct ? currentProduct.tags.map(tag => tag.name) : [];
 
 	let slider;
-	let scrollTarget = 0;
-	let currentScroll = 0;
-	let isAnimating = false;
 
 	function handleProductClick(product) {
 		currentProduct = product; // Set the clicked product as the current product
@@ -28,7 +25,6 @@
 	}
 
 	function handleMouseMove(event) {
-		// Only apply mouse move scroll for desktop screens
 		if (window.innerWidth >= 768) {
 			const rect = slider.getBoundingClientRect();
 			const mouseX = event.clientX - rect.left;
@@ -36,27 +32,11 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjust for smooth movement
-
-			if (!isAnimating) {
-				isAnimating = true;
-				animateScroll();
-			}
-		}
-	}
-
-	function animateScroll() {
-		const easing = 0.1; // Adjust this for smoother movement
-		const distance = scrollTarget - currentScroll;
-		currentScroll += distance * easing;
-
-		slider.scrollLeft = currentScroll;
-
-		// Continue the animation if not reached the target
-		if (Math.abs(distance) > 0.5) {
-			requestAnimationFrame(animateScroll);
-		} else {
-			isAnimating = false; // Stop animating when close to the target
+			const scrollPosition = (maxScroll * offsetX) / middleX / 2;
+			slider.scrollBy({
+				left: scrollPosition,
+				behavior: 'smooth',
+			});
 		}
 	}
 </script>
@@ -106,13 +86,13 @@
 		font-size: 4rem;
 		font-weight: bold;
 		color: var(--primary-color);
-		padding: 0.5rem 0;
+		padding: 0.5rem 0; /* Padding above and below */
 	}
 
 	.tag-container {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 2rem;
+		gap: 2rem; /* Increased gap for better spacing */
 	}
 
 	.tag-pill {
