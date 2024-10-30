@@ -1,7 +1,6 @@
 <script>
 	import { cart } from '$lib/stores/cartStore'; // Import your cart store
 	import { goto } from '$app/navigation';
-	import { fetchWooCommerceData } from '$lib/api'; // Ensure this is for the V3 API
 
 	let userInfo = {
 		email: '',
@@ -17,62 +16,12 @@
 	let savePaymentInfo = false;
 	let addOrderNote = false;
 
-async function placeOrder() {
-    if (!userInfo.email || !validateEmail(userInfo.email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
+	function placeOrder() {
+		// Handle the order placement logic here
+		goto('/order-confirmation'); // Example route after order is placed
+	}
 
-    const lineItems = $cart.map((item) => ({
-        product_id: item.id,
-        quantity: item.quantity
-    }));
-
-    const orderData = {
-        payment_method: 'bacs',
-        payment_method_title: 'Direct Bank Transfer',
-        set_paid: false,
-        billing: {
-            first_name: userInfo.firstName,
-            last_name: userInfo.lastName,
-            address_1: userInfo.address,
-            city: userInfo.city,
-            postcode: userInfo.postalCode,
-            country: userInfo.country,
-            email: userInfo.email,
-            phone: userInfo.phone
-        },
-        line_items: lineItems,
-        customer_note: addOrderNote ? 'Customer added a note' : ''
-    };
-
-    try {
-        const response = await fetchWooCommerceData('orders', {
-            method: 'POST',
-            body: JSON.stringify(orderData)
-        });
-
-        if (response && response.id) {
-            console.log('Order created:', response);
-            goto(`/order-confirmation/${response.id}`);
-        } else {
-            console.error('Order creation failed:', response);
-            alert('Order creation failed. Please check WooCommerce logs.');
-        }
-    } catch (error) {
-        console.error('Error creating order:', error);
-        alert('Error creating order. Please try again.');
-    }
-}
-
-// Email validation helper
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-
-	// Calculate total price from cart
+	// Calculate the total price
 	let total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
 	function formatPrice(price) {
 		return `€${(price / 100).toFixed(2)}`;
