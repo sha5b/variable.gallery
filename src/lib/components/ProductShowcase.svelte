@@ -13,7 +13,7 @@
   export let weight = "0.5"; // Weight
 </script>
 
-<div class="flex flex-col md:flex-row items-stretch w-full my-8 gap-8">
+<div class="flex flex-col md:flex-row items-stretch w-full my-8 gap-8 pt-8">
   <!-- Image Section with larger display on mobile -->
   <div class="w-full md:w-3/4 aspect-w-4 aspect-h-3 md:aspect-w-16 md:aspect-h-6">
     <img src={imageSrc} alt={name} class="w-full h-full object-cover rounded-lg" />

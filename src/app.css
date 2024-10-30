@@ -30,6 +30,8 @@ a {
   --primary-color: #0a0a1a; /* Bluish black */
   --secondary-color: #4c51bf;
   --background-color: #ffffff;
+  --secondary-bg-color: #d4d4d4;
+  
   --text-color: #333333;
   --accent-color: #f687b3;
   --error-color: #e53e3e;

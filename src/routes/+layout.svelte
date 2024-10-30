@@ -4,7 +4,6 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import CartSlider from '$lib/components/CartSlider.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartSliderStore';
-	import Newsletter from '$lib/components/Newsletter.svelte';
 
 	$: isOpen = $isCartSliderOpen;
 
@@ -32,7 +31,6 @@
 	</div>
 
 	<!-- Footer that appears after the main content -->
-	 <Newsletter/>
 	<Footer />
 </div>
 
