@@ -40,4 +40,3 @@ export const removeItem = (id) => {
 export const clearCart = () => {
   cart.set([]);
 };
-
