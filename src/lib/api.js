@@ -22,17 +22,26 @@ export async function fetchWooCommerceData(endpoint, options = {}) {
     return await response.json();
 }
 
+// api.js
 export async function fetchStripeData(endpoint, options = {}) {
-    const stripeSecretKey = import.meta.env.VITE_STRIPE_SECRET_KEY;  // Fetch the secret key from .env
-    const url = `https://api.stripe.com/v1/${endpoint}`;  // Ensure endpoint is correct
+    const stripeSecretKey = import.meta.env.VITE_STRIPE_SECRET_KEY;
+    const url = `https://api.stripe.com/v1/${endpoint}`;
+
+    // Convert JSON body to URL-encoded form data
+    const bodyData = new URLSearchParams();
+    const body = JSON.parse(options.body);
+    for (const [key, value] of Object.entries(body)) {
+        bodyData.append(key, value);
+    }
 
     const response = await fetch(url, {
-        method: options.method || 'GET',
+        method: options.method || 'POST',
         headers: {
-            'Authorization': `Bearer ${stripeSecretKey}`,  // Pass the secret key
-            ...options.headers
+            'Authorization': `Bearer ${stripeSecretKey}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Stripe-Version': '2022-08-01', // Ensure the correct Stripe API version
         },
-        body: options.body || null
+        body: bodyData
     });
 
     if (!response.ok) {

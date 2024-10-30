@@ -1,107 +1,112 @@
 <script>
     import { onMount } from 'svelte';
-    import { cart } from '$lib/stores/cartStore';
-    import { createStripePaymentIntent } from '$lib/utils/checkoutHelpers';
+    import { loadStripe } from '@stripe/stripe-js';
 
-    let cartItems = [];
-    let totalAmount = 0;
-    let clientSecret = null;
-    let stripe = null;
-    let elements = null;
+    let stripe, elements, cardElement;
+    let amount = 1000; // Example amount in cents
+    let currency = 'usd';
+    let paymentSuccess = false;
+    let paymentError = '';
 
-    // Fetch cart items and initialize Stripe on mount
     onMount(async () => {
-        cart.subscribe(items => { 
-            cartItems = items; 
-            totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 100; // Convert to cents
-        });
+        try {
+            stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+            if (!stripe) throw new Error('Stripe failed to initialize.');
 
-        // Create PaymentIntent and initialize Stripe
-        clientSecret = await createStripePaymentIntent(totalAmount);
-        
-        if (clientSecret) {
-            stripe = Stripe('pk_test_51QFZNGL5hydQy59EOqqmhh9qhazgrVZIxBk8htdG99O4UuszPcNbKP9JsBUnjYXAlF057pEOeKHl5OIfIjxTviUL009puKHWap');
             elements = stripe.elements();
-            const paymentElement = elements.create('payment');
-            paymentElement.mount('#payment-element');
-            console.log('Stripe and Elements initialized successfully');
-        } else {
-            console.error("Failed to initialize Stripe Elements due to missing clientSecret.");
+            cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        color: 'var(--text-color)',
+                        fontFamily: 'var(--font-primary)',
+                        fontSize: '16px',
+                        '::placeholder': { color: 'var(--secondary-color)' },
+                    }
+                }
+            });
+            cardElement.mount('#card-element');
+        } catch (error) {
+            console.error('Initialization error:', error);
+            paymentError = "Failed to initialize payment request. Please try again.";
         }
     });
 
-    async function handleSubmit(event) {
-        event.preventDefault();
-        if (!stripe || !elements) {
-            console.error("Stripe or Elements not initialized");
-            return;
-        }
+    async function handlePayment() {
+        paymentError = ''; // Reset error state
+        console.log('Initiating payment...');
 
-        const { error } = await stripe.confirmPayment({
-            elements,
-            confirmParams: {
-                return_url: '/order-confirmation/' // Replace with your success URL
+        try {
+            // Step 1: Create a PaymentIntent by calling the server
+            const response = await fetch('/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, currency })
+            });
+
+            const result = await response.json();
+            console.log('PaymentIntent response:', result);
+
+            if (!result.success) {
+                throw new Error(result.error || 'PaymentIntent creation failed');
             }
-        });
 
-        if (error) {
-            console.error('Payment error:', error.message);
+            const clientSecret = result.clientSecret;
+            console.log('Received clientSecret:', clientSecret);
+
+            // Step 2: Confirm the PaymentIntent with the collected card details
+            const confirmation = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: 'Customer Name',
+                        email: 'customer@example.com'
+                    }
+                }
+            });
+
+            console.log('Payment confirmation response:', confirmation);
+
+            if (confirmation.error) {
+                console.error('Payment confirmation error:', confirmation.error.message);
+                paymentError = confirmation.error.message;
+            } else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
+                console.log('Payment successful!');
+                paymentSuccess = true;
+            } else {
+                paymentError = 'Payment did not complete. Please try again.';
+            }
+        } catch (error) {
+            console.error('Error during payment process:', error);
+            paymentError = error.message || 'An error occurred during the payment process. Please try again.';
         }
     }
 </script>
 
-<style>
-    .checkout-container { max-width: 800px; margin: auto; padding: var(--spacing-md); }
-    .form-group { margin-bottom: var(--spacing-md); }
-    .input { width: 100%; padding: var(--spacing-sm); border: 1px solid var(--secondary-bg-color); border-radius: 4px; }
-    .input.error { border-color: var(--error-color); }
-    .error-message { color: var(--error-color); font-size: var(--font-size-small); margin-top: var(--spacing-xs); }
-    .checkout-button { background-color: var(--primary-color); color: var(--background-color); padding: var(--spacing-sm) var(--spacing-md); border-radius: 4px; cursor: pointer; }
-</style>
+<h2 class="text-center font-heading text-xl margin-md text-primary-color">Checkout</h2>
 
-<div class="checkout-container">
-    <div class="cart-summary">
-        <h2>Order Summary</h2>
-        {#each cartItems as item}
-            <div class="cart-item">
-                <span>{item.name} (x{item.quantity})</span>
-                <span>${item.price * item.quantity}</span>
-            </div>
-        {/each}
-        <hr />
-        <p><strong>Total: ${cartItems.reduce((total, item) => total + item.price * item.quantity, 0)}</strong></p>
-    </div>
+<div class="container flex-center">
+    {#if paymentSuccess}
+        <p class="text-lg text-accent-color font-heading">Payment successful! Thank you for your purchase.</p>
+    {:else}
+        <form on:submit|preventDefault={handlePayment} class="w-full max-w-md bg-secondary-bg-color p-lg rounded-lg shadow-md">
+            <label for="card-element" class="block font-heading text-base margin-md text-secondary-color">
+                Credit or Debit Card
+            </label>
+            <div id="card-element" class="p-md border border-secondary-color rounded-sm margin-md"></div>
 
-    <div class="order-details">
-        <h2>Billing Information</h2>
-        <label class="form-group">
-            First Name:
-            <input type="text" class="input" bind:value={user.firstName} required />
-        </label>
-        <label class="form-group">
-            Last Name:
-            <input type="text" class="input" bind:value={user.lastName} required />
-        </label>
-        <label class="form-group">
-            Email:
-            <input type="email" class="input" bind:value={user.email} required />
-        </label>
-        <label class="form-group">
-            Address:
-            <input type="text" class="input" bind:value={user.address} required />
-        </label>
-        <label class="form-group">
-            City:
-            <input type="text" class="input" bind:value={user.city} required />
-        </label>
-        <label class="form-group">
-            ZIP Code:
-            <input type="text" class="input" bind:value={user.zip} required />
-        </label>
-    </div>
+            {#if paymentError}
+                <p class="error text-error-color text-sm margin-sm">{paymentError}</p>
+            {/if}
 
-    <form id="payment-form" on:submit={handleSubmit}>
-        <div id="payment-element"></div>
-        <button class="checkout-button">Pay Now</button>
-    </form>
+            <button type="submit" class="button-primary w-full margin-md text-center text-lg">
+                Pay Now
+            </button>
+        </form>
+    {/if}
 </div>
+
+<style>
+    .error {
+        color: var(--error-color);
+    }
+</style>
