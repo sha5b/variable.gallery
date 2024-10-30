@@ -1,6 +1,6 @@
+import { fetchWooCommerceData, fetchStripeData } from '$lib/api';
 
-import { fetchWooCommerceData } from '$lib/api';
-
+// Create Order in WooCommerce
 export async function createOrder(orderData) {
     try {
         const order = await fetchWooCommerceData('orders', {
@@ -14,62 +14,86 @@ export async function createOrder(orderData) {
     }
 }
 
-
-// Function to create a payment intent with a static customer_id
-export async function createPaymentIntent(orderId, paymentMethod, name, email) {
+export async function createStripePaymentIntent(amount, currency = 'usd') {
     try {
-        const customer_id = generateCustomerId(name, email);
-
-        const intentData = { 
-            order_id: orderId, 
-            payment_method: paymentMethod, 
-            customer_id  // Use the generated unique customer ID
-        };
-
-        const intent = await fetchWooCommerceData('payments/payment_intents', {
+        const response = await fetchStripeData('payment_intents', {
             method: 'POST',
-            body: JSON.stringify(intentData)
+            body: JSON.stringify({
+                amount: Math.round(amount * 100), // Stripe expects the amount in cents
+                currency,
+                automatic_payment_methods: { enabled: true }
+            })
         });
-
-        return intent;
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error creating PaymentIntent:', errorData.error.message);
+            throw new Error('Failed to create PaymentIntent');
+        }
+        const { client_secret: clientSecret } = await response.json();
+        return clientSecret;
     } catch (error) {
-        console.error('Error creating payment intent:', error);
-        throw new Error(`Payment intent creation failed: ${error.message}`);
+        console.error('Error creating PaymentIntent:', error);
+        throw error;
+    }
+}
+// Capture Payment with WooCommerce
+async function captureStripePayment(orderId, paymentIntentId) {
+    try {
+        const response = await fetchWooCommerceData(`wc_stripe/orders/${orderId}/capture_terminal_payment`, {
+            method: 'POST',
+            body: JSON.stringify({ payment_intent_id: paymentIntentId })
+        });
+        return response;
+    } catch (error) {
+        console.error('Error capturing Stripe payment:', error);
+        throw new Error('Payment capture failed');
     }
 }
 
-// Function to check the payment authorization status
-export async function checkPaymentAuthorization(paymentIntentId) {
+// Cancel PaymentIntent if payment fails
+async function cancelStripePaymentIntent(paymentIntentId) {
     try {
-        const authorization = await fetchWooCommerceData(`payments/authorizations/${paymentIntentId}`);
-        return authorization.status === 'succeeded';
+        await fetchStripeData(`payment_intents/${paymentIntentId}/cancel`, {
+            method: 'POST'
+        });
     } catch (error) {
-        console.error('Error checking payment authorization:', error);
-        throw new Error(`Payment authorization failed: ${error.message}`);
+        console.error('Error canceling PaymentIntent:', error);
     }
 }
 
-// Main checkout handler
-export async function handleCheckout(orderData, paymentMethod) {
+// Main Checkout Handler
+export async function handleCheckout(orderData, amount) {
+    let paymentIntentId;
     try {
+        // Step 1: Create WooCommerce order
+        
         const order = await createOrder(orderData);
         const orderId = order.id;
 
-        const paymentIntent = await createPaymentIntent(orderId, paymentMethod);
-        const paymentIntentId = paymentIntent.id;
-
-        const paymentConfirmed = await checkPaymentAuthorization(paymentIntentId);
-        if (!paymentConfirmed) {
+        // Step 2: Create a Stripe PaymentIntent with the order's total amount
+        paymentIntentId = await createStripePaymentIntent(order.total);
+        // const paymentIntentId = await createStripePaymentIntent(amount, 'usd', order.customer_id);
+        // Step 3: Capture the PaymentIntent in WooCommerce
+        const paymentCapture = await captureStripePayment(orderId, paymentIntentId);
+        if (!paymentCapture.success) {
             await deleteOrder(orderId);
+            await cancelStripePaymentIntent(paymentIntentId);
             throw new Error('Payment failed. Order has been canceled.');
         }
     } catch (error) {
-        console.error('Checkout process encountered an error:', error);
-        throw error;  // Pass error up to display in UI
+        console.error('Checkout error:', error);
+        if (paymentIntentId) await cancelStripePaymentIntent(paymentIntentId);
+        throw error;
     }
 }
 
-// Helper function to create guest customer
-function generateCustomerId(name, email) {
-    return btoa(`${name}-${email}`).replace(/=/g, ''); // Base64 encoding without padding
+// Delete WooCommerce Order if Payment Fails
+export async function deleteOrder(orderId) {
+    try {
+        await fetchWooCommerceData(`orders/${orderId}`, { method: 'DELETE' });
+        console.log(`Order ${orderId} deleted due to failed payment.`);
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        throw new Error(error.message || 'Error deleting order');
+    }
 }

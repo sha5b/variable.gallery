@@ -21,3 +21,24 @@ export async function fetchWooCommerceData(endpoint, options = {}) {
 
     return await response.json();
 }
+
+export async function fetchStripeData(endpoint, options = {}) {
+    const stripeSecretKey = import.meta.env.VITE_STRIPE_SECRET_KEY;  // Fetch the secret key from .env
+    const url = `https://api.stripe.com/v1/${endpoint}`;  // Ensure endpoint is correct
+
+    const response = await fetch(url, {
+        method: options.method || 'GET',
+        headers: {
+            'Authorization': `Bearer ${stripeSecretKey}`,  // Pass the secret key
+            ...options.headers
+        },
+        body: options.body || null
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+}

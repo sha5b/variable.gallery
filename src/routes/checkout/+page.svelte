@@ -1,67 +1,52 @@
 <script>
     import { onMount } from 'svelte';
     import { cart } from '$lib/stores/cartStore';
-    import { userInfo } from '$lib/stores/userInfoStore';
-    import { handleCheckout } from '$lib/utils/checkoutHelpers';
+    import { createStripePaymentIntent } from '$lib/utils/checkoutHelpers';
 
     let cartItems = [];
-    let user = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        address: '',
-        city: '',
-        zip: ''
-    };
-    let paymentMethod = 'credit_card';
-    let cardDetails = {
-        card_number: '',
-        expiration_month: '',
-        expiration_year: '',
-        cvv: ''
-    };
-    let errors = {};
+    let totalAmount = 0;
+    let clientSecret = null;
+    let stripe = null;
+    let elements = null;
 
-    onMount(() => {
-        cart.subscribe(value => {
-            cartItems = value;
+    // Fetch cart items and initialize Stripe on mount
+    onMount(async () => {
+        cart.subscribe(items => { 
+            cartItems = items; 
+            totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0) * 100; // Convert to cents
         });
-        userInfo.subscribe(value => {
-            user = value;
-        });
+
+        // Create PaymentIntent and initialize Stripe
+        clientSecret = await createStripePaymentIntent(totalAmount);
+        
+        if (clientSecret) {
+            stripe = Stripe('pk_test_51QFZNGL5hydQy59EOqqmhh9qhazgrVZIxBk8htdG99O4UuszPcNbKP9JsBUnjYXAlF057pEOeKHl5OIfIjxTviUL009puKHWap');
+            elements = stripe.elements();
+            const paymentElement = elements.create('payment');
+            paymentElement.mount('#payment-element');
+            console.log('Stripe and Elements initialized successfully');
+        } else {
+            console.error("Failed to initialize Stripe Elements due to missing clientSecret.");
+        }
     });
 
-    function validateFields() {
-        errors = {};
-        if (!cardDetails.card_number) errors.card_number = 'Card number is required';
-        if (!cardDetails.expiration_month) errors.expiration_month = 'Expiration month is required';
-        if (!cardDetails.expiration_year) errors.expiration_year = 'Expiration year is required';
-        if (!cardDetails.cvv) errors.cvv = 'CVV is required';
-        return Object.keys(errors).length === 0;
-    }
+    async function handleSubmit(event) {
+        event.preventDefault();
+        if (!stripe || !elements) {
+            console.error("Stripe or Elements not initialized");
+            return;
+        }
 
-    async function initiateCheckout() {
-        if (!validateFields()) return;
+        const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: '/order-confirmation/' // Replace with your success URL
+            }
+        });
 
-        const orderData = {
-            payment_method: paymentMethod,
-            payment_method_title: paymentMethod === 'paypal' ? 'PayPal' : 'Credit Card',
-            set_paid: false,
-            billing: {
-                first_name: user.firstName,
-                last_name: user.lastName,
-                email: user.email,
-                address_1: user.address,
-                city: user.city,
-                postcode: user.zip
-            },
-            line_items: cartItems.map(item => ({
-                product_id: item.id,
-                quantity: item.quantity
-            }))
-        };
-
-        await handleCheckout(orderData, paymentMethod);
+        if (error) {
+            console.error('Payment error:', error.message);
+        }
     }
 </script>
 
@@ -115,29 +100,8 @@
         </label>
     </div>
 
-    <div class="payment-info">
-        <h2>Card Details</h2>
-        <label class="form-group">
-            Card Number:
-            <input type="text" class="input {errors.card_number ? 'error' : ''}" bind:value={cardDetails.card_number} placeholder="1234 5678 9012 3456" />
-            {#if errors.card_number}<div class="error-message">{errors.card_number}</div>{/if}
-        </label>
-        <label class="form-group">
-            Expiration Month:
-            <input type="text" class="input {errors.expiration_month ? 'error' : ''}" bind:value={cardDetails.expiration_month} placeholder="MM" />
-            {#if errors.expiration_month}<div class="error-message">{errors.expiration_month}</div>{/if}
-        </label>
-        <label class="form-group">
-            Expiration Year:
-            <input type="text" class="input {errors.expiration_year ? 'error' : ''}" bind:value={cardDetails.expiration_year} placeholder="YYYY" />
-            {#if errors.expiration_year}<div class="error-message">{errors.expiration_year}</div>{/if}
-        </label>
-        <label class="form-group">
-            CVV:
-            <input type="text" class="input {errors.cvv ? 'error' : ''}" bind:value={cardDetails.cvv} placeholder="123" />
-            {#if errors.cvv}<div class="error-message">{errors.cvv}</div>{/if}
-        </label>
-    </div>
-
-    <button class="checkout-button" on:click={initiateCheckout}>Pay Now</button>
+    <form id="payment-form" on:submit={handleSubmit}>
+        <div id="payment-element"></div>
+        <button class="checkout-button">Pay Now</button>
+    </form>
 </div>
