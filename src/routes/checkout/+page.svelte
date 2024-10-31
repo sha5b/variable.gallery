@@ -1,112 +1,334 @@
 <script>
-    import { onMount } from 'svelte';
-    import { loadStripe } from '@stripe/stripe-js';
+	import { onMount } from 'svelte';
+	import { loadStripe } from '@stripe/stripe-js';
+	import { userInfo } from '$lib/stores/userInfoStore';
+	import { cart } from '$lib/stores/cartStore';
+	import { get } from 'svelte/store';
+    import {fetchWooCommerceData} from '$lib/api'
+    
 
-    let stripe, elements, cardElement;
-    let amount = 1000; // Example amount in cents
-    let currency = 'usd';
-    let paymentSuccess = false;
-    let paymentError = '';
+	let stripe, elements, cardElement, paymentRequest, prButton;
+	let amount = 1000; // Example amount in cents
+	let currency = 'usd';
+	let paymentSuccess = false;
+	let paymentError = '';
+	let cartItems = [];
+	let validationErrors = {};
 
-    onMount(async () => {
-        try {
-            stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-            if (!stripe) throw new Error('Stripe failed to initialize.');
+	onMount(async () => {
+		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+		elements = stripe.elements();
+		cartItems = get(cart);
 
-            elements = stripe.elements();
-            cardElement = elements.create('card', {
-                style: {
-                    base: {
-                        color: 'var(--text-color)',
-                        fontFamily: 'var(--font-primary)',
-                        fontSize: '16px',
-                        '::placeholder': { color: 'var(--secondary-color)' },
-                    }
-                }
-            });
-            cardElement.mount('#card-element');
-        } catch (error) {
-            console.error('Initialization error:', error);
-            paymentError = "Failed to initialize payment request. Please try again.";
-        }
-    });
+		paymentRequest = stripe.paymentRequest({
+			country: 'US',
+			currency: currency,
+			total: { label: 'Total', amount: amount },
+			requestPayerName: true,
+			requestPayerEmail: true
+		});
 
-    async function handlePayment() {
-        paymentError = ''; // Reset error state
-        console.log('Initiating payment...');
+		const canMakePayment = await paymentRequest.canMakePayment();
+		if (canMakePayment) {
+			prButton = elements.create('paymentRequestButton', { paymentRequest });
+			prButton.mount('#payment-request-button');
+		}
 
-        try {
-            // Step 1: Create a PaymentIntent by calling the server
-            const response = await fetch('/checkout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount, currency })
-            });
+		cardElement = elements.create('card', {
+			style: {
+				base: {
+					color: 'var(--text-color)',
+					fontFamily: 'var(--font-primary)',
+					fontSize: '16px',
+					'::placeholder': { color: 'var(--secondary-color)' }
+				}
+			}
+		});
+		cardElement.mount('#card-element');
 
-            const result = await response.json();
-            console.log('PaymentIntent response:', result);
+		paymentRequest.on('paymentmethod', async (event) => {
+			const response = await fetch('/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ amount, currency })
+			});
+			const { clientSecret } = await response.json();
+			if (!clientSecret) return event.complete('fail');
+			const { error } = await stripe.confirmCardPayment(
+				clientSecret,
+				{ payment_method: event.paymentMethod.id },
+				{ handleActions: false }
+			);
+			if (error) return event.complete('fail');
+			paymentSuccess = true;
+			event.complete('success');
+		});
+	});
 
-            if (!result.success) {
-                throw new Error(result.error || 'PaymentIntent creation failed');
-            }
+	function validateForm() {
+		validationErrors = {};
+		const user = get(userInfo);
 
-            const clientSecret = result.clientSecret;
-            console.log('Received clientSecret:', clientSecret);
+		if (!user.firstName) validationErrors.firstName = 'First name is required.';
+		if (!user.lastName) validationErrors.lastName = 'Last name is required.';
+		if (!user.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email))
+			validationErrors.email = 'Valid email is required.';
+		if (!user.address) validationErrors.address = 'Address is required.';
+		if (!user.city) validationErrors.city = 'City is required.';
+		if (!user.postalCode || !/^\d{5}(-\d{4})?$/.test(user.postalCode))
+			validationErrors.postalCode = 'Valid postal code is required.';
+		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
+			validationErrors.phone = 'Valid phone number is required.';
 
-            // Step 2: Confirm the PaymentIntent with the collected card details
-            const confirmation = await stripe.confirmCardPayment(clientSecret, {
-                payment_method: {
-                    card: cardElement,
-                    billing_details: {
-                        name: 'Customer Name',
-                        email: 'customer@example.com'
-                    }
-                }
-            });
+		return Object.keys(validationErrors).length === 0;
+	}
 
-            console.log('Payment confirmation response:', confirmation);
+	async function handlePayment() {
+		paymentError = ''; // Reset error state
+		try {
+			const response = await fetch('/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ amount, currency: 'usd' })
+			});
 
-            if (confirmation.error) {
-                console.error('Payment confirmation error:', confirmation.error.message);
-                paymentError = confirmation.error.message;
-            } else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
-                console.log('Payment successful!');
-                paymentSuccess = true;
-            } else {
-                paymentError = 'Payment did not complete. Please try again.';
-            }
-        } catch (error) {
-            console.error('Error during payment process:', error);
-            paymentError = error.message || 'An error occurred during the payment process. Please try again.';
-        }
-    }
+			const result = await response.json();
+			if (!result.success) throw new Error(result.error || 'PaymentIntent creation failed');
+
+			const clientSecret = result.clientSecret;
+			const user = get(userInfo);
+
+			const confirmation = await stripe.confirmCardPayment(clientSecret, {
+				payment_method: {
+					card: cardElement,
+					billing_details: { name: `${user.firstName} ${user.lastName}`, email: user.email }
+				}
+			});
+
+			if (confirmation.error) {
+				paymentError = confirmation.error.message;
+			} else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
+				paymentSuccess = true;
+				await createWooCommerceOrder(); // Trigger order creation in WooCommerce
+				window.location.href = `/order-confirmation`;
+			}
+		} catch (error) {
+			paymentError =
+				error.message || 'An error occurred during the payment process. Please try again.';
+		}
+	}
+
+	async function createWooCommerceOrder() {
+		try {
+			const user = get(userInfo);
+			const cartData = get(cart).map((item) => ({
+				product_id: item.id,
+				quantity: item.quantity
+			}));
+
+			const orderData = {
+				payment_method: 'stripe',
+				payment_method_title: 'Stripe',
+				set_paid: true,
+				billing: {
+					first_name: user.firstName,
+					last_name: user.lastName,
+					address_1: user.address,
+					city: user.city,
+					postcode: user.postalCode,
+					country: 'US',
+					email: user.email,
+					phone: user.phone
+				},
+				shipping: {
+					first_name: user.firstName,
+					last_name: user.lastName,
+					address_1: user.address,
+					city: user.city,
+					postcode: user.postalCode,
+					country: 'US'
+				},
+				line_items: cartData,
+				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }] // Example shipping
+			};
+
+			// Call WooCommerce API to create the order
+			const result = await fetchWooCommerceData('orders', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(orderData)
+			});
+
+			if (!result.id) throw new Error('Order creation failed in WooCommerce');
+			console.log('Order created in WooCommerce:', result);
+		} catch (error) {
+			console.error('WooCommerce Order Creation Error:', error);
+			paymentError = 'Failed to create order in WooCommerce. Please contact support.';
+		}
+	}
 </script>
 
-<h2 class="text-center font-heading text-xl margin-md text-primary-color">Checkout</h2>
+<div class="checkout-wrapper">
+	<!-- Left Column: User Information Form -->
+	<div class="user-info-container">
+		<form class="user-info-form">
+			<label>First Name</label>
+			<input
+				type="text"
+				bind:value={$userInfo.firstName}
+				required
+				placeholder="Your First Name"
+				class="input-field"
+			/>
 
-<div class="container flex-center">
-    {#if paymentSuccess}
-        <p class="text-lg text-accent-color font-heading">Payment successful! Thank you for your purchase.</p>
-    {:else}
-        <form on:submit|preventDefault={handlePayment} class="w-full max-w-md bg-secondary-bg-color p-lg rounded-lg shadow-md">
-            <label for="card-element" class="block font-heading text-base margin-md text-secondary-color">
-                Credit or Debit Card
-            </label>
-            <div id="card-element" class="p-md border border-secondary-color rounded-sm margin-md"></div>
+			<label>Last Name</label>
+			<input
+				type="text"
+				bind:value={$userInfo.lastName}
+				required
+				placeholder="Your Last Name"
+				class="input-field"
+			/>
 
-            {#if paymentError}
-                <p class="error text-error-color text-sm margin-sm">{paymentError}</p>
-            {/if}
+			<label>Email</label>
+			<input
+				type="email"
+				bind:value={$userInfo.email}
+				required
+				placeholder="Your Email"
+				class="input-field"
+			/>
 
-            <button type="submit" class="button-primary w-full margin-md text-center text-lg">
-                Pay Now
-            </button>
-        </form>
-    {/if}
+			<label>Address</label>
+			<textarea
+				bind:value={$userInfo.address}
+				required
+				placeholder="Your Address"
+				class="input-field"
+			></textarea>
+
+			<label>City</label>
+			<input
+				type="text"
+				bind:value={$userInfo.city}
+				required
+				placeholder="Your City"
+				class="input-field"
+			/>
+
+			<label>Postal Code</label>
+			<input
+				type="text"
+				bind:value={$userInfo.postalCode}
+				required
+				placeholder="Your Postal Code"
+				class="input-field"
+			/>
+
+			<label>Phone</label>
+			<input
+				type="text"
+				bind:value={$userInfo.phone}
+				required
+				placeholder="Your Phone"
+				class="input-field"
+			/>
+		</form>
+	</div>
+
+	<!-- Right Column: Cart Summary and Payment -->
+	<div class="order-summary-container">
+		<!-- Cart Summary -->
+		<div class="cart-summary pb-12 pt-8">
+			<h3 class="font-heading text-secondary-color text-lg">Cart Summary</h3>
+			{#each cartItems as item}
+				<div class="cart-item gap-sm flex items-center">
+					<a href={`/shop/${item.id}`} class="product-image-link">
+						<img
+							src={item.images[0]?.src || '/placeholder.jpg'}
+							alt={item.name}
+							class="product-image-large"
+						/>
+					</a>
+					<div class="item-details">
+						<p class="font-heading text-lg">{item.name}</p>
+						<p class="text-secondary-color text-sm">Quantity: {item.quantity}</p>
+						<p class="text-primary-color text-sm">Price: ${(item.price / 1).toFixed(2)}</p>
+					</div>
+				</div>
+			{/each}
+		</div>
+
+		<!-- Payment Section -->
+		<div class="payment-section">
+			{#if paymentSuccess}
+				<p class="text-accent-color font-heading text-lg">
+					Payment successful! Thank you for your purchase.
+				</p>
+			{:else}
+				<div id="payment-request-button" class="payment-request-button mb-8"></div>
+				<form on:submit|preventDefault={handlePayment} class="payment-form">
+					<label for="card-element" class="font-heading text-secondary-color block text-base"
+						>Credit or Debit Card</label
+					>
+					<div id="card-element" class="card-element padding-sm"></div>
+					{#if paymentError}
+						<p class="error text-error-color text-sm">{paymentError}</p>
+					{/if}
+					<button type="submit" class="button-primary w-full">Pay Now</button>
+				</form>
+			{/if}
+		</div>
+	</div>
 </div>
 
 <style>
-    .error {
-        color: var(--error-color);
-    }
+	.checkout-wrapper {
+		display: flex;
+		gap: var(--spacing-lg);
+		max-width: 1200px;
+		margin: auto;
+		padding: var(--page-padding-md);
+	}
+	.user-info-container,
+	.order-summary-container {
+		flex: 1;
+	}
+	.user-info-form,
+	.cart-summary,
+	.payment-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+	.input-field,
+	.card-element,
+	.button-primary {
+		width: 100%;
+		padding: var(--spacing-sm);
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: var(--font-size-base);
+	}
+	.product-image-large {
+		width: 80px;
+		height: 80px;
+		object-fit: cover;
+		border-radius: 4px;
+		margin-right: var(--spacing-sm);
+	}
+	.button-primary {
+		background-color: var(--primary-color);
+		color: #fff;
+		border: none;
+		cursor: pointer;
+		padding: var(--spacing-sm) var(--spacing-md);
+		transition: background-color 0.3s ease;
+	}
+	.button-primary:hover {
+		background-color: var(--secondary-color);
+	}
+	.error {
+		color: var(--error-color);
+	}
 </style>
