@@ -19,18 +19,12 @@ src/
             Newsletter.svelte
             ProductShowcase.svelte
             TagDisplay.svelte
-            checkout/
-                CheckoutForm.svelte
-                OrderSummary.svelte
-                PaymentSection.svelte
-                UserInformation.svelte
         stores/
             cartSliderStore.js
             cartStore.js
             productStore.js
             userInfoStore.js
         utils/
-            checkoutHelpers.js
     routes/
         +layout.svelte
         +page.server.js
@@ -41,9 +35,9 @@ src/
             +page.svelte
         checkout/
             +page.svelte
+            +server.js
         order-confirmation/
-            [orderId]/
-                +page.svelte
+            +page.svelte
         shop/
             +page.server.js
             +page.svelte

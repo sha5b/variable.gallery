@@ -4,8 +4,7 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
-    import {fetchWooCommerceData} from '$lib/api'
-    
+	import { fetchWooCommerceData } from '$lib/api';
 
 	let stripe, elements, cardElement, paymentRequest, prButton;
 	let amount = 1000; // Example amount in cents
@@ -69,6 +68,7 @@
 		validationErrors = {};
 		const user = get(userInfo);
 
+		// Validation logic for each required field
 		if (!user.firstName) validationErrors.firstName = 'First name is required.';
 		if (!user.lastName) validationErrors.lastName = 'Last name is required.';
 		if (!user.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email))
@@ -84,20 +84,26 @@
 	}
 
 	async function handlePayment() {
-		paymentError = ''; // Reset error state
+		paymentError = '';
+		if (!validateForm()) {
+			console.error('Form validation failed:', validationErrors);
+			return;
+		}
+
 		try {
+			console.log('Creating PaymentIntent...');
 			const response = await fetch('/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ amount, currency: 'usd' })
+				body: JSON.stringify({ amount, currency })
 			});
-
 			const result = await response.json();
 			if (!result.success) throw new Error(result.error || 'PaymentIntent creation failed');
 
 			const clientSecret = result.clientSecret;
 			const user = get(userInfo);
 
+			console.log('Confirming payment with Stripe...');
 			const confirmation = await stripe.confirmCardPayment(clientSecret, {
 				payment_method: {
 					card: cardElement,
@@ -109,8 +115,19 @@
 				paymentError = confirmation.error.message;
 			} else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
 				paymentSuccess = true;
-				await createWooCommerceOrder(); // Trigger order creation in WooCommerce
-				window.location.href = `/order-confirmation`;
+
+				// Step 3: Create WooCommerce Order
+				const orderId = await createWooCommerceOrder();
+				if (!orderId) throw new Error('Failed to create WooCommerce order.');
+
+				// Store orderId in userInfo
+				userInfo.update((info) => {
+					const updatedInfo = { ...info, orderId };
+					sessionStorage.setItem('orderId', orderId); // Save to sessionStorage
+					return updatedInfo;
+				});
+				// Redirect to order confirmation page
+				// window.location.href = `/order-confirmation`;
 			}
 		} catch (error) {
 			paymentError =
@@ -149,10 +166,9 @@
 					country: 'US'
 				},
 				line_items: cartData,
-				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }] // Example shipping
+				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }]
 			};
 
-			// Call WooCommerce API to create the order
 			const result = await fetchWooCommerceData('orders', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -161,9 +177,11 @@
 
 			if (!result.id) throw new Error('Order creation failed in WooCommerce');
 			console.log('Order created in WooCommerce:', result);
+			return result.id; // Return orderId for confirmation page
 		} catch (error) {
 			console.error('WooCommerce Order Creation Error:', error);
 			paymentError = 'Failed to create order in WooCommerce. Please contact support.';
+			return null;
 		}
 	}
 </script>
@@ -172,67 +190,88 @@
 	<!-- Left Column: User Information Form -->
 	<div class="user-info-container">
 		<form class="user-info-form">
-			<label>First Name</label>
+			<label for="firstName">First Name</label>
 			<input
+				id="firstName"
 				type="text"
 				bind:value={$userInfo.firstName}
-				required
 				placeholder="Your First Name"
 				class="input-field"
 			/>
+			{#if validationErrors.firstName}
+				<p class="error">{validationErrors.firstName}</p>
+			{/if}
 
-			<label>Last Name</label>
+			<label for="lastName">Last Name</label>
 			<input
+				id="lastName"
 				type="text"
 				bind:value={$userInfo.lastName}
-				required
 				placeholder="Your Last Name"
 				class="input-field"
 			/>
+			{#if validationErrors.lastName}
+				<p class="error">{validationErrors.lastName}</p>
+			{/if}
 
-			<label>Email</label>
+			<label for="email">Email</label>
 			<input
+				id="email"
 				type="email"
 				bind:value={$userInfo.email}
-				required
 				placeholder="Your Email"
 				class="input-field"
 			/>
+			{#if validationErrors.email}
+				<p class="error">{validationErrors.email}</p>
+			{/if}
 
-			<label>Address</label>
+			<label for="address">Address</label>
 			<textarea
+				id="address"
 				bind:value={$userInfo.address}
-				required
 				placeholder="Your Address"
 				class="input-field"
 			></textarea>
+			{#if validationErrors.address}
+				<p class="error">{validationErrors.address}</p>
+			{/if}
 
-			<label>City</label>
+			<label for="city">City</label>
 			<input
+				id="city"
 				type="text"
 				bind:value={$userInfo.city}
-				required
 				placeholder="Your City"
 				class="input-field"
 			/>
+			{#if validationErrors.city}
+				<p class="error">{validationErrors.city}</p>
+			{/if}
 
-			<label>Postal Code</label>
+			<label for="postalCode">Postal Code</label>
 			<input
+				id="postalCode"
 				type="text"
 				bind:value={$userInfo.postalCode}
-				required
 				placeholder="Your Postal Code"
 				class="input-field"
 			/>
+			{#if validationErrors.postalCode}
+				<p class="error">{validationErrors.postalCode}</p>
+			{/if}
 
-			<label>Phone</label>
+			<label for="phone">Phone</label>
 			<input
+				id="phone"
 				type="text"
 				bind:value={$userInfo.phone}
-				required
 				placeholder="Your Phone"
 				class="input-field"
 			/>
+			{#if validationErrors.phone}
+				<p class="error">{validationErrors.phone}</p>
+			{/if}
 		</form>
 	</div>
 
