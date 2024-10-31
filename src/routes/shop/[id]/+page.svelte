@@ -12,20 +12,15 @@
 	let currentImageIndex = 0;
 	let gallery = [];
 	let primaryCategory = '';
+	let hoveredIndex = null; // Track the index of the hovered image
 
 	// Get the current product based on the page params
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
-	console.log('Current Product:', product); // Debugging: Check the current product
 
 	// If the product exists, set up gallery images and primary category
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
-		console.log('Product Categories:', product.categories); // Debugging: Check product categories
-
-		// Choose the primary category (e.g., the first one in the categories array)
-		primaryCategory =
-			product.categories && product.categories.length > 0 ? product.categories[0].name : '';
-		console.log('Primary Category:', primaryCategory); // Debugging: Check primary category value
+		primaryCategory = product.categories?.[0]?.name || '';
 	}
 
 	function addToCart() {
@@ -45,40 +40,25 @@
 	}
 
 	let slider;
-
 	let scrollTarget = 0;
 	let currentScroll = 0;
 	let isAnimating = false;
 
-	function handleMouseMove(event) {
-		const rect = slider.getBoundingClientRect();
-		const mouseX = event.clientX - rect.left;
-		const sliderWidth = rect.width;
-		const middleX = sliderWidth / 2;
-		const offsetX = mouseX - middleX;
-		const maxScroll = slider.scrollWidth - sliderWidth;
-		scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjusted for a gentler movement
+	// Image zooming variables
+	let zoomImageStyle = "";
 
-		if (!isAnimating) {
-			isAnimating = true;
-			animateScroll();
-		}
+	function handleImageHover(event, index) {
+		hoveredIndex = index;
+		const img = event.currentTarget;
+		const rect = img.getBoundingClientRect();
+		const offsetX = ((event.clientX - rect.left) / rect.width) * 100;
+		const offsetY = ((event.clientY - rect.top) / rect.height) * 100;
+		zoomImageStyle = `transform: scale(2); transform-origin: ${offsetX}% ${offsetY}%;`;
 	}
 
-	function animateScroll() {
-		// Apply easing effect
-		const easing = 0.1; // Change to control speed and smoothness
-		const distance = scrollTarget - currentScroll;
-		currentScroll += distance * easing;
-
-		slider.scrollLeft = currentScroll;
-
-		// Continue the animation if not reached the target
-		if (Math.abs(distance) > 0.5) {
-			requestAnimationFrame(animateScroll);
-		} else {
-			isAnimating = false; // Stop animating when close to the target
-		}
+	function resetImageZoom() {
+		hoveredIndex = null;
+		zoomImageStyle = "";
 	}
 </script>
 
@@ -86,23 +66,12 @@
 
 {#if product}
 	<div class="product-container flex h-screen w-full">
-		<!-- Details Section (Reordered on Mobile) -->
-		<div
-			class="product-details flex h-full w-full flex-col justify-end space-y-4 bg-[var(--background-color)] p-4 md:w-1/4"
-		>
+		<!-- Details Section -->
+		<div class="product-details flex h-full w-full flex-col justify-end space-y-4 bg-[var(--background-color)] p-4 md:w-1/4">
 			<h1 class="text-4xl font-bold text-[var(--text-color)]">{product.name}</h1>
-			<p class="text-lg text-[var(--text-color)]">
-				{product.short_description || product.description}
-			</p>
-
-			<!-- Relevant product information -->
+			<p class="text-lg text-[var(--text-color)]">{product.short_description || product.description}</p>
 			<p class="text-sm text-[var(--text-color)]"><strong>SKU:</strong> {product.sku || 'N/A'}</p>
-			<p class="text-sm text-[var(--text-color)]">
-				<strong>Stock Status:</strong>
-				{product.stock_status || 'N/A'}
-			</p>
-
-			<!-- Price Display Logic -->
+			<p class="text-sm text-[var(--text-color)]"><strong>Stock Status:</strong> {product.stock_status || 'N/A'}</p>
 			<p class="text-2xl font-semibold">
 				{#if product.sale_price && product.sale_price !== ''}
 					<span class="text-[var(--secondary-color)] line-through">€{product.regular_price}</span>
@@ -113,55 +82,22 @@
 					Price not available
 				{/if}
 			</p>
-
-			<!-- Additional Product Details -->
-			{#if product.dimensions}
-				<p class="mb-2 text-sm text-[var(--text-color)]">
-					<strong>Dimensions:</strong>
-					{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product
-						.dimensions.height || 'N/A'} cm
-				</p>
-			{/if}
-			{#if product.weight}
-				<p class="mb-2 text-sm text-[var(--text-color)]">
-					<strong>Weight:</strong>
-					{product.weight || 'N/A'} kg
-				</p>
-			{/if}
-
-			<!-- Display Categories and Tags -->
-			{#if product.categories.length > 0}
-				<p class="mb-2 text-sm text-[var(--text-color)]">
-					<strong>Categories:</strong>
-					{#each product.categories as category}{category.name}{#if category !== product.categories[product.categories.length - 1]},
-						{/if}{/each}
-				</p>
-			{/if}
-
-			{#if product.tags.length > 0}
-				<p class="mb-2 text-sm text-[var(--text-color)]">
-					<strong>Tags:</strong>
-					{#each product.tags as tag}{tag.name}{#if tag !== product.tags[product.tags.length - 1]},
-						{/if}{/each}
-				</p>
-			{/if}
-
 			<!-- Add to Cart Button -->
-			<button
-				on:click={addToCart}
-				class="rounded-md bg-[var(--primary-color)] px-4 py-2 font-semibold text-[var(--background-color)] transition duration-300 hover:bg-[var(--secondary-color)]"
-			>
+			<button on:click={addToCart} class="rounded-md bg-[var(--primary-color)] px-4 py-2 font-semibold text-[var(--background-color)] transition duration-300 hover:bg-[var(--secondary-color)]">
 				Add to Cart
 			</button>
 		</div>
 
 		<!-- Image Gallery Section -->
 		<div class="image-gallery flex h-full w-full flex-col md:w-full">
-			<div class="thumbnail-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
+			<div class="thumbnail-slider-container" bind:this={slider}>
 				<div class="thumbnail-slider">
 					{#each gallery as image, index}
-						<div class="featured-card" on:click={() => openModal(index)}>
-							<img src={image} alt="Gallery image" class="product-image" />
+						<div class="featured-card {hoveredIndex === index ? 'active' : ''}" 
+						     on:click={() => openModal(index)}
+						     on:mousemove={(event) => handleImageHover(event, index)}
+						     on:mouseleave={resetImageZoom}>
+							<img src={image} alt="Gallery image" class="product-image" style={hoveredIndex === index ? zoomImageStyle : ''} />
 						</div>
 					{/each}
 				</div>
@@ -170,7 +106,6 @@
 	</div>
 {/if}
 
-<!-- CategorySlider component with category passed as prop -->
 <CategorySlider {products} category={primaryCategory} />
 
 <style>
@@ -186,34 +121,31 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
-		scroll-behavior: smooth;
 	}
 
 	.thumbnail-slider {
 		display: flex;
 		gap: 1rem;
-		transition: transform 0.3s ease;
 	}
 
 	.featured-card {
-		flex: 0 0 33%;
+		flex: 1;
 		height: 100vh;
-		position: relative;
 		overflow: hidden;
-		border-radius: 10px;
-		transition: flex 0.9s ease;
+		transition: flex 0.6s ease, background-position 0.6s ease;
 		cursor: pointer;
 	}
 
-	.featured-card:hover {
-		flex: 0 0 90%;
+	.featured-card.active {
+		flex: 3;
+		background-position: top;
 	}
 
 	.product-image {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		border-radius: 10px;
+		transition: transform 0.3s ease;
 	}
 
 	/* Mobile-specific adjustments */
@@ -250,7 +182,6 @@
 			height: auto;
 			width: 100%;
 			max-height: 300px;
-			cursor: pointer;
 		}
 
 		.product-image {
