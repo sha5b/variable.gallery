@@ -13,7 +13,6 @@
 		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
 		.slice(0, 20);
 
-	// Initially set the first product as the current product
 	let currentProduct = limitedProducts[0];
 	$: currentProductTags = currentProduct ? currentProduct.tags.map(tag => tag.name) : [];
 
@@ -23,12 +22,11 @@
 	let isAnimating = false;
 
 	function handleProductClick(product) {
-		currentProduct = product; // Set the clicked product as the current product
+		currentProduct = product;
 		goto(`/shop/${product.id}`);
 	}
 
 	function handleMouseMove(event) {
-		// Only apply mouse move scroll for desktop screens
 		if (window.innerWidth >= 768) {
 			const rect = slider.getBoundingClientRect();
 			const mouseX = event.clientX - rect.left;
@@ -36,7 +34,7 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjust for smooth movement
+			scrollTarget = (maxScroll * offsetX) / middleX / 10;
 
 			if (!isAnimating) {
 				isAnimating = true;
@@ -46,17 +44,16 @@
 	}
 
 	function animateScroll() {
-		const easing = 0.1; // Adjust this for smoother movement
+		const easing = 0.1;
 		const distance = scrollTarget - currentScroll;
 		currentScroll += distance * easing;
 
 		slider.scrollLeft = currentScroll;
 
-		// Continue the animation if not reached the target
 		if (Math.abs(distance) > 0.5) {
 			requestAnimationFrame(animateScroll);
 		} else {
-			isAnimating = false; // Stop animating when close to the target
+			isAnimating = false;
 		}
 	}
 </script>
@@ -76,7 +73,7 @@
 			<div class="category-card" on:click={() => handleProductClick(product)}>
 				<div class="product-tag-container">
 					{#each product.tags as tag}
-						<span class="tag">{tag.name}</span>
+						<span class="tag-pill">{tag.name}</span>
 					{/each}
 				</div>
 				<img src={product.images[0]?.src} alt={product.name} class="product-image" />
@@ -86,7 +83,6 @@
 </div>
 
 <style>
-	/* Slider Container */
 	.category-slider-container {
 		width: 100%;
 		overflow: hidden;
@@ -95,15 +91,15 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Category Header */
 	.category-header {
 		display: flex;
 		align-items: center;
-		gap: 4rem;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	.category-title {
-		font-size: 4rem;
+		font-size: 2rem;
 		font-weight: bold;
 		color: var(--primary-color);
 		padding: 0.5rem 0;
@@ -112,15 +108,15 @@
 	.tag-container {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 2rem;
+		gap: 0.5rem;
 	}
 
 	.tag-pill {
 		background-color: var(--primary-color);
 		color: var(--background-color);
-		padding: 0.6rem 1.2rem;
+		padding: 0.4rem 0.8rem;
 		border-radius: 9999px;
-		font-size: 1rem;
+		font-size: 0.9rem;
 		font-weight: 600;
 	}
 
@@ -137,9 +133,19 @@
 		}
 
 		.category-card {
-			flex: 0 0 80%;
+			flex: 0 0 70%;
 			scroll-snap-align: start;
 			position: relative;
+			border-radius: 10px;
+		}
+
+		.category-title {
+			font-size: 1.5rem;
+		}
+
+		.tag-pill {
+			font-size: 0.8rem;
+			padding: 0.3rem 0.6rem;
 		}
 	}
 
@@ -181,10 +187,10 @@
 		z-index: 10;
 	}
 
-	.tag {
+	.tag-pill {
 		background-color: var(--primary-color);
 		color: var(--background-color);
-		padding: 0.25rem 0.5rem;
+		padding: 0.3rem 0.5rem;
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 600;
