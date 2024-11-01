@@ -1,69 +1,85 @@
 <script>
-  // Accept WooCommerce product fields as props
-  export let imageSrc = "/path/to/image.jpg"; // Product's main image source
-  export let name = "Product Name"; // WooCommerce uses `name` for the title
-  export let description = "Product description goes here."; // Use WooCommerce's `description` or `short_description`
-  export let buttonText = "Shop Now";
-  export let buttonLink = "/shop"; // Use WooCommerce's `permalink` for the product link
-  export let sku = "12345"; // SKU (unique product identifier)
-  export let stockStatus = "In Stock"; // Stock status
-  export let regularPrice = "100.00"; // Regular price
-  export let salePrice = ""; // Sale price (if applicable)
-  export let dimensions = { length: "10", width: "5", height: "15" }; // Dimensions
-  export let weight = "0.5"; // Weight
+	// Accept `product` and `variation` as props
+	export let products;
+
+	let latestProduct =
+		products.length > 0
+			? products.reduce(
+					(latest, product) =>
+						new Date(product.date_modified) > new Date(latest.date_modified) ? product : latest,
+					products[0]
+				)
+			: null;
+
+	console.log(latestProduct);
+	// Default values if properties are undefined
 </script>
 
-<div class="flex flex-col md:flex-row items-stretch w-full my-8 gap-8 pt-8">
-  <!-- Image Section with larger display on mobile -->
-  <div class="w-full md:w-3/4 aspect-w-4 aspect-h-3 md:aspect-w-16 md:aspect-h-6">
-    <img src={imageSrc} alt={name} class="w-full h-full object-cover rounded-lg" />
-  </div>
+{#if latestProduct}
+	<div class="my-8 flex w-full flex-col items-stretch gap-8 pt-8 md:flex-row">
+		<!-- Image Section with larger display on mobile -->
+		<div class="aspect-h-3 aspect-w-4 w-full md:aspect-h-6 md:aspect-w-16 md:w-3/4">
+			<img
+				src={latestProduct.images[0]?.src || '/path/to/default.jpg'}
+				alt={latestProduct.name}
+				class="h-full w-full rounded-lg object-cover"
+			/>
+		</div>
 
-  <!-- Text Section aligned to top left -->
-  <div class="md:w-1/4 w-full flex flex-col justify-start items-start bg-[var(--background-color)] rounded-lg">
-    <h2 class="text-2xl font-bold mb-4 text-[var(--text-color)]">{name}</h2>
-    <p class="text-[var(--text-color)] mb-4">{description}</p>
-    
-    <!-- Product Details -->
-    <p class="text-sm text-[var(--text-color)] mb-2"><strong>SKU:</strong> {sku || 'N/A'}</p>
-    <p class="text-sm text-[var(--text-color)] mb-2"><strong>Stock Status:</strong> {stockStatus || 'N/A'}</p>
-    <p class="text-sm text-[var(--text-color)] mb-2">
-      <strong>Price:</strong> 
-      {#if salePrice}
-        <span class="line-through text-[var(--secondary-color)]">€{regularPrice}</span> €{salePrice}
-      {:else}
-        €{regularPrice}
-      {/if}
-    </p>
-    
-    <!-- Dimensions and Weight -->
-    {#if dimensions}
-      <p class="text-sm text-[var(--text-color)] mb-2">
-        <strong>Dimensions:</strong> {dimensions.length || 'N/A'} x {dimensions.width || 'N/A'} x {dimensions.height || 'N/A'} cm
-      </p>
-    {/if}
-    {#if weight}
-      <p class="text-sm text-[var(--text-color)] mb-2"><strong>Weight:</strong> {weight} kg</p>
-    {/if}
+		<!-- Text Section aligned to top left -->
+		<div
+			class="flex w-full flex-col items-start justify-start rounded-lg bg-[var(--background-color)] p-4 md:w-1/4"
+		>
+			<h2 class="mb-4 text-2xl font-bold text-[var(--text-color)]">{latestProduct.name}</h2>
+			<p class="mb-4 text-[var(--text-color)]">
+				{@html latestProduct.description || latestProduct.short_description}
+			</p>
+			<p class="mb-4 text-[var(--text-color)]">{@html latestProduct.variations[0].name}</p>
+			<!-- SKU and Stock Status -->
+			<p class="mb-2 text-sm text-[var(--text-color)]">
+				<strong>SKU:</strong>
+				{latestProduct.variations[0].stock_quantity || 'N/A'}
+			</p>
+			<p class="mb-2 text-sm text-[var(--text-color)]">
+				<strong>Stock Status:</strong>
+				{latestProduct.variations[0].stock_status === 'instock' ? 'In Stock' : 'Out of Stock'}
+			</p>
 
-    <!-- Action Button -->
-    <a href={buttonLink} class="bg-[var(--primary-color)] text-[var(--background-color)] py-2 px-4 rounded-md hover:bg-[var(--secondary-color)] transition-colors">
-      {buttonText}
-    </a>
-  </div>
-</div>
+			<!-- Price Display Logic -->
+			<p class="text-2xl font-semibold">
+				€{latestProduct.variations[0].price || 'N/A'}
+			</p>
+
+			<!-- Dimensions and Weight -->
+			{#if latestProduct.weight}
+				<p class="mb-2 text-sm text-[var(--text-color)] mt-2">
+					<strong>Weight:</strong>
+					{latestProduct.weight || 'N/A'} kg
+				</p>
+			{/if}
+
+			<!-- Action Button -->
+			<a
+				href={latestProduct.permalink || '/shop'}
+				class="rounded-md bg-[var(--primary-color)] px-4 py-2 text-[var(--background-color)] transition-colors hover:bg-[var(--secondary-color)] mt-4"
+			>
+				Shop Now
+			</a>
+		</div>
+	</div>
+{/if}
 
 <style>
-  .product-container {
-    display: flex;
-    gap: var(--spacing-md);
-  }
-  .image-section {
-    width: 100%;
-  }
-  .product-details {
-    padding: var(--spacing-lg);
-    background-color: var(--background-color);
-    border-radius: var(--spacing-xs);
-  }
+	.product-container {
+		display: flex;
+		gap: var(--spacing-md);
+	}
+	.image-section {
+		width: 100%;
+	}
+	.product-details {
+		padding: var(--spacing-lg);
+		background-color: var(--background-color);
+		border-radius: var(--spacing-xs);
+	}
 </style>

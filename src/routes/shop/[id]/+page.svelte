@@ -6,7 +6,7 @@
 	import CategorySlider from '$lib/components/CategorySlider.svelte';
 
 	export let data;
-	const { products } = data;
+	let { product, variation, products } = data;
 
 	let modalOpen = false;
 	let currentImageIndex = 0;
@@ -29,8 +29,8 @@
 	}
 
 	function addToCart() {
-		if (product) {
-			addItem(product);
+		if (product && variation) {
+			addItem({ ...product, ...variation });
 			toggleCartSlider();
 		}
 	}
@@ -85,6 +85,7 @@
 <Modal images={gallery} bind:open={modalOpen} bind:currentIndex={currentImageIndex} />
 
 {#if product}
+{console.log(variation)}
 	<div class="product-container flex h-screen w-full">
 		<!-- Details Section (Reordered on Mobile) -->
 		<div
@@ -92,14 +93,18 @@
 		>
 			<h1 class="text-4xl font-bold text-[var(--text-color)]">{product.name}</h1>
 			<p class="text-lg text-[var(--text-color)]">
-				{product.short_description || product.description}
+				{@html product.short_description || product.description}
+			</p>
+
+			<p class="text-lg text-[var(--text-color)]">
+				{variation.name}
 			</p>
 
 			<!-- Relevant product information -->
-			<p class="text-sm text-[var(--text-color)]"><strong>SKU:</strong> {product.sku || 'N/A'}</p>
+			<p class="text-sm text-[var(--text-color)]"><strong>SKU:</strong> {variation.stock_quantity || 'N/A'}</p>
 			<p class="text-sm text-[var(--text-color)]">
 				<strong>Stock Status:</strong>
-				{product.stock_status || 'N/A'}
+				{variation.stock_status || 'N/A'}
 			</p>
 
 			<!-- Price Display Logic -->
@@ -107,8 +112,8 @@
 				{#if product.sale_price && product.sale_price !== ''}
 					<span class="text-[var(--secondary-color)] line-through">€{product.regular_price}</span>
 					€{product.sale_price}
-				{:else if product.regular_price}
-					€{product.regular_price}
+				{:else if variation.regular_price}
+					€{variation.regular_price}
 				{:else}
 					Price not available
 				{/if}
