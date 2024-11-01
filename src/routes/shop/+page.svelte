@@ -31,7 +31,7 @@
   {:else}
     <div class="grid grid-cols-1 gap-[var(--spacing-md)] md:grid-cols-2">
       {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full bg-[var(--background-color-alt)] rounded-lg">
+        <div class="category-container w-full p-[var(--spacing-md)] bg-[var(--background-color-alt)] rounded-lg">
           <h2 class="text-[var(--font-size-large)] font-semibold my-[var(--spacing-sm)] text-[var(--text-color)]">
             {categoryName}
           </h2>
