@@ -88,17 +88,22 @@
 	<div class="product-details space-y-md bg-background flex-col md:w-1/4">
 		<h1 class="product-title text-xlarge text-primary font-bold">{product.name}</h1>
 		<p class="text-primary text-base">{@html product.short_description || product.description}</p>
-		<p class="text-large text-primary">{variation.name}</p>
+		<p class="text-large text-primary">{variation ? variation.name : product.name}</p>
 
-		<p class="text-small text-primary"><strong>SKU:</strong> {variation.stock_quantity || 'N/A'}</p>
-		<p class="text-small text-primary"><strong>Stock Status:</strong> {variation.stock_status || 'N/A'}</p>
+		<p class="text-small text-primary"><strong>SKU:</strong> {variation ? variation.stock_quantity || 'N/A' : product.sku || 'N/A'}</p>
+		<p class="text-small text-primary">
+			<strong>Stock Status:</strong> 
+			{variation ? (variation.stock_status === 'instock' ? 'In Stock' : 'Out of Stock') : (product.stock_status === 'instock' ? 'In Stock' : 'Out of Stock')}
+		</p>
 
 		<p class="price text-large text-primary font-semibold">
 			{#if product.sale_price && product.sale_price !== ''}
 				<span class="sale-price text-secondary line-through">€{product.regular_price}</span>
 				€{product.sale_price}
-			{:else if variation.regular_price}
+			{:else if variation?.regular_price}
 				€{variation.regular_price}
+			{:else if product.regular_price}
+				€{product.regular_price}
 			{:else}
 				Price not available
 			{/if}
@@ -107,8 +112,7 @@
 		{#if product.dimensions}
 			<p class="product-info text-small">
 				<strong>Dimensions:</strong>
-				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product
-					.dimensions.height || 'N/A'} cm
+				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
 			</p>
 		{/if}
 		{#if product.weight}
@@ -148,8 +152,6 @@
 </div>
 
 <CategorySlider {products} category={primaryCategory} />
-
-
 
 <style>
 .product-container {

@@ -97,7 +97,7 @@
 	}
 
 	.featured-card {
-		flex: 0 0 80%;
+		flex: 0 0 50%;
 		scroll-snap-align: start;
 		position: relative;
 	}

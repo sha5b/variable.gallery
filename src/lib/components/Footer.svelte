@@ -22,15 +22,15 @@
   }
 </script>
 
-<footer class="footer-container bg-[var(--primary-color)] text-[var(--background-color)]">
-  <div class="container flex flex-col md:flex-row gap-[var(--spacing-md)]">
+<footer class="footer-container bg-primary text-background px-page py-lg">
+  <div class="container flex flex-col md:flex-row gap-md justify-start">
     <!-- Quick Links Section -->
-    <div class="footer-links md:w-1/2 text-left">
-      <h2 class="text-[var(--font-size-large)] font-bold mb-[var(--spacing-sm)]">Quick Links</h2>
-      <ul class="space-y-[var(--spacing-xs)]">
+    <div class="footer-links flex-shrink-0 text-left">
+      <h2 class="text-large font-bold">Quick Links</h2>
+      <ul class="space-y-xs">
         {#each links as { label, href }}
           <li>
-            <a href={href} class="hover:text-[var(--accent-color)] transition" on:click|preventDefault={label === 'Contact' ? openModal : null}>
+            <a href={href} class="hover:text-accent transition-default" on:click|preventDefault={label === 'Contact' ? openModal : null}>
               {label}
             </a>
           </li>
@@ -39,18 +39,22 @@
     </div>
 
     <!-- Social Media Links -->
-    <div class="footer-social md:w-1/2 text-left md:ml-auto">
-      <h2 class="text-[var(--font-size-large)] font-bold mb-[var(--spacing-sm)]">Connect with Us</h2>
-      <ul class="space-y-[var(--spacing-xs)]">
+    <div class="footer-social flex-shrink-0 text-left">
+      <h2 class="text-large font-bold">Connect with Us</h2>
+      <ul class="space-y-xs">
         {#each socialLinks as { label, href }}
-          <li><a href={href} target="_blank" rel="noopener noreferrer" class="hover:text-[var(--accent-color)] transition">{label}</a></li>
+          <li>
+            <a href={href} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-default">
+              {label}
+            </a>
+          </li>
         {/each}
       </ul>
     </div>
   </div>
 
   <!-- Copyright Section -->
-  <div class="container text-[var(--font-size-small)] mt-[var(--spacing-md)] text-left">
+  <div class="container text-small mt-md text-center">
     <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
   </div>
 
@@ -60,69 +64,40 @@
 
 <style>
   .footer-container {
-    padding: var(--page-padding);
-    text-align: center;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    padding: var(--page-padding) var(--spacing-lg);
   }
 
   .container {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
-    flex-direction: column;
     gap: var(--spacing-md);
-    padding: 0;
   }
 
-  /* Adjust layout for desktop screens */
-  @media (min-width: 768px) {
-    .footer-container {
-      padding: var(--page-padding-md);
-    }
-
-    .container {
-      flex-direction: row;
-      text-align: left;
-    }
-
-    .footer-links,
-    .footer-social {
-      width: 50%;
-    }
-
-    .footer-social {
-      margin-left: auto;
-    }
+  .footer-links,
+  .footer-social {
+    align-self: flex-start;
+    text-align: left;
   }
 
-  /* Additional style for footer items */
   .footer-links ul,
   .footer-social ul {
-    padding: 0;
     list-style: none;
+    padding: 0;
   }
 
-  .footer-links h2,
-  .footer-social h2 {
-    font-size: var(--font-size-large);
-    font-weight: bold;
-    margin-bottom: var(--spacing-sm);
-  }
-
-  .footer-links li,
-  .footer-social li {
-    margin-bottom: var(--spacing-xs);
-  }
-
-  .footer-links a,
-  .footer-social a {
+  a {
     color: var(--background-color);
-    transition: color 0.3s;
+    text-decoration: none;
+    transition: color 0.3s ease;
   }
 
-  .footer-links a:hover,
-  .footer-social a:hover {
+  a:hover {
     color: var(--accent-color);
   }
 
-  /* Center-align copyright text */
   .footer-container .container:last-child {
     text-align: center;
     margin-top: var(--spacing-md);

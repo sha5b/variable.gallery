@@ -14,7 +14,6 @@
 			: null;
 
 	let variation = latestProduct?.variations[0];
-	
 </script>
 
 {#if latestProduct}
@@ -30,20 +29,23 @@
 
 		<!-- Text Section aligned to top left -->
 		<div class="product-details space-y-md bg-background p-lg flex-col rounded-lg md:w-1/4">
-			<h2 class="text-xlarge text-primary font-bold">{latestProduct.name}</h2>
+			<h2 class="text-xlarge text-primary font-bold">{variation ? variation.name : latestProduct.name}</h2>
 			<p class="text-primary text-base">
 				{@html latestProduct.description || latestProduct.short_description}
 			</p>
-			<p class="text-large text-primary">{variation.name}</p>
+			{#if variation}
+				<p class="text-large text-primary">{variation.name}</p>
+			{/if}
 
 			<!-- SKU and Stock Status -->
 			<p class="text-small text-primary">
 				<strong>SKU:</strong>
-				{variation.stock_quantity || 'N/A'}
+				{variation ? (variation.stock_quantity || 'N/A') : (latestProduct.sku || 'N/A')}
 			</p>
+
 			<p class="text-small text-primary">
 				<strong>Stock Status:</strong>
-				{variation.stock_status === 'instock' ? 'In Stock' : 'Out of Stock'}
+				{variation ? (variation.stock_status === 'instock' ? 'In Stock' : 'Out of Stock') : (latestProduct.stock_status === 'instock' ? 'In Stock' : 'Out of Stock')}
 			</p>
 
 			<!-- Price Display Logic -->
@@ -51,8 +53,10 @@
 				{#if latestProduct.sale_price && latestProduct.sale_price !== ''}
 					<span class="sale-price text-secondary line-through">€{latestProduct.regular_price}</span>
 					€{latestProduct.sale_price}
-				{:else if variation.regular_price}
+				{:else if variation?.regular_price}
 					€{variation.regular_price}
+				{:else if latestProduct.regular_price}
+					€{latestProduct.regular_price}
 				{:else}
 					Price not available
 				{/if}
@@ -89,7 +93,7 @@
 			{/if}
 
 			<!-- Action Button -->
-			<a href={'/shop'} class="button-primary mt-4 px-4 py-2">Shop Nows</a>
+			<a href={'/shop'} class="button-primary mt-4 px-4 py-2">Shop Now</a>
 		</div>
 	</div>
 {/if}
@@ -101,7 +105,7 @@
 	}
 
 	.image-section {
-		width: 100%;
+		width: 65%;
 	}
 
 	.product-details {

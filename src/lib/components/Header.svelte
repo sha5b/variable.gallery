@@ -5,7 +5,7 @@
 
 <style>
 	.header-container {
-		height: 35vh;
+		height: 20vh;
 		/* Background color, padding, etc., can be customized here if needed */
 	}
 
