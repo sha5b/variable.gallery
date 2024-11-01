@@ -1,6 +1,5 @@
 <script>
 	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
 	let total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
@@ -26,44 +25,44 @@
 	}
 
 	function formatPrice(price) {
-		return `€${(price / 100).toFixed(2)}`;
+		return `€${(price / 1).toFixed(2)}`;
 	}
 </script>
 
-<div class="cart-container mx-auto my-10 p-6 max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="cart-container mx-auto my-lg p-md max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-lg">
 	<!-- Cart Items Section -->
 	<div class="col-span-2">
-		<h1 class="text-4xl font-bold mb-8">Cart</h1>
+		<h1 class="text-xlarge font-bold mb-lg">Cart</h1>
 		{#if $cart.length === 0}
 			<p>Your cart is empty.</p>
 		{:else}
-			<table class="w-full text-left">
+			<table class="w-full text-left border-separate space-y-md">
 				<thead>
-					<tr class="border-b">
-						<th class="pb-4">Product</th>
+					<tr class="border-b text-large">
+						<th class="pb-md">Product</th>
 						<th></th>
-						<th class="pb-4">Total</th>
+						<th class="pb-md text-right">Total</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each $cart as item}
 						<tr class="border-b">
-							<td class="py-4">
-								<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 rounded-md object-cover" />
+							<td class="py-md">
+								<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 rounded object-cover" />
 							</td>
 							<td>
 								<div>
-									<h3 class="text-xl font-semibold">{item.name}</h3>
+									<h3 class="text-base font-semibold">{item.name}</h3>
 									<p class="text-gray-600">{formatPrice(item.price)}</p>
-									<div class="flex items-center mt-2">
-										<button class="border px-3 py-1" on:click={() => decreaseQuantity(item)}>-</button>
+									<div class="flex items-center mt-sm gap-xs">
+										<button class="quantity-btn" on:click={() => decreaseQuantity(item)}>-</button>
 										<span class="mx-3">{item.quantity}</span>
-										<button class="border px-3 py-1" on:click={() => increaseQuantity(item)}>+</button>
+										<button class="quantity-btn" on:click={() => increaseQuantity(item)}>+</button>
 									</div>
-									<a href="#" class="text-red-500 text-sm mt-2 inline-block" on:click={() => removeItem(item.id)}>Remove item</a>
+									<a href="#" class="remove-btn mt-sm inline-block" on:click={() => removeItem(item.id)}>Remove item</a>
 								</div>
 							</td>
-							<td class="py-4 text-right text-lg font-semibold">{formatPrice(item.quantity * item.price)}</td>
+							<td class="py-md text-right text-lg font-semibold">{formatPrice(item.quantity * item.price)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -72,22 +71,22 @@
 	</div>
 
 	<!-- Cart Totals Section -->
-	<div class="bg-gray-100 p-6 rounded-lg shadow-md">
-		<h2 class="text-2xl font-bold mb-6">Cart Totals</h2>
-		<div class="mb-4">
-			<label class="block font-semibold mb-2">Add a coupon</label>
-			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-2 rounded" />
+	<div class="cart-totals p-lg rounded-lg">
+		<h2 class="text-large font-bold mb-md">Cart Totals</h2>
+		<div class="mb-md">
+			<label class="block font-semibold mb-xs">Add a coupon</label>
+			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-sm rounded" />
 		</div>
-		<div class="flex justify-between text-lg font-semibold">
+		<div class="flex justify-between text-base font-semibold">
 			<span>Subtotal</span>
 			<span>{formatPrice(total)}</span>
 		</div>
-		<hr class="my-4" />
-		<div class="flex justify-between text-2xl font-bold">
+		<hr class="my-md" />
+		<div class="flex justify-between text-large font-bold">
 			<span>Total</span>
 			<span>{formatPrice(total)} EUR</span>
 		</div>
-		<button on:click={proceedToCheckout} class="w-full mt-6 py-3 bg-black text-white font-semibold rounded hover:bg-gray-800 transition">
+		<button on:click={proceedToCheckout} class="button-primary w-full mt-md py-md">
 			Proceed to Checkout
 		</button>
 	</div>
@@ -96,5 +95,40 @@
 <style>
 	.cart-container {
 		max-width: 1200px;
+	}
+
+	/* Cart Totals Styling */
+	.cart-totals {
+		padding: var(--spacing-lg);
+		border-radius: var(--rounded-lg);
+	}
+
+	.quantity-btn {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border: 1px solid var(--border-color);
+		border-radius: var(--rounded-sm);
+	}
+
+	/* Remove button styling */
+	.remove-btn {
+		margin-top: var(--spacing-sm);
+		color: #ffffff; /* Ensures text is visible on red background */
+		background-color: var(--error-color);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: var(--rounded-sm);
+		display: inline-block;
+		text-align: center;
+		font-weight: bold;
+	}
+
+	/* Responsive adjustments */
+	@media (max-width: 767px) {
+		.cart-container {
+			padding: var(--spacing-md) var(--spacing-sm);
+		}
+
+		.cart-totals {
+			width: 100%;
+		}
 	}
 </style>

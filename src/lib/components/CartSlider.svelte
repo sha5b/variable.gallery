@@ -46,7 +46,7 @@
 </script>
 
 <!-- Cart Slider -->
-<div class={` fixed top-0 right-0 h-screen w-[350px] bg-primary text-background transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
+<div class={` fixed top-0 right-0 h-screen w-[500px] bg-primary text-background transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
   
   <!-- Header with Cart Title and Close Button -->
   <div class="padding-md">

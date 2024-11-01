@@ -24,7 +24,7 @@
 	}
 
 	function addToCart() {
-		if (product && variation) {
+		if (product || variation) {
 			addItem({ ...product, ...variation });
 			toggleCartSlider();
 		}
