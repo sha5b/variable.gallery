@@ -60,7 +60,7 @@
 
 			<!-- Action Button -->
 			<a
-				href={latestProduct.permalink || '/shop'}
+				href={'/shop'}
 				class="rounded-md bg-[var(--primary-color)] px-4 py-2 text-[var(--background-color)] transition-colors hover:bg-[var(--secondary-color)] mt-4"
 			>
 				Shop Now
