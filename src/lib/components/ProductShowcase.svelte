@@ -109,7 +109,6 @@
 	}
 
 	.product-details {
-		background-color: var(--background-color);
 		padding: var(--spacing-lg);
 		border-radius: var(--rounded-lg);
 		display: flex;

@@ -4,6 +4,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import CartSlider from '$lib/components/CartSlider.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartSliderStore';
+	import ParallaxGrid from '$lib/components/ParallaxGrid.svelte';
 
 	$: isOpen = $isCartSliderOpen;
 
@@ -15,6 +16,7 @@
 <div class="relative min-h-screen flex flex-col">
 	<!-- Navbar and Cart Overlay -->
 	<Navbar />
+	<ParallaxGrid />
 	<div
 		class={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out ${isOpen ? 'visible z-50 opacity-100' : 'invisible opacity-0'}`}
 		on:click={closeCart}
@@ -33,6 +35,7 @@
 	<!-- Footer that appears after the main content -->
 	<Footer />
 </div>
+
 
 <style>
 	/* Optional: Add styling for a smoother layout */
