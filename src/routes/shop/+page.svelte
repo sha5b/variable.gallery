@@ -25,14 +25,14 @@
   }
 </script>
 
-<div class="shop-container w-full px-[var(--page-padding)] pt-[var(--spacing-xl)]">
+<div class="shop-container px-page bg-background">
   {#if error}
-    <p class="text-[var(--error-color)]">{error}</p>
+    <p class="text-error">{error}</p>
   {:else}
-    <div class="grid grid-cols-1 gap-[var(--spacing-md)] md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-md md:grid-cols-2">
       {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full p-[var(--spacing-md)] bg-[var(--background-color-alt)] rounded-lg">
-          <h2 class="text-[var(--font-size-large)] font-semibold my-[var(--spacing-sm)] text-[var(--text-color)]">
+        <div class="category-container w-full rounded-lg transition-default">
+          <h2 class="text-xl font-semibold my-sm text-primary">
             {categoryName}
           </h2>
           
@@ -46,7 +46,6 @@
   <TagDisplay {products} />
 </div>
 
-
 <style>
   .shop-container {
     background-color: var(--background-color);
@@ -56,5 +55,17 @@
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
+  }
+
+  .text-error {
+    color: var(--error-color);
+  }
+
+  .pt-xl {
+    padding-top: var(--spacing-xl);
+  }
+
+  .rounded-lg {
+    border-radius: var(--rounded-lg);
   }
 </style>

@@ -61,7 +61,7 @@
 </script>
 
 <div class="featured-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
-	<div class="featured-slider">
+	<div class="featured-slider flex gap-md">
 		{#each limitedProducts as product}
 			<div class="featured-card" on:click={() => handleProductClick(product.id)}>
 				<!-- Display Product Tags Above the Image -->
@@ -78,73 +78,76 @@
 </div>
 
 <style>
+.featured-slider-container {
+	width: 100%;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+@media (max-width: 767px) {
 	.featured-slider-container {
-		width: 100%;
-		overflow: hidden;
-		transition: all 0.3s ease;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
 	}
 
-	@media (max-width: 767px) {
-		.featured-slider-container {
-			overflow-x: auto;
-			scroll-snap-type: x mandatory;
-			-webkit-overflow-scrolling: touch;
-		}
-		.featured-slider {
-			display: flex;
-			gap: 1rem;
-		}
-		.featured-card {
-			flex: 0 0 80%;
-			scroll-snap-align: start;
-			position: relative;
-		}
-	}
-
-	@media (min-width: 768px) {
-		.featured-slider {
-			display: flex;
-			gap: 1rem;
-		}
-
-		.featured-card {
-			flex: 0 0 300px;
-			height: 50vh;
-			position: relative;
-			overflow: hidden;
-			border-radius: 10px;
-			transition: flex 0.9s ease;
-			cursor: pointer;
-		}
-
-		.featured-card:hover {
-			flex: 0 0 600px;
-		}
-	}
-
-	.product-image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		border-radius: 10px;
-	}
-
-	.tag-container {
-		position: absolute;
-		top: 8px;
-		left: 8px;
+	.featured-slider {
 		display: flex;
-		gap: 0.25rem;
-		flex-wrap: wrap;
-		z-index: 10;
+		gap: 1rem;
 	}
 
-	.tag {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		padding: 0.25rem 0.5rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 600;
+	.featured-card {
+		flex: 0 0 80%;
+		scroll-snap-align: start;
+		position: relative;
 	}
+}
+
+@media (min-width: 768px) {
+	.featured-slider {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.featured-card {
+		flex: 0 0 300px;
+		height: 50vh;
+		position: relative;
+		overflow: hidden;
+		border-radius: 10px;
+		transition: flex 0.9s ease;
+		cursor: pointer;
+	}
+
+	.featured-card:hover {
+		flex: 0 0 600px;
+	}
+}
+
+.product-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: 10px;
+}
+
+.tag-container {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	display: flex;
+	gap: 0.25rem;
+	flex-wrap: wrap;
+	z-index: 10;
+}
+
+.tag {
+	background-color: var(--primary-color);
+	color: var(--background-color);
+	padding: 0.25rem 0.5rem;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
 </style>

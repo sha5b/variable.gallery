@@ -22,70 +22,51 @@
   function closeMenu() {
     isMenuOpen = false;
   }
-
-  function handleClickOutside(event) {
-    if (
-      isMenuOpen &&
-      !event.target.closest('.menu-container') &&
-      !event.target.closest('.burger-icon')
-    ) {
-      closeMenu();
-    }
-  }
-
-  onMount(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  });
 </script>
 
-<nav class="fixed left-0 top-0 z-50 flex w-full items-center justify-between bg-[var(--background-color)] px-[var(--page-padding)] py-[var(--spacing-md)] md:px-[var(--page-padding-md)]">
+<nav class="navbar w-full flex justify-between items-center bg-background px-page py-md md:px-page-md">
   <!-- Logo -->
-  <div class="text-sm font-semibold">
-    <a href="/" class="text-[var(--text-color)] hover:text-[var(--primary-color)]">store.shahabned.xyz</a>
+  <div class="text-base font-semibold">
+    <a href="/" class="text-text-color hover:text-primary-color">store.shahabned.xyz</a>
   </div>
 
   <!-- Desktop Navigation Links -->
-  <ul class="hidden list-none gap-[var(--spacing-lg)] md:flex">
-    <li><a href="/shop" class="text-[var(--text-color)] hover:text-[var(--primary-color)]">Shop</a></li>
-    <li><a href="/about" class="text-[var(--text-color)] hover:text-[var(--primary-color)]">About</a></li>
-    <li><a href="/profile" class="text-[var(--text-color)] hover:text-[var(--primary-color)]">Profile</a></li>
+  <ul class="hidden md:flex list-none gap-lg items-center">
+    <li><a href="/shop" class="text-text-color hover:text-primary-color">Shop</a></li>
+    <li><a href="/about" class="text-text-color hover:text-primary-color">About</a></li>
+    <li><a href="/profile" class="text-text-color hover:text-primary-color">Profile</a></li>
   </ul>
 
   <!-- Cart and Hamburger Menu -->
   <div class="relative flex items-center">
     <!-- Cart Icon (hidden on mobile) -->
-    <button class="hidden text-2xl transition-colors md:block" on:click={handleCartIconClick}>
+    <button class="hidden md:block text-2xl relative" on:click={handleCartIconClick}>
       🛒
       {#if totalItems > 0}
-        <span class="absolute -right-[var(--spacing-xs)] -top-[var(--spacing-xs)] flex h-5 w-5 items-center justify-center rounded-full bg-[var(--error-color)] text-xs text-[var(--background-color)]">
-          {totalItems}
-        </span>
+        <span class="cart-badge">{totalItems}</span>
       {/if}
     </button>
 
     <!-- Hamburger Menu (visible on mobile) -->
-    <div class="burger-icon ml-[var(--spacing-sm)] flex cursor-pointer flex-col gap-[var(--spacing-xs)] md:hidden" on:click={toggleMenu}>
-      <div class="h-[2px] w-6 bg-[var(--text-color)]"></div>
-      <div class="h-[2px] w-6 bg-[var(--text-color)]"></div>
-      <div class="h-[2px] w-6 bg-[var(--text-color)]"></div>
+    <div class="burger-icon ml-sm flex flex-col gap-xs cursor-pointer md:hidden" on:click={toggleMenu}>
+      <div class="h-[2px] w-6 bg-text-color"></div>
+      <div class="h-[2px] w-6 bg-text-color"></div>
+      <div class="h-[2px] w-6 bg-text-color"></div>
     </div>
   </div>
 
   <!-- Mobile Menu -->
   {#if isMenuOpen}
-    <div class="menu-container absolute right-[var(--spacing-md)] top-full mt-[var(--spacing-sm)] flex w-48 flex-col items-start rounded-md bg-[var(--background-color)] p-[var(--spacing-md)] md:hidden">
-      <ul class="flex w-full list-none flex-col gap-[var(--spacing-sm)] text-left">
-        <li><a href="/shop" class="text-[var(--text-color)] hover:text-[var(--primary-color)]" on:click={closeMenu}>Shop</a></li>
-        <li><a href="/about" class="text-[var(--text-color)] hover:text-[var(--primary-color)]" on:click={closeMenu}>About</a></li>
-        <li><a href="/profile" class="text-[var(--text-color)] hover:text-[var(--primary-color)]" on:click={closeMenu}>Profile</a></li>
+    <div class="menu-container absolute right-md top-full mt-sm flex flex-col w-48 bg-background rounded-md p-md md:hidden">
+      <ul class="w-full flex-col gap-sm text-left">
+        <li><a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Shop</a></li>
+        <li><a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}>About</a></li>
+        <li><a href="/profile" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Profile</a></li>
         <li class="text-2xl">
           <button on:click={() => { handleCartIconClick(); closeMenu(); }}>
             🛒
             {#if totalItems > 0}
-              <span class="absolute -right-[var(--spacing-xs)] -top-[var(--spacing-xs)] flex h-5 w-5 items-center justify-center rounded-full bg-[var(--error-color)] text-xs text-[var(--background-color)]">
-                {totalItems}
-              </span>
+              <span class="cart-badge">{totalItems}</span>
             {/if}
           </button>
         </li>
@@ -93,3 +74,30 @@
     </div>
   {/if}
 </nav>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: var(--error-color);
+    color: var(--background-color);
+    font-size: var(--font-size-small);
+    border-radius: 9999px;
+  }
+
+  .burger-icon div {
+    background-color: var(--text-color);
+  }
+</style>

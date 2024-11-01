@@ -1,18 +1,17 @@
 <div class="header-container flex h-full w-full flex-col items-start justify-end rounded-lg p-0">
-	<h2 class="subheadline m-0 text-[var(--font-size-large)] md:text-[var(--font-size-xlarge)]">shahabned.xyz</h2>
-	<!-- Main Headline -->
+	<h2 class="subheadline text-large md:text-xlarge m-0">shahabned.xyz</h2>
 	<h1 class="headline m-0 font-bold leading-none">store.</h1>
 </div>
 
 <style>
 	.header-container {
-
+		height: 35vh;
+		/* Background color, padding, etc., can be customized here if needed */
 	}
 
 	.subheadline {
 		font-family: var(--font-primary);
 		color: var(--text-color);
-		font-size: var(--font-size-large);
 	}
 
 	.headline {
@@ -22,10 +21,13 @@
 		font-size: 6rem; /* Default for mobile */
 	}
 
-	/* Responsive font sizes for larger screens */
 	@media (min-width: 768px) {
 		.headline {
 			font-size: 8rem;
+		}
+		.header-container {
+			height: 20vh;
+			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}
 
@@ -33,11 +35,19 @@
 		.headline {
 			font-size: 10rem;
 		}
+		.header-container {
+			height: 30vh;
+			/* Background color, padding, etc., can be customized here if needed */
+		}
 	}
 
 	@media (min-width: 1280px) {
 		.headline {
 			font-size: 14rem;
+		}
+		.header-container {
+			height: 30vh;
+			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}
 </style>

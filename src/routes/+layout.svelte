@@ -21,7 +21,7 @@
 	></div>
 
 	<!-- Main Content Area -->
-	<div class="flex-grow flex">
+	<div class="flex-grow flex ">
 		<div class={`flex-grow transition-all duration-300 ${isOpen ? 'mr-[300px]' : 'mr-0'}`}>
 			<slot /> <!-- Page-specific content goes here -->
 		</div>

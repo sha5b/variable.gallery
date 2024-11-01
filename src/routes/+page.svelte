@@ -9,7 +9,7 @@
 	import TagDisplay from '$lib/components/TagDisplay.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
-	
+
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
 	let thumbnail = '';
@@ -29,41 +29,31 @@
 </script>
 
 <div
-	class="landing-container grid min-h-screen grid-rows-[auto_1fr] space-y-[var(--spacing-lg)] px-[var(--page-padding)] pt-[var(--spacing-xl)] md:px-[var(--page-padding-md)]"
+	class="landing-container space-y-lg px-page pt-xl md:px-page-md grid min-h-screen grid-rows-[auto_1fr]"
 >
 	<div>
 		<!-- Top Featured Slider -->
-		<div class="row-start-1 mb-[var(--spacing-lg)]">
-			<FeaturedSlider {products} />
-		</div>
+			<div class="row-start-1">
+				<FeaturedSlider {products} />
+			</div>
 
 		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="row-start-2 flex flex-col gap-[var(--spacing-md)] md:flex-row">
+		<div class="gap-md row-start-2 flex flex-col md:flex-row">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="flex-1 rounded-lg bg-[var(--background-color-alt)]">
+			<div class="bg-alt flex-1 rounded-lg">
 				<Header />
 			</div>
 
 			<!-- Category Display and Contact -->
-			<div class="flex flex-1 flex-col space-y-[var(--spacing-md)]">
-				<div class="rounded-lg bg-[var(--background-color-alt)] p-[var(--spacing-lg)]"></div>
-				<div class="rounded-lg bg-[var(--background-color)]">
-					<Contact />
-				</div>
+			<div class="gap-md flex flex-1 flex-col">
+				<div class="bg-alt padding-lg rounded-lg"></div>
+				<Contact />
 			</div>
 		</div>
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
-    <ProductShowcase {products} />
+	<ProductShowcase {products} />
 
 	<TagDisplay {products} />
 </div>
-
-<style>
-	.landing-container {
-		padding-top: 4rem;
-		background-color: var(--background-color);
-		color: var(--text-color);
-	}
-</style>

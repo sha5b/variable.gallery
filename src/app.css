@@ -27,7 +27,7 @@ a {
 /* CSS Variables for Global Styles */
 :root {
   /* Colors */
-  --primary-color: #0a0a1a; /* Bluish black */
+  --primary-color: #0a0a1a;
   --secondary-color: #4c51bf;
   --background-color: #ffffff;
   --secondary-bg-color: #d4d4d4;
@@ -52,15 +52,15 @@ a {
   --spacing-md: 1rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  --page-padding: var(--spacing-md);       /* Default padding for mobile */
-  --page-padding-md: var(--spacing-lg);    /* Padding for medium and larger screens */
+  --page-padding: var(--spacing-md);
+  --page-padding-md: var(--spacing-lg);
 }
 
-/* Responsive Container with padding */
+/* Responsive Container */
 .container {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-md); /* Ensure consistent gap */
+  gap: var(--spacing-md);
 }
 
 @media (min-width: 768px) {
@@ -87,14 +87,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: var(--spacing-md);
 }
 
-/* Utility for Centralized Flex Containers */
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Spacing Utility Classes */
+/* Utility Classes for Padding and Margin */
 .margin-xs { margin: var(--spacing-xs); }
 .margin-sm { margin: var(--spacing-sm); }
 .margin-md { margin: var(--spacing-md); }
@@ -107,7 +100,31 @@ h1, h2, h3, h4, h5, h6 {
 .padding-lg { padding: var(--spacing-lg); }
 .padding-xl { padding: var(--spacing-xl); }
 
-/* Example Primary Button */
+/* Spacing Utility for Gap */
+.space-y-xs { row-gap: var(--spacing-xs); }
+.space-y-sm { row-gap: var(--spacing-sm); }
+.space-y-md { row-gap: var(--spacing-md); }
+.space-y-lg { row-gap: var(--spacing-lg); }
+.gap-xs { gap: var(--spacing-xs); }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+/* Page Padding */
+.px-page { padding-left: var(--page-padding); padding-right: var(--page-padding); }
+.px-page-md { padding-left: var(--page-padding-md); padding-right: var(--page-padding-md); }
+
+/* Tag Styling */
+.tag {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 9999px;
+  font-size: var(--font-size-small);
+  font-weight: bold;
+}
+
+/* Button Styling */
 .button-primary {
   background-color: var(--primary-color);
   color: var(--background-color);
@@ -118,4 +135,79 @@ h1, h2, h3, h4, h5, h6 {
 
 .button-primary:hover {
   background-color: var(--secondary-color);
+}
+
+.button-secondary {
+  background-color: var(--secondary-color);
+  color: var(--background-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 0.25rem;
+  transition: background-color 0.3s ease;
+}
+
+.button-secondary:hover {
+  background-color: var(--accent-color);
+}
+
+/* Utility Classes for Centralized Flex Containers */
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.flex-between { display: flex; justify-content: space-between; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-row { display: flex; flex-direction: row; }
+
+/* Additional Background Color Utility Classes */
+.bg-primary { background-color: var(--primary-color); }
+.bg-secondary { background-color: var(--secondary-color); }
+.bg-accent { background-color: var(--accent-color); }
+.bg-background { background-color: var(--background-color); }
+.bg-secondary-bg { background-color: var(--secondary-bg-color); }
+.bg-error { background-color: var(--error-color); }
+
+/* Text Size Utilities */
+.text-small { font-size: var(--font-size-small); }
+.text-base { font-size: var(--font-size-base); }
+.text-large { font-size: var(--font-size-large); }
+.text-xlarge { font-size: var(--font-size-xlarge); }
+
+/* Round Borders and Overflow */
+.rounded { border-radius: 0.5rem; }
+.rounded-lg { border-radius: 0.75rem; }
+.overflow-y-auto { overflow-y: auto; }
+.max-h-cart-content { max-height: calc(100vh - 240px); }
+
+/* Transition Effects */
+.transition-default { transition: all 0.3s ease; }
+
+.quantity-btn {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.quantity-btn:hover {
+  background-color: var(--accent-color);
+  color: var(--background-color);
+}
+
+.remove-btn {
+  background-color: var(--error-color);
+  color: var(--background-color);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.remove-btn:hover {
+  background-color: #d9534f; /* Slightly darker red for hover */
+}
+
+.flex.items-center.gap-2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
