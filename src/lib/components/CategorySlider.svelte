@@ -1,24 +1,13 @@
 <script>
 	import { goto } from '$app/navigation';
 
-	export let products = []; // List of all products passed to the component
-	export let category = ''; // Selected category name
+	export let products = [];
+	export let category = '';
 
-	// Log the initial products and category for debugging
-	console.log("All Products:", products);
-	console.log("Selected Category:", category);
+	$: filteredProducts = products.filter((product) =>
+		product.categories.some((cat) => cat.name === category)
+	);
 
-	// Reactive filter to include only products in the specified category
-	$: filteredProducts = products.filter((product) => {
-		const hasCategory = product.categories.some((cat) => cat.name === category);
-		console.log(`Product: ${product.name}, Matches Category: ${hasCategory}`);
-		return hasCategory;
-	});
-
-	// Log the filtered products to verify the filtering result
-	console.log("Filtered Products:", filteredProducts);
-
-	// Sort the filtered products by date modified, most recent first
 	$: displayedProducts = filteredProducts
 		.slice()
 		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified));
@@ -40,7 +29,9 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			scrollTarget = (maxScroll * offsetX) / middleX / 10;
+
+			// Adjust `scrollTarget` and ensure it stays within bounds
+			scrollTarget = Math.min(maxScroll, Math.max(0, currentScroll + (offsetX / middleX) * maxScroll / 2));
 
 			if (!isAnimating) {
 				isAnimating = true;
@@ -55,7 +46,8 @@
 		currentScroll += distance * easing;
 		slider.scrollLeft = currentScroll;
 
-		if (Math.abs(distance) > 0.5) {
+		// Stop animating if the scroll has reached the start or end
+		if (Math.abs(distance) > 0.5 && currentScroll !== 0 && currentScroll !== slider.scrollWidth - slider.clientWidth) {
 			requestAnimationFrame(animateScroll);
 		} else {
 			isAnimating = false;
@@ -67,7 +59,6 @@
 	<h1 class="category-title">{category}</h1>
 </div>
 
-<!-- Category Slider Container with each block to render products -->
 <div class="category-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
 	<div class="category-slider">
 		{#each displayedProducts as product}

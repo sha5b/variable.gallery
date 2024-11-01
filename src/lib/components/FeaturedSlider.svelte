@@ -27,7 +27,6 @@
 	}
 
 	function handleMouseMove(event) {
-		// Only apply mouse move scroll for desktop screens
 		if (window.innerWidth >= 768) {
 			const rect = slider.getBoundingClientRect();
 			const mouseX = event.clientX - rect.left;
@@ -35,7 +34,9 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjust for smooth movement
+
+			// Constrain scrollTarget within the slider bounds
+			scrollTarget = Math.min(maxScroll, Math.max(0, currentScroll + (offsetX / middleX) * maxScroll / 2));
 
 			if (!isAnimating) {
 				isAnimating = true;
@@ -45,18 +46,16 @@
 	}
 
 	function animateScroll() {
-		// Apply easing effect
-		const easing = 0.1; // Adjust this for smoother movement
+		const easing = 0.1;
 		const distance = scrollTarget - currentScroll;
 		currentScroll += distance * easing;
-
 		slider.scrollLeft = currentScroll;
 
-		// Continue the animation if not reached the target
-		if (Math.abs(distance) > 0.5) {
+		// Stop animating if the slider reaches the start or end
+		if (Math.abs(distance) > 0.5 && currentScroll !== 0 && currentScroll !== slider.scrollWidth - slider.clientWidth) {
 			requestAnimationFrame(animateScroll);
 		} else {
-			isAnimating = false; // Stop animating when close to the target
+			isAnimating = false;
 		}
 	}
 </script>
@@ -71,7 +70,6 @@
 						<span class="tag">{tag.name}</span>
 					{/each}
 				</div>
-				
 				<!-- Product Image -->
 				<img src={product.images[0]?.src} alt={product.name} class="product-image" />
 			</div>
@@ -86,7 +84,6 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Horizontal scrolling for mobile */
 	@media (max-width: 767px) {
 		.featured-slider-container {
 			overflow-x: auto;
@@ -104,7 +101,6 @@
 		}
 	}
 
-	/* Normal desktop layout */
 	@media (min-width: 768px) {
 		.featured-slider {
 			display: flex;
