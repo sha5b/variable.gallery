@@ -52,16 +52,32 @@
 
 			<!-- Dimensions and Weight -->
 			{#if latestProduct.weight}
-				<p class="mb-2 text-sm text-[var(--text-color)] mt-2">
+				<p class="mb-2 mt-2 text-sm text-[var(--text-color)]">
 					<strong>Weight:</strong>
 					{latestProduct.weight || 'N/A'} kg
+				</p>
+			{/if}
+			<!-- Display Categories and Tags -->
+			{#if latestProduct.categories.length > 0}
+				<p class="mb-2 text-sm text-[var(--text-color)]">
+					<strong>Categories:</strong>
+					{#each latestProduct.categories as category}{category.name}{#if category !== latestProduct.categories[latestProduct.categories.length - 1]},
+						{/if}{/each}
+				</p>
+			{/if}
+
+			{#if latestProduct.tags.length > 0}
+				<p class="mb-2 text-sm text-[var(--text-color)]">
+					<strong>Tags:</strong>
+					{#each latestProduct.tags as tag}{tag.name}{#if tag !== latestProduct.tags[latestProduct.tags.length - 1]},
+						{/if}{/each}
 				</p>
 			{/if}
 
 			<!-- Action Button -->
 			<a
 				href={'/shop'}
-				class="rounded-md bg-[var(--primary-color)] px-4 py-2 text-[var(--background-color)] transition-colors hover:bg-[var(--secondary-color)] mt-4"
+				class="mt-4 rounded-md bg-[var(--primary-color)] px-4 py-2 text-[var(--background-color)] transition-colors hover:bg-[var(--secondary-color)]"
 			>
 				Shop Now
 			</a>

@@ -1,21 +1,27 @@
 <script>
 	import { goto } from '$app/navigation';
 
-	export let products = [];
-	export let category = '';
+	export let products = []; // List of all products passed to the component
+	export let category = ''; // Selected category name
 
-	let filteredProducts = products.filter((product) =>
-		product.categories.some((cat) => cat.name === category)
-	);
+	// Log the initial products and category for debugging
+	console.log("All Products:", products);
+	console.log("Selected Category:", category);
 
-	let limitedProducts = filteredProducts
+	// Reactive filter to include only products in the specified category
+	$: filteredProducts = products.filter((product) => {
+		const hasCategory = product.categories.some((cat) => cat.name === category);
+		console.log(`Product: ${product.name}, Matches Category: ${hasCategory}`);
+		return hasCategory;
+	});
+
+	// Log the filtered products to verify the filtering result
+	console.log("Filtered Products:", filteredProducts);
+
+	// Sort the filtered products by date modified, most recent first
+	$: displayedProducts = filteredProducts
 		.slice()
-		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
-		.slice(0, 20);
-
-	// Initially set the first product as the current product
-	let currentProduct = limitedProducts[0];
-	$: currentProductTags = currentProduct ? currentProduct.tags.map(tag => tag.name) : [];
+		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified));
 
 	let slider;
 	let scrollTarget = 0;
@@ -23,12 +29,10 @@
 	let isAnimating = false;
 
 	function handleProductClick(product) {
-		currentProduct = product; // Set the clicked product as the current product
 		goto(`/shop/${product.id}`);
 	}
 
 	function handleMouseMove(event) {
-		// Only apply mouse move scroll for desktop screens
 		if (window.innerWidth >= 768) {
 			const rect = slider.getBoundingClientRect();
 			const mouseX = event.clientX - rect.left;
@@ -36,7 +40,7 @@
 			const middleX = sliderWidth / 2;
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
-			scrollTarget = (maxScroll * offsetX) / middleX / 10; // Adjust for smooth movement
+			scrollTarget = (maxScroll * offsetX) / middleX / 10;
 
 			if (!isAnimating) {
 				isAnimating = true;
@@ -46,33 +50,27 @@
 	}
 
 	function animateScroll() {
-		const easing = 0.1; // Adjust this for smoother movement
+		const easing = 0.1;
 		const distance = scrollTarget - currentScroll;
 		currentScroll += distance * easing;
-
 		slider.scrollLeft = currentScroll;
 
-		// Continue the animation if not reached the target
 		if (Math.abs(distance) > 0.5) {
 			requestAnimationFrame(animateScroll);
 		} else {
-			isAnimating = false; // Stop animating when close to the target
+			isAnimating = false;
 		}
 	}
 </script>
 
 <div class="category-header pl-4 py-4">
 	<h1 class="category-title">{category}</h1>
-	<div class="tag-container">
-		{#each currentProductTags as tag}
-			<span class="tag-pill">{tag}</span>
-		{/each}
-	</div>
 </div>
 
+<!-- Category Slider Container with each block to render products -->
 <div class="category-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
 	<div class="category-slider">
-		{#each limitedProducts as product}
+		{#each displayedProducts as product}
 			<div class="category-card" on:click={() => handleProductClick(product)}>
 				<div class="product-tag-container">
 					{#each product.tags as tag}
@@ -86,7 +84,6 @@
 </div>
 
 <style>
-	/* Slider Container */
 	.category-slider-container {
 		width: 100%;
 		overflow: hidden;
@@ -95,7 +92,6 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Category Header */
 	.category-header {
 		display: flex;
 		align-items: center;
@@ -107,21 +103,6 @@
 		font-weight: bold;
 		color: var(--primary-color);
 		padding: 0.5rem 0;
-	}
-
-	.tag-container {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 2rem;
-	}
-
-	.tag-pill {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		padding: 0.6rem 1.2rem;
-		border-radius: 9999px;
-		font-size: 1rem;
-		font-weight: 600;
 	}
 
 	@media (max-width: 767px) {
