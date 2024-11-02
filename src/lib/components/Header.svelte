@@ -1,6 +1,6 @@
 <div class="header-container flex h-full w-full flex-col items-start justify-end rounded-lg p-0">
-	<h2 class="subheadline text-large md:text-xlarge m-0">shahabned.xyz</h2>
-	<h1 class="headline m-0 font-bold leading-none">store.</h1>
+	<h2 class="subheadline text-large md:text-xlarge m-0">gallerie fuer provisorische Kunst und diverse Austellungen.</h2>
+	<h1 class="headline m-0 font-bold leading-none">varaible.</h1>
 </div>
 
 <style>

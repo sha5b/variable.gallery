@@ -27,7 +27,7 @@
 <nav class="navbar w-full flex justify-between items-center bg-background px-page py-md md:px-page-md">
   <!-- Logo -->
   <div class="text-base font-semibold">
-    <a href="/" class="text-text-color hover:text-primary-color">store.shahabned.xyz</a>
+    <a href="/" class="text-text-color hover:text-primary-color">variable.gallery</a>
   </div>
 
   <!-- Desktop Navigation Links -->
