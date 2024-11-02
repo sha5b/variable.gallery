@@ -34,13 +34,12 @@
   <ul class="hidden md:flex list-none gap-lg items-center">
     <li><a href="/shop" class="text-text-color hover:text-primary-color">Shop</a></li>
     <li><a href="/about" class="text-text-color hover:text-primary-color">About</a></li>
-    <li><a href="/profile" class="text-text-color hover:text-primary-color">Profile</a></li>
   </ul>
 
   <!-- Cart and Hamburger Menu -->
-  <div class="relative flex items-center">
-    <!-- Cart Icon (hidden on mobile) -->
-    <button class="hidden md:block text-2xl relative" on:click={handleCartIconClick}>
+  <div class="relative flex items-center gap-sm">
+    <!-- Cart Icon (now visible on all screen sizes) -->
+    <button class="text-2xl relative" on:click={handleCartIconClick}>
       🛒
       {#if totalItems > 0}
         <span class="cart-badge">{totalItems}</span>
@@ -61,7 +60,6 @@
       <ul class="w-full flex-col gap-sm text-left">
         <li><a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Shop</a></li>
         <li><a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}>About</a></li>
-        <li><a href="/profile" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Profile</a></li>
         <li class="text-2xl">
           <button on:click={() => { handleCartIconClick(); closeMenu(); }}>
             🛒

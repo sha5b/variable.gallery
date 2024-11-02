@@ -1,52 +1,52 @@
 <script>
-  import { cart, removeItem, addItem } from '$lib/stores/cartStore';
-  import { isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartSliderStore';
-  import { goto } from '$app/navigation';
+	import { cart, removeItem, addItem } from '$lib/stores/cartStore';
+	import { isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartSliderStore';
+	import { goto } from '$app/navigation';
 
-  let isOpen;
+	let isOpen;
 
-  // Subscribe to the store's value
-  $: isCartSliderOpen.subscribe(value => {
-    isOpen = value;
-  });
+	// Subscribe to the store's value
+	$: isCartSliderOpen.subscribe((value) => {
+		isOpen = value;
+	});
 
-  function closeCart() {
-    toggleCartSlider();
-  }
+	function closeCart() {
+		toggleCartSlider();
+	}
 
-  function increaseQuantity(item) {
-    addItem(item);
-  }
+	function increaseQuantity(item) {
+		addItem(item);
+	}
 
-  function decreaseQuantity(item) {
-    cart.update((items) => {
-      const existingItem = items.find((i) => i.id === item.id);
-      if (existingItem.quantity > 1) {
-        existingItem.quantity -= 1;
-      } else {
-        return items.filter((i) => i.id !== item.id);
-      }
-      return [...items];
-    });
-  }
+	function decreaseQuantity(item) {
+		cart.update((items) => {
+			const existingItem = items.find((i) => i.id === item.id);
+			if (existingItem.quantity > 1) {
+				existingItem.quantity -= 1;
+			} else {
+				return items.filter((i) => i.id !== item.id);
+			}
+			return [...items];
+		});
+	}
 
-  function handleCheckout() {
-    closeCart();
-    goto('/checkout');
-  }
+	function handleCheckout() {
+		closeCart();
+		goto('/checkout');
+	}
 
-  function viewCart() {
-    closeCart();
-    goto('/cart');
-  }
+	function viewCart() {
+		closeCart();
+		goto('/cart');
+	}
 
-  function handleImageClick(productId) {
-    goto(`/shop/${productId}`);
-  }
+	function handleImageClick(productId) {
+		goto(`/shop/${productId}`);
+	}
 </script>
 
 <!-- Cart Slider -->
-<div class={` fixed top-0 right-0 h-screen w-[500px] bg-primary text-background transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
+<div class={`cart-slider fixed top-0 right-0 h-screen bg-primary text-background transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'} z-50 flex flex-col`}>
   
   <!-- Header with Cart Title and Close Button -->
   <div class="padding-md">
@@ -54,9 +54,9 @@
       <h2 class="text-large font-bold text-white">Your Cart</h2>
       <button class="button-primary w-8 h-8 rounded-lg flex-center hover:bg-accent text-white" on:click={closeCart}>✕</button>
     </div>
-    
+
     <!-- Cart Content (Scrollable) -->
-    <div class="cart-content overflow-y-auto max-h-cart-content padding-md text-white">
+    <div class="cart-content overflow-y-auto flex-1 padding-md text-white">
       {#if $cart.length === 0}
         <p>Your cart is empty</p>
       {:else}
@@ -85,7 +85,6 @@
         </ul>
       {/if}
     </div>
-    
   </div>
 
   <!-- Fixed Checkout and View Cart Buttons -->
@@ -100,3 +99,22 @@
     </button>
   </div>
 </div>
+
+<style>
+  /* Default desktop width */
+  .cart-slider {
+    width: 500px;
+  }
+
+  /* Full-width on mobile */
+  @media (max-width: 768px) {
+    .cart-slider {
+      width: 100vw; /* Make it full screen on mobile */
+    }
+
+    /* Adjust padding and alignment for mobile */
+    .padding-md {
+      padding: 1rem;
+    }
+  }
+</style>
