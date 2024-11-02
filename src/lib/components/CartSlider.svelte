@@ -52,7 +52,7 @@
   <div class="padding-md">
     <div class="flex-between items-center margin-md">
       <h2 class="text-large font-bold text-white">Your Cart</h2>
-      <button class="button-primary w-8 h-8 rounded-lg flex-center hover:bg-accent text-white" on:click={closeCart}>✕</button>
+      <button class="button-primary w-8 h-8 flex-center hover:bg-accent text-white" on:click={closeCart}>✕</button>
     </div>
 
     <!-- Cart Content (Scrollable) -->
@@ -65,7 +65,7 @@
             <li class="flex items-start gap-sm">
               <!-- Image with Click Redirect -->
               <img src={item.images?.[0]?.src || '/path/to/placeholder.jpg'} alt={item.name} 
-                   class="w-20 h-20 object-cover rounded-lg cursor-pointer" 
+                   class="w-20 h-20 object-cover cursor-pointer" 
                    on:click={() => handleImageClick(item.id)} />
               <div class="flex-1">
                 <h3 class="text-base font-semibold margin-sm text-white">{item.name}</h3>
@@ -88,7 +88,7 @@
   </div>
 
   <!-- Fixed Checkout and View Cart Buttons -->
-  <div class="padding-md bg-primary flex flex-col items-center gap-md rounded-b-lg">
+  <div class="padding-md bg-primary flex flex-col items-center gap-md">
     <button 
       on:click={viewCart} 
       class="button-secondary w-full text-white">View Cart

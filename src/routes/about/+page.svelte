@@ -70,7 +70,6 @@
 			src={googleMapUrl}
 			width="100%"
 			height="450"
-			class="rounded-lg"
 			allowfullscreen=""
 			loading="lazy"
 			style="border: none;"

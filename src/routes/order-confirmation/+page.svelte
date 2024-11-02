@@ -32,7 +32,7 @@
 </script>
 
 {#if orderData}
-	<div class="order-confirmation-container mx-auto my-10 max-w-4xl rounded p-8 bg-white">
+	<div class="order-confirmation-container mx-auto my-10 max-w-4xl p-8 bg-white">
 		<h1 class="text-4xl font-heading font-bold mb-6 text-primary-color">Thank you for your order!</h1>
 		<p class="text-xl mb-2 font-body">Order ID: <strong>{orderData.id}</strong></p>
 		<p class="text-xl mb-2 font-body">Status: <strong class="capitalize">{orderData.status}</strong></p>
@@ -52,7 +52,7 @@
 					<img
 						src={item.image?.src || '/placeholder.jpg'}
 						alt={item.name}
-						class="product-image-large rounded-md mr-6"
+						class="product-image-large mr-6"
 					/>
 					<div>
 						<p class="text-lg font-semibold font-body text-primary-color">{item.name}</p>

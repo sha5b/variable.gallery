@@ -23,12 +23,12 @@
 			<img
 				src={latestProduct.images[0]?.src || '/path/to/default.jpg'}
 				alt={latestProduct.name}
-				class="h-full w-full rounded-lg object-cover"
+				class="h-full w-full object-cover"
 			/>
 		</div>
 
 		<!-- Text Section aligned to top left -->
-		<div class="product-details space-y-md bg-background p-lg flex-col rounded-lg md:w-1/4">
+		<div class="product-details space-y-md bg-background p-lg flex-col md:w-1/4">
 			<h2 class="text-xlarge text-primary font-bold">{variation ? variation.name : latestProduct.name}</h2>
 			<p class="text-primary text-base">
 				{@html latestProduct.description || latestProduct.short_description}
@@ -110,7 +110,6 @@
 
 	.product-details {
 		padding: var(--spacing-lg);
-		border-radius: var(--rounded-lg);
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-md);

@@ -53,11 +53,6 @@
         </ul>
       </div>
     </div>
-
-    <!-- Logo aligned to the right -->
-    <div class="footer-logo">
-      <img src="/Logo.svg" alt="Company Logo" class="logo-image" />
-    </div>
   </div>
 
   <!-- Copyright Section -->

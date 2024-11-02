@@ -151,7 +151,7 @@
 	>
 		{#each gallery as image, index}
 			<div
-				class="featured-card rounded-lg"
+				class="featured-card"
 				on:mouseenter={() => handleMouseEnter(index)}
 				on:mouseleave={handleMouseLeave}
 				on:mousemove={(event) => handleMouseMove(event, index)}
@@ -205,7 +205,6 @@
 		overflow: hidden;
 		position: relative;
 		cursor: pointer;
-		border-radius: var(--rounded-lg);
 	}
 
 	.featured-hover {

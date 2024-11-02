@@ -21,7 +21,7 @@
 	<div class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50" on:click={closeModal}>
 		
 		<!-- Modal Content (prevents clicks within from closing the modal) -->
-		<div class="modal-content lg:max-w-4xl p-lg rounded-lg shadow-lg relative flex flex-col lg:flex-row" on:click|stopPropagation>
+		<div class="modal-content lg:max-w-4xl p-lg shadow-lg relative flex flex-col lg:flex-row" on:click|stopPropagation>
 			<!-- Close Button -->
 			<button class="absolute top-4 right-4 text-primary text-2xl hover:text-secondary" on:click={closeModal}>✕</button>
 
@@ -66,7 +66,6 @@
 		background-color: var(--background-color);
 		max-width: 80%;
 		color: var(--text-color);
-		border-radius: var(--rounded-lg);
 		padding: var(--spacing-lg);
 	}
 

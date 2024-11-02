@@ -48,7 +48,7 @@
 					{#each $cart as item}
 						<tr class="border-b">
 							<td class="py-md">
-								<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 rounded object-cover" />
+								<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 object-cover" />
 							</td>
 							<td>
 								<div>
@@ -75,7 +75,7 @@
 		<h2 class="text-large font-bold mb-md">Cart Totals</h2>
 		<div class="mb-md">
 			<label class="block font-semibold mb-xs">Add a coupon</label>
-			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-sm rounded" />
+			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-sm" />
 		</div>
 		<div class="flex justify-between text-base font-semibold">
 			<span>Subtotal</span>
@@ -100,7 +100,6 @@
 	/* Cart Totals Styling */
 	.cart-totals {
 		padding: var(--spacing-lg);
-		border-radius: var(--rounded-lg);
 	}
 
 	.quantity-btn {

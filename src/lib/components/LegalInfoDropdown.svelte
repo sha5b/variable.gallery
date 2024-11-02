@@ -8,7 +8,7 @@
   }
 </script>
 
-<div class="border rounded-lg  mb-4">
+<div class="border mb-4">
   <button on:click={toggleOpen} class="w-full p-4 flex justify-between items-center text-left text-[var(--primary-color)] font-semibold hover:bg-[var(--background-color)] transition">
     {title}
     <span>{isOpen ? '−' : '+'}</span>

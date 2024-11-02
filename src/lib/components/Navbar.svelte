@@ -56,7 +56,7 @@
 
   <!-- Mobile Menu -->
   {#if isMenuOpen}
-    <div class="menu-container absolute right-md top-full mt-sm flex flex-col w-48 bg-background rounded-md p-md md:hidden">
+    <div class="menu-container absolute right-md top-full mt-sm flex flex-col w-48 bg-background p-md md:hidden">
       <ul class="w-full flex-col gap-sm text-left">
         <li><a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Shop</a></li>
         <li><a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}>About</a></li>

@@ -114,7 +114,6 @@
 		height: 50vh;
 		position: relative;
 		overflow: hidden;
-		border-radius: 10px;
 		transition: flex 0.9s ease;
 		cursor: pointer;
 	}
@@ -128,7 +127,6 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	border-radius: 10px;
 }
 
 .tag-container {

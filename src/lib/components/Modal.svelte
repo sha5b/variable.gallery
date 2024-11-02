@@ -25,10 +25,10 @@
         <!-- Modal Content with Image and Navigation -->
         <div class="relative max-w-4xl w-full h-full flex items-center justify-center" on:click|stopPropagation>
             <!-- Navigation Arrows -->
-            <button on:click={prevImage} class="absolute left-4 text-[var(--background-color)] text-4xl p-2 hover:bg-[var(--secondary-color)] rounded-full transition">
+            <button on:click={prevImage} class="absolute left-4 text-[var(--background-color)] text-4xl p-2 hover:bg-[var(--secondary-color)] transition">
                 ❮
             </button>
-            <button on:click={nextImage} class="absolute right-4 text-[var(--background-color)] text-4xl p-2 hover:bg-[var(--secondary-color)] rounded-full transition">
+            <button on:click={nextImage} class="absolute right-4 text-[var(--background-color)] text-4xl p-2 hover:bg-[var(--secondary-color)] transition">
                 ❯
             </button>
   

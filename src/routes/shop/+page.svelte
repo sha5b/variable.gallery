@@ -31,7 +31,7 @@
   {:else}
     <div class="grid grid-cols-1 gap-md md:grid-cols-2 mb-8">
       {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full rounded-lg transition-default">
+        <div class="category-container w-full transition-default">
           <h2 class="text-xl font-semibold my-sm text-primary">
             {categoryName}
           </h2>
@@ -61,11 +61,4 @@
     color: var(--error-color);
   }
 
-  .pt-xl {
-    padding-top: var(--spacing-xl);
-  }
-
-  .rounded-lg {
-    border-radius: var(--rounded-lg);
-  }
 </style>

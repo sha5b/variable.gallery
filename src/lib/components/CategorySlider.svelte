@@ -76,7 +76,7 @@
 							<span class="tag">{tag.name}</span>
 						{/each}
 					</div>
-					<img src={product.images[0]?.src} alt={product.name} class="product-image rounded-lg" />
+					<img src={product.images[0]?.src} alt={product.name} class="product-image" />
 				</div>
 			{/each}
 		</div>
@@ -113,7 +113,6 @@
 		height: 300px;
 		position: relative;
 		overflow: hidden;
-		border-radius: var(--rounded-lg);
 		transition: flex 0.9s ease;
 		cursor: pointer;
 	}

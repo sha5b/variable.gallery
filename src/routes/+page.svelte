@@ -41,13 +41,13 @@
 		<!-- Bottom Row with Product Banner and Category Grid -->
 		<div class="gap-md row-start-2 flex flex-col md:flex-row w-full">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="bg-alt flex-1 rounded-lg w-full md:w-auto">
+			<div class="bg-alt flex-1 w-full md:w-auto">
 				<Header />
 			</div>
 
 			<!-- Category Display and Contact -->
 			<div class="gap-md flex flex-1 flex-col w-full md:w-auto">
-				<div class="bg-alt padding-lg rounded-lg"></div>
+				<div class="bg-alt padding-lg"></div>
 				<Contact />
 			</div>
 		</div>

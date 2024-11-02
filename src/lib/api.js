@@ -13,7 +13,6 @@ export async function fetchWooCommerceData(endpoint, options = {}) {
         },
         body: options.body || null
     });
-
     if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);

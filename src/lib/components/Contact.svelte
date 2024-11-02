@@ -12,7 +12,7 @@
 	}
 </script>
 
-<div class="w-full my-8 rounded-lg text-left flex flex-col h-full justify-end items-start">
+<div class="w-full my-8 text-left flex flex-col h-full justify-end items-start">
 	<button class="button-primary text-xl px-6 py-2" on:click={handleButtonClick}>
 		Contact Us
 	</button>

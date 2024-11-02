@@ -1,14 +1,26 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { fade } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 
 	export let products;
 	let selectedTag = null;
 	let selectedCategory = null;
+	let minPrice = 0;
+	let maxPrice = 1000; // Adjust as needed based on product price range
 
-	$: filteredProducts = products.filter(product => 
+	// Initialize price range from products
+	const productPrices = products.map(product => parseFloat(product.price));
+	const initialMinPrice = Math.min(...productPrices);
+	const initialMaxPrice = Math.max(...productPrices);
+
+	// Set default price range based on products
+	minPrice = initialMinPrice;
+	maxPrice = initialMaxPrice;
+
+	$: filteredProducts = products.filter(product =>
 		(!selectedTag || product.tags.some(tag => tag.name === selectedTag)) &&
-		(!selectedCategory || product.categories.some(cat => cat.name === selectedCategory))
+		(!selectedCategory || product.categories.some(cat => cat.name === selectedCategory)) &&
+		(parseFloat(product.price) >= minPrice && parseFloat(product.price) <= maxPrice)
 	);
 
 	function handleTagClick(tag) {
@@ -17,6 +29,15 @@
 
 	function handleCategoryClick(category) {
 		selectedCategory = selectedCategory === category ? null : category;
+	}
+
+	function handlePriceChange(event, type) {
+		const value = parseFloat(event.target.value);
+		if (type === 'min') {
+			minPrice = Math.min(value, maxPrice); // Ensure minPrice doesn't exceed maxPrice
+		} else if (type === 'max') {
+			maxPrice = Math.max(value, minPrice); // Ensure maxPrice isn't below minPrice
+		}
 	}
 
 	let uniqueTags = [...new Set(products.flatMap(product => product.tags.map(tag => tag.name)))];
@@ -39,7 +60,7 @@
 			</div>
 
 			<h2 class="font-heading font-bold mb-sm text-large">Tag</h2>
-			<div class="flex flex-wrap gap-sm">
+			<div class="flex flex-wrap gap-sm mb-md">
 				{#each uniqueTags as tag}
 					<span
 						on:click={() => handleTagClick(tag)}
@@ -49,17 +70,41 @@
 					</span>
 				{/each}
 			</div>
+
+			<!-- Price Filter -->
+			<h2 class="font-heading font-bold mb-sm text-large">Price Range</h2>
+			<div class="flex flex-col gap-sm">
+				<label for="min-price">Min Price: €{minPrice}</label>
+				<input
+					id="min-price"
+					type="range"
+					min={initialMinPrice}
+					max={initialMaxPrice}
+					bind:value={minPrice}
+					on:input={(event) => handlePriceChange(event, 'min')}
+				/>
+				<label for="max-price">Max Price: €{maxPrice}</label>
+				<input
+					id="max-price"
+					type="range"
+					min={initialMinPrice}
+					max={initialMaxPrice}
+					bind:value={maxPrice}
+					on:input={(event) => handlePriceChange(event, 'max')}
+				/>
+			</div>
 		</aside>
 
 		<!-- Product Grid -->
 		<div class="product-grid w-full flex flex-wrap gap-md">
 			{#each filteredProducts as product (product.id)}
-				<div
-					in:fade={{ duration: 400 }} out:fade={{ duration: 300 }}
-					class="featured-card group h-80 overflow-hidden rounded-lg bg-background transition-all cursor-pointer"
+				<div in:fly={{ x: 20, duration: 400 }} out:fly={{ x: -20, duration: 300 }}
+					class="featured-card group h-80 overflow-hidden bg-background transition-all cursor-pointer min-w-[200px] relative"
 					on:click={() => goto(`/shop/${product.id}`)}
 				>
-					<img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-105" />
+					<img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover rounded-lg" />
+					<!-- Price Pill in Bottom Left -->
+					<span class="price-pill">€{parseFloat(product.price).toFixed(2)}</span>
 					<div class="overlay absolute inset-0 bg-primary bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex-center text-center p-md">
 						<h3 class="text-white text-large font-bold mb-sm">{product.name}</h3>
 						<div class="flex gap-xs flex-wrap justify-center">
@@ -110,18 +155,26 @@
 
 	/* Featured Card */
 	.featured-card {
-		flex: 1 1 calc(33.333% - var(--spacing-md)); /* Consistent basis for grid items */
+		flex: 1 1 300px;
 		position: relative;
-		border-radius: var(--rounded-lg);
-		overflow: hidden;
+		transition: flex 0.3s ease;
 	}
 
-	.product-image {
-		transition: transform 0.3s ease; /* Smooth scale effect */
+	.featured-card:hover {
+		flex: 1 1 600px;
 	}
 
-	.featured-card:hover .product-image {
-		transform: scale(1.05); /* Scale slightly without causing layout shifts */
+	/* Price Pill Styling */
+	.price-pill {
+		position: absolute;
+		bottom: var(--spacing-sm);
+		left: var(--spacing-sm);
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: var(--spacing-xs) var(--spacing-md);
+		border-radius: 9999px;
+		font-size: var(--font-size-small);
+		font-weight: bold;
 	}
 
 	/* Overlay on Hover */
@@ -129,31 +182,7 @@
 		background-color: rgba(0, 0, 0, 0.5);
 		display: flex;
 		justify-content: center;
-		border-radius: var(--rounded-lg);
 		align-items: center;
 		flex-direction: column;
-	}
-
-	/* Responsive adjustments */
-	@media (max-width: 767px) {
-		.product-grid {
-			flex-direction: column;
-		}
-
-		.featured-card {
-			flex: 1 1 100%; /* Full width on mobile */
-		}
-	}
-
-	@media (min-width: 768px) and (max-width: 1024px) {
-		.featured-card {
-			flex: 1 1 calc(50% - var(--spacing-md)); /* Two columns on tablet */
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.featured-card {
-			flex: 1 1 calc(25% - var(--spacing-md)); /* Four columns on desktop */
-		}
 	}
 </style>
