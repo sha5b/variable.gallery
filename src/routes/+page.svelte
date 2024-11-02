@@ -9,6 +9,7 @@
 	import TagDisplay from '$lib/components/TagDisplay.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
+	import Logo from '$lib/components/Logo.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -28,24 +29,24 @@
 	getRandomTypeAndThumbnail();
 </script>
 
-<div
-	class="landing-container space-y-lg px-page pt-xl md:px-page-md grid min-h-screen grid-rows-[auto_1fr]"
->
-	<div>
+<div class="shop-container px-page bg-background">
+
+
+	<div class="content max-w-full mx-auto w-full">
 		<!-- Top Featured Slider -->
-			<div class="row-start-1">
-				<FeaturedSlider {products} />
-			</div>
+		<div class="row-start-1 w-full">
+			<FeaturedSlider {products} />
+		</div>
 
 		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="gap-md row-start-2 flex flex-col md:flex-row">
+		<div class="gap-md row-start-2 flex flex-col md:flex-row w-full">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="bg-alt flex-1 rounded-lg">
+			<div class="bg-alt flex-1 rounded-lg w-full md:w-auto">
 				<Header />
 			</div>
 
 			<!-- Category Display and Contact -->
-			<div class="gap-md flex flex-1 flex-col">
+			<div class="gap-md flex flex-1 flex-col w-full md:w-auto">
 				<div class="bg-alt padding-lg rounded-lg"></div>
 				<Contact />
 			</div>
@@ -54,6 +55,22 @@
 
 	<!-- Product Showcase Component outside the main grid layout -->
 	<ProductShowcase {products} />
-
 	<TagDisplay {products} />
 </div>
+
+<style>
+	.landing-container {
+		width: 100vw; /* Ensures it fits the viewport width */
+		max-width: 100vw;
+		overflow-x: hidden; /* Prevents horizontal overflow */
+	}
+
+	.content {
+		max-width: 100%; /* Prevents child elements from expanding beyond container */
+		width: 100%; /* Full width to prevent overflow */
+		padding-inline: var(--page-padding); /* Adds padding on both sides */
+		box-sizing: border-box;
+	}
+
+
+</style>

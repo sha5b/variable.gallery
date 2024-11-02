@@ -13,12 +13,13 @@
 }
 
 html, body {
-  height: 100%;
+  overflow-x: hidden;
+  width: 100%; /* Limits to viewport width */
   font-family: var(--font-primary);
-  background-color: var(--background-color);
-  color: var(--text-color);
+  margin: 0; /* Removes any default margin that could cause overflow */
+  padding: 0;
+  box-sizing: border-box;
 }
-
 a {
   text-decoration: none;
   color: inherit;

@@ -23,38 +23,45 @@
 </script>
 
 <footer class="footer-container bg-primary text-background px-page py-lg">
-  <div class="container flex flex-col md:flex-row gap-md justify-start">
-    <!-- Quick Links Section -->
-    <div class="footer-links flex-shrink-0 text-left">
-      <h2 class="text-large font-bold">Quick Links</h2>
-      <ul class="space-y-xs">
-        {#each links as { label, href }}
-          <li>
-            <a href={href} class="hover:text-accent transition-default" on:click|preventDefault={label === 'Contact' ? openModal : null}>
-              {label}
-            </a>
-          </li>
-        {/each}
-      </ul>
+  <div class="container flex flex-col md:flex-row justify-between items-start gap-md">
+    <div class="footer-links-social flex flex-col md:flex-row gap-lg">
+      <!-- Quick Links Section -->
+      <div class="footer-links flex-shrink-0 text-left">
+        <h2 class="text-large font-bold">Quick Links</h2>
+        <ul class="space-y-xs">
+          {#each links as { label, href }}
+            <li>
+              <a href={href} class="hover:text-accent transition-default" on:click|preventDefault={label === 'Contact' ? openModal : null}>
+                {label}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </div>
+
+      <!-- Social Media Links -->
+      <div class="footer-social flex-shrink-0 text-left">
+        <h2 class="text-large font-bold">Connect with Us</h2>
+        <ul class="space-y-xs">
+          {#each socialLinks as { label, href }}
+            <li>
+              <a href={href} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-default">
+                {label}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </div>
     </div>
 
-    <!-- Social Media Links -->
-    <div class="footer-social flex-shrink-0 text-left">
-      <h2 class="text-large font-bold">Connect with Us</h2>
-      <ul class="space-y-xs">
-        {#each socialLinks as { label, href }}
-          <li>
-            <a href={href} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-default">
-              {label}
-            </a>
-          </li>
-        {/each}
-      </ul>
+    <!-- Logo aligned to the right -->
+    <div class="footer-logo">
+      <img src="/Logo.svg" alt="Company Logo" class="logo-image" />
     </div>
   </div>
 
   <!-- Copyright Section -->
-  <div class="container text-small mt-md text-center">
+  <div class="footer-bottom text-small mt-md text-left px-page">
     <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
   </div>
 
@@ -70,16 +77,28 @@
   }
 
   .container {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: 100%;
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--spacing-lg);
+    justify-content: space-between; /* Align items to left and right */
   }
 
   .footer-links,
-  .footer-social {
-    align-self: flex-start;
+  .footer-social,
+  .footer-bottom {
     text-align: left;
+  }
+
+  .footer-logo {
+    display: flex;
+    justify-content: flex-end; /* Aligns the logo to the right */
+    align-items: center;
+  }
+
+  .logo-image {
+    width: 160px; /* Adjust size as needed */
+    height: auto;
+    filter: invert(1) brightness(2); /* Changes the logo to white */
   }
 
   .footer-links ul,
@@ -98,8 +117,9 @@
     color: var(--accent-color);
   }
 
-  .footer-container .container:last-child {
-    text-align: center;
+  .footer-bottom {
+    text-align: left; /* Align text to the left */
     margin-top: var(--spacing-md);
+    width: 100%; /* Ensure it takes full width */
   }
 </style>
