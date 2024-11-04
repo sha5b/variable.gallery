@@ -1,4 +1,4 @@
-import { fetchWooCommerceData } from '$lib/api';
+import { fetchWooCommerceData, fetchWordPressData } from '$lib/api';
 
 export async function load({ params }) {
     const productId = params.id;
@@ -9,6 +9,8 @@ export async function load({ params }) {
         // Fetch the product details
         const product = await fetchWooCommerceData(`products/${productId}`);
 
+        const artists = await fetchWordPressData('artist');
+
         // Fetch the variations for the product
         const variations = await fetchWooCommerceData(`products/${productId}/variations`);
 
@@ -16,7 +18,7 @@ export async function load({ params }) {
         const variation = variations.length > 0 ? variations[0] : null;
 
         // Return the product, variation, and products list
-        return { product, variation, products};
+        return { product, variation, products, artists};
     } catch (error) {
         console.error("Failed to fetch product or variation data:", error);
         return { product: null, variation: null, products: [] }; // Fallback in case of error

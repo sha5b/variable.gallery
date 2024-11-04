@@ -7,16 +7,30 @@
 	import Gallery from '$lib/components/Gallery.svelte';
 
 	export let data;
-	let { product, variation, products } = data;
+	let { product, variation, products, artists } = data;
 
 	let primaryCategory = '';
 	let gallery = [];
+	let artistInfo = null;
+	let artistImageUrl = '';
 
 	// Assign the product and prepare the gallery images
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
-		primaryCategory = product.categories && product.categories.length > 0 ? product.categories[0].name : '';
+		primaryCategory =
+			product.categories && product.categories.length > 0 ? product.categories[0].name : '';
+
+		// Load the artist info in the same way as in ProductShowcase
+		const artistName = product.attributes.find((attr) => attr.name.toLowerCase() === 'artist')
+			?.options[0];
+		artistInfo = artists.find(
+			(artist) => artist.title.rendered.toLowerCase() === artistName?.toLowerCase()
+		);
+		// If artist info and image ID are present, fetch the image URL
+		if (artistInfo && artistInfo.acf.image) {
+			fetchArtistImage(artistInfo.acf.image);
+		}
 	}
 
 	function addToCart() {
@@ -25,10 +39,23 @@
 			toggleCartSlider();
 		}
 	}
+
+	async function fetchArtistImage(imageId) {
+		try {
+			const response = await fetch(`/wp-json/wp/v2/media/${imageId}`);
+			const mediaData = await response.json();
+			artistImageUrl = mediaData.source_url || '';
+		} catch (error) {
+			console.error('Error fetching artist image:', error);
+		}
+	}
 </script>
 
-<div class="product-container px-page">
-	<div class="product-details space-y-md bg-background flex-col md:w-1/4">
+<div
+	class="product-container px-page gap-md my-8 flex w-full flex-col items-stretch pt-8 md:flex-row"
+>
+	<!-- Product Details Section with 1/3 width -->
+	<div class="product-details space-y-md bg-background p-lg flex-col md:w-1/3">
 		<h1 class="product-title text-xlarge text-primary font-bold">{product.name}</h1>
 		<p class="text-primary text-base">{@html product.short_description || product.description}</p>
 		<p class="text-large text-primary">{variation ? variation.name : product.name}</p>
@@ -64,7 +91,8 @@
 		{#if product.dimensions}
 			<p class="product-info text-small">
 				<strong>Dimensions:</strong>
-				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product
+					.dimensions.height || 'N/A'} cm
 			</p>
 		{/if}
 		{#if product.weight}
@@ -84,14 +112,56 @@
 			</p>
 		{/if}
 
-		<button on:click={addToCart} class="button-primary">Add to Cart</button>
+		<button on:click={addToCart} class="button-primary mt-4 px-4 py-2">Add to Cart</button>
 	</div>
 
-	<!-- Gallery Component -->
-	<div class="image-gallery md:w-3/4">
+	<!-- Gallery Component with 2/3 width -->
+	<div class="image-gallery md:w-2/3">
 		<Gallery images={gallery} />
 	</div>
 </div>
+
+<!-- Artist Details Section -->
+{#if artistInfo}
+	<div class="artist-container gap-md bg-background p-lg mt-8 flex flex-col md:flex-row">
+		<!-- Artist Thumbnail -->
+		{#if artistInfo.acf.image}
+			<div class="artist-thumbnail mb-4 w-full md:mb-0 md:w-1/2">
+				<img
+					src={artistInfo.acf.image}
+					alt="Artist Thumbnail"
+					class="h-auto w-full rounded-md object-cover"
+				/>
+			</div>
+		{/if}
+
+		<!-- First Column: Artist Image and Details -->
+		<div class="flex flex-col items-start md:w-1/2">
+			<!-- Artist Details -->
+			<div class="artist-details space-y-md mt-4 md:mt-0">
+				<h3 class="text-large text-primary font-bold">About the Artist</h3>
+				<p class="text-primary text-base">
+					<strong>Artist Name:</strong>
+					{artistInfo.title.rendered}
+				</p>
+				<p class="text-primary text-base">
+					<strong>Bio:</strong>
+					{artistInfo.acf.description || 'No description available.'}
+				</p>
+				<p class="text-primary text-base">
+					<strong>Location:</strong>
+					{artistInfo.acf.location || 'Unknown'}
+				</p>
+				<a href={artistInfo.link} target="_blank" class="artist-link text-accent">View Profile</a>
+			</div>
+		</div>
+
+		<!-- Second Column: Placeholder -->
+		<div class="placeholder-column flex-1 rounded-md bg-gray-200 p-4">
+			<!-- Placeholder content here, can be updated later -->
+		</div>
+	</div>
+{:else}{/if}
 
 <CategorySlider {products} category={primaryCategory} />
 
@@ -108,16 +178,37 @@
 		padding-right: var(--spacing-md);
 		align-self: flex-end;
 		word-break: break-word;
+		flex: 1 1 33%; /* Ensures the product details take up 1/3 */
+	}
+
+	.image-gallery {
+		width: 100%;
+		flex: 1 1 67%; /* Ensures the gallery takes up 2/3 */
+	}
+
+	.artist-container {
+		display: flex;
+		flex-direction: row;
+		background-color: var(--background-color);
+		padding: var(--spacing-lg);
+		margin-top: var(--spacing-md);
+		gap: var(--spacing-md);
+	}
+
+	.artist-thumbnail {
+		width: 100%;
+		max-width: 200px;
+	}
+
+	.artist-details {
+		width: 100%;
+		flex: 1;
 	}
 
 	.product-title,
 	.product-info,
 	.price {
 		word-break: break-word;
-	}
-
-	.image-gallery {
-		width: 100%;
 	}
 
 	.button-primary {
@@ -131,6 +222,12 @@
 
 	.button-primary:hover {
 		background-color: var(--secondary-color);
+	}
+
+	.sale-price {
+		color: var(--secondary-color);
+		text-decoration: line-through;
+		margin-right: 0.5em;
 	}
 
 	@media (min-width: 768px) and (max-width: 1024px) {
@@ -161,6 +258,15 @@
 		}
 
 		.button-primary {
+			margin-bottom: var(--spacing-md);
+		}
+
+		.artist-container {
+			flex-direction: column;
+		}
+
+		.artist-thumbnail {
+			width: 100%;
 			margin-bottom: var(--spacing-md);
 		}
 	}

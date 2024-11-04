@@ -25,6 +25,7 @@
 		const artistName = latestProduct.attributes.find(attr => attr.name.toLowerCase() === 'artist')?.options[0];
 		artistInfo = artists.find(artist => artist.title.rendered.toLowerCase() === artistName?.toLowerCase());
 	}
+
 </script>
 
 {#if latestProduct}
@@ -65,7 +66,7 @@
 
 			<!-- Artist Details Section -->
 			{#if artistInfo}
-				<div class="artist-details space-y-md bg-background flex-1 p-lg">
+				<div class="artist-details space-y-md bg-background flex-1">
 					<h3 class="text-large text-primary font-bold">About the Artist</h3>
 					<p class="text-primary text-base"><strong>Artist Name:</strong> {artistInfo.title.rendered}</p>
 					<p class="text-primary text-base"><strong>Bio:</strong> {artistInfo.acf.description || 'No description available.'}</p>
@@ -124,7 +125,6 @@
 		flex-direction: column;
 		gap: var(--spacing-md);
 		width: 100%;
-		padding: var(--spacing-lg);
 	}
 
 	.text-primary {
