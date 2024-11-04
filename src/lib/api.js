@@ -50,3 +50,24 @@ export async function fetchStripeData(endpoint, options = {}) {
 
     return await response.json();
 }
+
+export async function fetchWordPressData(endpoint, options = {}) {
+    const apiUrl = import.meta.env.VITE_WP_API_URL;
+    const url = `${apiUrl}/wp/v2/${endpoint}`;
+
+    const response = await fetch(url, {
+        method: options.method || 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+        body: options.body || null
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+}

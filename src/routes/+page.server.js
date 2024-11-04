@@ -1,9 +1,12 @@
-import { fetchWooCommerceData } from '$lib/api';
+import { fetchWooCommerceData, fetchWordPressData } from '$lib/api';
 
 export async function load() {
     try {
         // Fetch all products
         const products = await fetchWooCommerceData('products');
+
+        // Fetch artist data from WordPress API
+        const artists = await fetchWordPressData('artist');
 
         // Fetch variations for each product
         const productsWithVariations = await Promise.all(products.map(async (product) => {
@@ -11,9 +14,12 @@ export async function load() {
             return { ...product, variations };
         }));
 
-        return { products: productsWithVariations };
+        return { 
+            products: productsWithVariations,
+            artists // Pass artist data to the main page
+        };
     } catch (error) {
         console.error(error);
-        return { products: [] }; // fallback in case of error
+        return { products: [], artists: [] }; // fallback in case of error
     }
 }

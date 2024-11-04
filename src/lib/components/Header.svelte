@@ -1,5 +1,5 @@
 <div class="header-container flex h-full w-full flex-col items-start justify-end p-0">
-	<h2 class="subheadline text-large md:text-xlarge m-0">gallerie fuer provisorische Kunst und diverse austellungen.</h2>
+	<h2 class="subheadline text-large md:text-xlarge m-0">gallerie fuer provisorische kunst und diverse austellungen.</h2>
 	<h1 class="headline m-0 font-bold leading-none">variable.</h1>
 </div>
 

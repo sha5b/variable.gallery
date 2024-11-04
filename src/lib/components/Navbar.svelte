@@ -2,6 +2,7 @@
   import { isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartSliderStore';
   import { cart } from '$lib/stores/cartStore';
   import { onMount } from 'svelte';
+  export let artists = []; // Artists data from WordPress API
 
   let isCartOpen;
   $: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
@@ -11,9 +12,14 @@
   }
 
   let isMenuOpen = false;
+  let isDropdownOpen = false;
 
   function toggleMenu() {
     isMenuOpen = !isMenuOpen;
+  }
+
+  function toggleDropdown() {
+    isDropdownOpen = !isDropdownOpen;
   }
 
   let totalItems = 0;
@@ -34,6 +40,24 @@
   <ul class="hidden md:flex list-none gap-lg items-center">
     <li><a href="/shop" class="text-text-color hover:text-primary-color">Shop</a></li>
     <li><a href="/about" class="text-text-color hover:text-primary-color">About</a></li>
+
+    <!-- Artists Dropdown Link -->
+    <li class="relative">
+      <button on:click={toggleDropdown} class="text-text-color hover:text-primary-color">
+        Artists
+      </button>
+      {#if isDropdownOpen}
+        <ul class="dropdown-menu absolute bg-background rounded-lg mt-2 shadow-lg py-2">
+          {#each artists as artist}
+            <li>
+              <a href={`/artist/${artist.slug}`} class="block px-4 py-2 text-text-color hover:bg-primary-color hover:text-background">
+                {artist.title.rendered}
+              </a>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </li>
   </ul>
 
   <!-- Cart and Hamburger Menu -->
@@ -60,6 +84,22 @@
       <ul class="w-full flex-col gap-sm text-left">
         <li><a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Shop</a></li>
         <li><a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}>About</a></li>
+        <li class="relative">
+          <button on:click={toggleDropdown} class="text-text-color hover:text-primary-color">
+            Artists
+          </button>
+          {#if isDropdownOpen}
+            <ul class="dropdown-menu-mobile absolute bg-background rounded-lg mt-2 shadow-lg py-2">
+              {#each artists as artist}
+                <li>
+                  <a href={`/artist/${artist.slug}`} class="block px-4 py-2 text-text-color hover:bg-primary-color hover:text-background">
+                    {artist.title.rendered}
+                  </a>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </li>
         <li class="text-2xl">
           <button on:click={() => { handleCartIconClick(); closeMenu(); }}>
             🛒
@@ -93,6 +133,14 @@
     color: var(--background-color);
     font-size: var(--font-size-small);
     border-radius: 9999px;
+  }
+
+  .dropdown-menu {
+    min-width: 150px;
+  }
+
+  .dropdown-menu-mobile {
+    position: relative;
   }
 
   .burger-icon div {
