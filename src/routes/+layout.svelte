@@ -14,6 +14,7 @@
 	function closeCart() {
 		closeCartSlider(); // Close the cart when clicking on the overlay
 	}
+	console.log(artists)
 </script>
 
 <div class="relative min-h-screen flex flex-col">

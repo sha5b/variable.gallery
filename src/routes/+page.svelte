@@ -1,7 +1,7 @@
 <script>
 	// Accept data with products as a prop
 	export let data;
-	const { products } = data;
+	const { products, artists } = data;
 
 	// Import components
 	import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
@@ -27,6 +27,7 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
+
 </script>
 
 <div class="shop-container px-page bg-background">
@@ -54,7 +55,7 @@
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
-	<ProductShowcase {products} />
+	<ProductShowcase {products} {artists}/>
 	<TagDisplay {products} />
 </div>
 

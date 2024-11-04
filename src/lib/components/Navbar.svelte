@@ -2,7 +2,7 @@
   import { isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartSliderStore';
   import { cart } from '$lib/stores/cartStore';
   import { onMount } from 'svelte';
-  export let artists = []; // Artists data from WordPress API
+  export let artists = [];
 
   let isCartOpen;
   $: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
@@ -62,7 +62,6 @@
 
   <!-- Cart and Hamburger Menu -->
   <div class="relative flex items-center gap-sm">
-    <!-- Cart Icon (now visible on all screen sizes) -->
     <button class="text-2xl relative" on:click={handleCartIconClick}>
       🛒
       {#if totalItems > 0}
@@ -118,6 +117,7 @@
     position: sticky;
     top: 0;
     z-index: 50;
+    background-color: var(--background-color);
   }
 
   .cart-badge {
