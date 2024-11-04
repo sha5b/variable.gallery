@@ -5,6 +5,7 @@
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
 	import CategorySlider from '$lib/components/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
+	import ArtistSlider from '$lib/components/ArtistSlider.svelte';
 
 	export let data;
 	let { product, variation, products, artists } = data;
@@ -12,25 +13,17 @@
 	let primaryCategory = '';
 	let gallery = [];
 	let artistInfo = null;
-	let artistImageUrl = '';
+	let artistName = '';
 
 	// Assign the product and prepare the gallery images
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
-		primaryCategory =
-			product.categories && product.categories.length > 0 ? product.categories[0].name : '';
-
-		// Load the artist info in the same way as in ProductShowcase
-		const artistName = product.attributes.find((attr) => attr.name.toLowerCase() === 'artist')
-			?.options[0];
-		artistInfo = artists.find(
-			(artist) => artist.title.rendered.toLowerCase() === artistName?.toLowerCase()
-		);
-		// If artist info and image ID are present, fetch the image URL
-		if (artistInfo && artistInfo.acf.image) {
-			fetchArtistImage(artistInfo.acf.image);
-		}
+		primaryCategory = product.categories && product.categories.length > 0 ? product.categories[0].name : '';
+		// Retrieve artist information
+		const artistAttr = product.attributes.find((attr) => attr.name.toLowerCase() === 'artist')?.options[0];
+		artistInfo = artists.find((artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase());
+		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
 	function addToCart() {
@@ -39,20 +32,10 @@
 			toggleCartSlider();
 		}
 	}
-
-	async function fetchArtistImage(imageId) {
-		try {
-			const response = await fetch(`/wp-json/wp/v2/media/${imageId}`);
-			const mediaData = await response.json();
-			artistImageUrl = mediaData.source_url || '';
-		} catch (error) {
-			console.error('Error fetching artist image:', error);
-		}
-	}
 </script>
 
 <div
-	class="product-container px-page gap-md my-8 flex w-full flex-col items-stretch pt-8 md:flex-row"
+	class="product-container px-page gap-md flex w-full flex-col items-stretch md:flex-row"
 >
 	<!-- Product Details Section with 1/3 width -->
 	<div class="product-details space-y-md bg-background p-lg flex-col md:w-1/3">
@@ -61,8 +44,8 @@
 		<p class="text-large text-primary">{variation ? variation.name : product.name}</p>
 
 		<p class="text-small text-primary">
-			<strong>SKU:</strong>
-			{variation ? variation.stock_quantity || 'N/A' : product.sku || 'N/A'}
+			<strong>Editions:</strong>
+			{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
 		</p>
 		<p class="text-small text-primary">
 			<strong>Stock Status:</strong>
@@ -123,42 +106,31 @@
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background p-lg mt-8 flex flex-col md:flex-row">
-		<!-- Artist Thumbnail -->
-		{#if artistInfo.acf.image}
-			<div class="artist-thumbnail mb-4 w-full md:mb-0 md:w-1/2">
-				<img
-					src={artistInfo.acf.image}
-					alt="Artist Thumbnail"
-					class="h-auto w-full rounded-md object-cover"
-				/>
-			</div>
-		{/if}
-
+	<div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row  px-page">
 		<!-- First Column: Artist Image and Details -->
 		<div class="flex flex-col items-start md:w-1/2">
 			<!-- Artist Details -->
 			<div class="artist-details space-y-md mt-4 md:mt-0">
-				<h3 class="text-large text-primary font-bold">About the Artist</h3>
+				<h3 class="text-large text-primary font-bold">about the artist</h3>
 				<p class="text-primary text-base">
-					<strong>Artist Name:</strong>
+					<strong>name:</strong>
 					{artistInfo.title.rendered}
 				</p>
 				<p class="text-primary text-base">
-					<strong>Bio:</strong>
+					<strong>bio:</strong>
 					{artistInfo.acf.description || 'No description available.'}
 				</p>
 				<p class="text-primary text-base">
-					<strong>Location:</strong>
+					<strong>location:</strong>
 					{artistInfo.acf.location || 'Unknown'}
 				</p>
-				<a href={artistInfo.link} target="_blank" class="artist-link text-accent">View Profile</a>
+				<a href={artistInfo.link} target="_blank" class="artist-link text-accent">view profile</a>
 			</div>
 		</div>
 
 		<!-- Second Column: Placeholder -->
-		<div class="placeholder-column flex-1 rounded-md bg-gray-200 p-4">
-			<!-- Placeholder content here, can be updated later -->
+		<div class="placeholder-column flex-1 rounded-md ">
+			<ArtistSlider {products} artistName={artistName} />
 		</div>
 	</div>
 {:else}{/if}
@@ -190,7 +162,6 @@
 		display: flex;
 		flex-direction: row;
 		background-color: var(--background-color);
-		padding: var(--spacing-lg);
 		margin-top: var(--spacing-md);
 		gap: var(--spacing-md);
 	}

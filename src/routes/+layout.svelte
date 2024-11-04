@@ -14,12 +14,11 @@
 	function closeCart() {
 		closeCartSlider(); // Close the cart when clicking on the overlay
 	}
-	console.log(artists)
+	console
 </script>
 
 <div class="relative min-h-screen flex flex-col">
 	<!-- Navbar and Cart Overlay -->
-	 {console.log(artists)}
 	<Navbar  {artists}/>
 	<ParallaxGrid />
 	<div

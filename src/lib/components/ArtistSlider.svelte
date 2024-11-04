@@ -2,15 +2,12 @@
 	import { goto } from '$app/navigation';
 
 	export let products = [];
-	export let category = '';
+	export let artistName = '';
 
-	$: filteredProducts = products.filter((product) =>
-		product.categories.some((cat) => cat.name === category)
+	// Filter products based on artist attribute
+	$: filteredProducts = products.filter(product =>
+		product.attributes.some(attr => attr.name.toLowerCase() === 'artist' && attr.options.includes(artistName))
 	);
-
-	$: displayedProducts = filteredProducts
-		.slice()
-		.sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified));
 
 	let slider;
 	let scrollTarget = 0;
@@ -30,11 +27,7 @@
 			const offsetX = mouseX - middleX;
 			const maxScroll = slider.scrollWidth - sliderWidth;
 
-			// Adjust `scrollTarget` and ensure it stays within bounds
-			scrollTarget = Math.min(
-				maxScroll,
-				Math.max(0, currentScroll + ((offsetX / middleX) * maxScroll) / 2)
-			);
+			scrollTarget = Math.min(maxScroll, Math.max(0, currentScroll + ((offsetX / middleX) * maxScroll) / 2));
 
 			if (!isAnimating) {
 				isAnimating = true;
@@ -49,12 +42,7 @@
 		currentScroll += distance * easing;
 		slider.scrollLeft = currentScroll;
 
-		// Stop animating if the scroll has reached the start or end
-		if (
-			Math.abs(distance) > 0.5 &&
-			currentScroll !== 0 &&
-			currentScroll !== slider.scrollWidth - slider.clientWidth
-		) {
+		if (Math.abs(distance) > 0.5 && currentScroll !== 0 && currentScroll !== slider.scrollWidth - slider.clientWidth) {
 			requestAnimationFrame(animateScroll);
 		} else {
 			isAnimating = false;
@@ -62,15 +50,15 @@
 	}
 </script>
 
-<section class='px-page mt-4'>
-	<div class="category-header pl-page py-page ">
-		<h1 class="category-title text-large font-bold">{category}</h1>
+<section class='artist-slider-section'>
+	<div class="artist-slider-header pl-page py-page ">
+		<h1 class="artist-slider-title text-large font-bold">more from {artistName}</h1>
 	</div>
 
-	<div class="category-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
-		<div class="category-slider gap-lg flex">
-			{#each displayedProducts as product}
-				<div class="category-card" on:click={() => handleProductClick(product)}>
+	<div class="artist-slider-container" bind:this={slider} on:mousemove={handleMouseMove}>
+		<div class="artist-slider gap-lg flex">
+			{#each filteredProducts as product}
+				<div class="artist-card" on:click={() => handleProductClick(product)}>
 					<div class="product-tag-container">
 						{#each product.tags as tag}
 							<span class="tag">{tag.name}</span>
@@ -84,41 +72,44 @@
 </section>
 
 <style>
-	.category-slider-container {
+	.artist-slider-section {
 		width: 100%;
 		overflow: hidden;
-		padding-left: var(--spacing-md);
-		padding-bottom: var(--spacing-lg);
+	}
+
+	.artist-slider-container {
+		width: 100%;
+		overflow: hidden;
 		transition: all 0.3s ease;
 	}
 
-	.category-header {
+	.artist-slider-header {
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-lg);
 	}
 
-	.category-title {
+	.artist-slider-title {
 		color: var(--primary-color);
-		padding: var(--spacing-sm) 0;
 	}
 
-	.category-slider {
+	.artist-slider {
 		display: flex;
 		gap: var(--spacing-md);
+		overflow: hidden;
 	}
 
-	.category-card {
-		flex: 0 0 300px;
-		height: 300px;
+	.artist-card {
+		flex: 0 0 150px;
+		height: 150px;
 		position: relative;
 		overflow: hidden;
-		transition: flex 0.9s ease;
+		transition: flex 0.6s ease;
 		cursor: pointer;
 	}
 
-	.category-card:hover {
-		flex: 0 0 600px;
+	.artist-card:hover {
+		flex: 0 0 300px;
 	}
 
 	.product-image {
@@ -148,19 +139,26 @@
 
 	/* Responsive styles */
 	@media (max-width: 767px) {
-		.category-slider-container {
-			overflow-x: auto;
+		.artist-slider-container {
+			overflow-x: hidden;
 			scroll-snap-type: x mandatory;
 			-webkit-overflow-scrolling: touch;
 		}
 
-		.category-slider {
+		.artist-slider {
 			gap: var(--spacing-sm);
+			overflow-x: auto;
+			padding-left: var(--spacing-xs);
+			padding-right: var(--spacing-xs);
+			scroll-snap-type: x mandatory;
+			-webkit-overflow-scrolling: touch;
 		}
 
-		.category-card {
+		.artist-card {
 			flex: 0 0 80%;
 			scroll-snap-align: start;
+			height: 500px;
+			min-height: 150px;
 		}
 	}
 </style>
