@@ -1,10 +1,13 @@
 <script>
 	import { addItem } from '$lib/stores/cartStore';
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
+	import Gallery from './Gallery.svelte';
 	export let products;
 	export let artists;
+	let gallery = []
 
 	let latestProduct =
+	
 		products.length > 0
 			? products.reduce(
 					(latest, product) =>
@@ -14,19 +17,11 @@
 			: null;
 
 	let variation = latestProduct?.variations[0];
-	let currentImageIndex = 0;
-
-	function nextImage() {
-		currentImageIndex = (currentImageIndex + 1) % latestProduct.images.length;
-	}
-
-	function prevImage() {
-		currentImageIndex = (currentImageIndex - 1 + latestProduct.images.length) % latestProduct.images.length;
-	}
 
 	// Find the corresponding artist for the current product
 	let artistInfo = null;
 	if (latestProduct) {
+		gallery = latestProduct.images?.map((img) => img.src) || [];
 		const artistName = latestProduct.attributes.find(attr => attr.name.toLowerCase() === 'artist')?.options[0];
 		artistInfo = artists.find(artist => artist.title.rendered.toLowerCase() === artistName?.toLowerCase());
 	}
@@ -34,16 +29,10 @@
 
 {#if latestProduct}
 	<div class="product-container gap-md my-8 flex w-full flex-col items-stretch pt-8 md:flex-row">
-		<!-- Image Slider Section -->
-		<div class="image-section aspect-h-3 aspect-w-4 w-full md:aspect-h-6 md:aspect-w-16 md:w-7/10 relative">
-			<img
-				src={latestProduct.images[currentImageIndex]?.src || '/path/to/default.jpg'}
-				alt={latestProduct.name}
-				class="h-full w-full object-cover"
-			/>
-			<!-- Navigation buttons -->
-			<button on:click={prevImage} class="slider-button slider-button-left">‹</button>
-			<button on:click={nextImage} class="slider-button slider-button-right">›</button>
+		<!-- Image Gallery Section with Hover Expansion -->
+		<div class="gallery-section flex overflow-hidden gap-md">
+			{console.log(latestProduct.images)}
+			<Gallery images={gallery}/>
 		</div>
 
 		<!-- Details Container -->
@@ -98,51 +87,44 @@
 		width: 100%;
 	}
 
-	.image-section {
+	.gallery-section {
 		width: 100%;
-		position: relative;
-	}
-
-	.slider-button {
-		position: absolute;
-		top: 50%;
-		transform: translateY(-50%);
-		background: rgba(0, 0, 0, 0.5);
-		color: white;
-		border: none;
-		font-size: 2rem;
-		padding: 0.5rem;
-		cursor: pointer;
-		border-radius: 50%;
-		width: 2.5rem;
-		height: 2.5rem;
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: background 0.3s ease;
+		gap: var(--spacing-md);
+		overflow-x: auto;
 	}
 
-	.slider-button-left {
-		left: 1rem;
+	.gallery-card {
+		flex: 0 0 100px;
+		position: relative;
+		transition: flex 0.9s ease;
+		cursor: pointer;
 	}
 
-	.slider-button-right {
-		right: 1rem;
+	.gallery-card:hover {
+		flex: 0 0 600px;
+	}
+
+	.gallery-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
 	}
 
 	.details-container {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
-		gap: var(--spacing-md);
+		margin-top: var(--spacing-md);
 	}
 
-	.product-details,
-	.artist-details {
+	.product-details, .artist-details {
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-md);
 		width: 100%;
+		padding: var(--spacing-lg);
 	}
 
 	.text-primary {
@@ -178,24 +160,17 @@
 		background-color: var(--secondary-color);
 	}
 
-	/* Responsive adjustments */
 	@media (min-width: 768px) {
 		.product-container {
 			flex-direction: row;
 		}
 
-		.image-section {
+		.gallery-section {
 			width: 65%;
 		}
 
 		.details-container {
 			width: 35%;
-			flex-direction: row;
-		}
-
-		.product-details,
-		.artist-details {
-			width: 50%;
 		}
 	}
 </style>

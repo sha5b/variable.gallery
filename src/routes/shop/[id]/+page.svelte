@@ -4,23 +4,19 @@
 	import { addItem } from '$lib/stores/cartStore';
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
 	import CategorySlider from '$lib/components/CategorySlider.svelte';
+	import Gallery from '$lib/components/Gallery.svelte';
 
 	export let data;
 	let { product, variation, products } = data;
 
-	let modalOpen = false;
-	let currentImageIndex = 0;
-	let gallery = [];
 	let primaryCategory = '';
-	let hoveredImageIndex = null;
-	let gallerySlider;
+	let gallery = [];
 
+	// Assign the product and prepare the gallery images
 	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
-
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
-		primaryCategory =
-			product.categories && product.categories.length > 0 ? product.categories[0].name : '';
+		primaryCategory = product.categories && product.categories.length > 0 ? product.categories[0].name : '';
 	}
 
 	function addToCart() {
@@ -29,59 +25,7 @@
 			toggleCartSlider();
 		}
 	}
-
-	function openModal(index) {
-		currentImageIndex = index;
-		modalOpen = true;
-	}
-
-	function closeModal() {
-		modalOpen = false;
-	}
-
-	function handleMouseEnter(index) {
-		hoveredImageIndex = index;
-	}
-
-	function handleMouseLeave() {
-		hoveredImageIndex = null;
-		resetImageTransforms();
-	}
-
-	function handleMouseMove(event, imageIndex) {
-		if (hoveredImageIndex === imageIndex) {
-			const image = event.target;
-			const rect = image.getBoundingClientRect();
-			const x = (event.clientX - rect.left) / rect.width;
-			const y = (event.clientY - rect.top) / rect.height;
-
-			image.style.transformOrigin = `${x * 100}% ${y * 100}%`;
-			image.style.transform = 'scale(1.5)';
-		}
-	}
-
-	function resetImageTransforms() {
-		const images = document.querySelectorAll('.product-image');
-		images.forEach((img) => {
-			img.style.transform = 'scale(1)';
-			img.style.transformOrigin = 'center';
-		});
-	}
-
-	// Function to handle scrolling or dragging similar to FeaturedSlider
-	function handleScroll(event) {
-		const sliderWidth = gallerySlider.scrollWidth - gallerySlider.clientWidth;
-		let scrollPosition = gallerySlider.scrollLeft;
-
-		// Calculate new scroll position based on dragging or other slider controls
-		// Implement similar logic to the FeaturedSlider (if it has drag-to-scroll or auto-scroll behavior)
-	}
-	console.log(variation);
 </script>
-
-<Modal images={gallery} bind:open={modalOpen} bind:currentIndex={currentImageIndex}>
-	<button class="close-modal" on:click={closeModal}>Close</button>
-</Modal>
 
 <div class="product-container px-page">
 	<div class="product-details space-y-md bg-background flex-col md:w-1/4">
@@ -120,8 +64,7 @@
 		{#if product.dimensions}
 			<p class="product-info text-small">
 				<strong>Dimensions:</strong>
-				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product
-					.dimensions.height || 'N/A'} cm
+				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
 			</p>
 		{/if}
 		{#if product.weight}
@@ -144,23 +87,9 @@
 		<button on:click={addToCart} class="button-primary">Add to Cart</button>
 	</div>
 
-	<div
-		bind:this={gallerySlider}
-		class="image-gallery gap-md flex w-full overflow-hidden md:w-3/4"
-		on:scroll={handleScroll}
-	>
-		{#each gallery as image, index}
-			<div
-				class="featured-card"
-				on:mouseenter={() => handleMouseEnter(index)}
-				on:mouseleave={handleMouseLeave}
-				on:mousemove={(event) => handleMouseMove(event, index)}
-				on:click={() => openModal(index)}
-				class:featured-hover={hoveredImageIndex === index}
-			>
-				<img src={image} alt="Gallery image" class="product-image" />
-			</div>
-		{/each}
+	<!-- Gallery Component -->
+	<div class="image-gallery md:w-3/4">
+		<Gallery images={gallery} />
 	</div>
 </div>
 
@@ -177,8 +106,8 @@
 	.product-details {
 		background-color: var(--background-color);
 		padding-right: var(--spacing-md);
-		align-self: flex-end; /* Aligns the details container to the bottom */
-		word-break: break-word; /* Ensures long words break to fit the container */
+		align-self: flex-end;
+		word-break: break-word;
 	}
 
 	.product-title,
@@ -188,37 +117,22 @@
 	}
 
 	.image-gallery {
-		display: flex;
 		width: 100%;
-		height: 80vh; /* Fixed height for the container */
-		overflow-x: hidden; /* Ensures images are clipped within this container */
-		scroll-behavior: smooth;
-		gap: var(--spacing-md);
 	}
 
-	.featured-card {
-		flex: 0 0 20%; /* Adjusted to take a reasonable space on desktop */
-		height: 100%;
-		transition:
-			flex 0.6s ease,
-			transform 0.3s ease;
-		overflow: hidden;
-		position: relative;
-		cursor: pointer;
+	.button-primary {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		border-radius: var(--rounded-md);
+		transition: background-color 0.3s;
+		text-align: center;
+		font-weight: 600;
 	}
 
-	.featured-hover {
-		flex: 0 0 60%; /* Expand when hovered */
+	.button-primary:hover {
+		background-color: var(--secondary-color);
 	}
 
-	.product-image {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		transition: transform 0.3s ease;
-	}
-
-	/* Tablet-specific styles */
 	@media (min-width: 768px) and (max-width: 1024px) {
 		.product-container {
 			flex-direction: row;
@@ -226,52 +140,28 @@
 		}
 
 		.product-details {
-			flex: 0 0 35%; /* Makes product details take up more space on tablets */
+			flex: 0 0 35%;
 		}
 
 		.image-gallery {
-			flex: 0 0 65%; /* Adjusts the gallery width for tablet */
-			height: 60vh; /* Reduce height slightly for tablet view */
+			flex: 0 0 65%;
 		}
 	}
 
+	@media (max-width: 767px) {
+		.product-container {
+			flex-direction: column;
+		}
 
-/* Mobile-specific styles */
-@media (max-width: 767px) {
-    .product-container {
-        flex-direction: column; /* Stacks items vertically on mobile */
-    }
+		.product-details {
+			flex: 0 0 100%;
+			width: 100%;
+			padding: var(--spacing-sm);
+			margin-bottom: var(--spacing-md);
+		}
 
-    .product-details {
-        flex: 0 0 100%; /* Ensures product details take up the full width on mobile */
-        width: 100%; /* Added to make sure it expands fully */
-        padding: var(--spacing-sm); /* Adds padding around details for spacing */
-        margin-bottom: var(--spacing-md); /* Space below details section */
-    }
-
-    .button-primary {
-        margin-bottom: var(--spacing-md); /* Adds spacing below Add to Cart button */
-    }
-
-    .image-gallery {
-        flex-direction: row;
-        height: auto;
-        max-height: 60vh;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        gap: var(--spacing-xs);
-        padding-left: var(--spacing-xs);
-        padding-right: var(--spacing-xs);
-    }
-
-    .featured-card {
-        flex: 0 0 calc(80% - var(--spacing-xs));
-        max-width: calc(80% - var(--spacing-xs));
-        scroll-snap-align: start;
-        margin-right: var(--spacing-xs);
-        height: auto;
-    }
-}
-
+		.button-primary {
+			margin-bottom: var(--spacing-md);
+		}
+	}
 </style>
