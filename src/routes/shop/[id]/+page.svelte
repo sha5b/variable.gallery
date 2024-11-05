@@ -1,11 +1,10 @@
 <script>
-	import Modal from '$lib/components/Modal.svelte';
 	import { page } from '$app/stores';
 	import { addItem } from '$lib/stores/cartStore';
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
-	import CategorySlider from '$lib/components/CategorySlider.svelte';
+	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
-	import ArtistSlider from '$lib/components/ArtistSlider.svelte';
+	import ArtistSlider from '$src/lib/components/slider/ArtistSlider.svelte';
 
 	export let data;
 	let { product, variation, products, artists } = data;

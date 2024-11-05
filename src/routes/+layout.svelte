@@ -1,8 +1,9 @@
 <script>
 	import '../app.css';
-	import Footer from '$lib/components/Footer.svelte';
-	import Navbar from '$lib/components/Navbar.svelte';
-	import CartSlider from '$lib/components/CartSlider.svelte';
+
+	import Footer from '$lib/components/navigation/Footer.svelte';
+	import Navbar from '$lib/components/navigation/Navbar.svelte';
+	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartSliderStore';
 
 	export let data;

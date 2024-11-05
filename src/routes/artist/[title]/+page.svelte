@@ -1,6 +1,6 @@
 <script>
     import { page } from '$app/stores';
-    import ArtistSlider from '$lib/components/ArtistSlider.svelte';
+    import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 
     export let data;
     let { products, artists } = data;

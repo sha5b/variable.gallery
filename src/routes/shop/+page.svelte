@@ -1,7 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
-  import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
-  import TagDisplay from '$lib/components/TagDisplay.svelte';
+  import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
+  import TagDisplay from '$lib/components/Filter.svelte';
 
   export let data;
   const { products, error } = data;
