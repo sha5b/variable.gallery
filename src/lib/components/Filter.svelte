@@ -1,14 +1,13 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 
 	export let products = [];
 	let selectedTag = null;
 	let selectedCategory = null;
+	let selectedArtist = null;
 	let minPrice = 0;
 	let maxPrice = 1000;
-	let minSize = 30;
-	let maxSize = 150;
 
 	// Initialize price range from products
 	const productPrices = products.map(product => parseFloat(product.price));
@@ -19,27 +18,27 @@
 	minPrice = initialMinPrice;
 	maxPrice = initialMaxPrice;
 
-	// Extract size values in cm and set initial range for size filter
-	const sizeValues = products
-		.flatMap(product => product.attributes?.filter(attr => attr.name.toLowerCase() === 'size'))
-		.flatMap(attr => attr?.options?.map(option => parseFloat(option.match(/\d+/)?.[0])) || [])
-		.filter(size => !isNaN(size));
-	const initialMinSize = Math.min(...sizeValues);
-	const initialMaxSize = Math.max(...sizeValues);
-
-	minSize = initialMinSize;
-	maxSize = initialMaxSize;
-
-	// Create lists of unique tags and categories
+	// Create lists of unique tags, categories, and artists
 	let uniqueTags = [...new Set(products.flatMap(product => product.tags?.map(tag => tag.name)))];
 	let uniqueCategories = [...new Set(products.flatMap(product => product.categories?.map(cat => cat.name)))];
+	let uniqueArtists = [...new Set(
+		products.flatMap(product => product.attributes
+			.filter(attr => attr.name.toLowerCase() === 'artist')
+			.flatMap(attr => attr.options)
+		)
+	)];
 
 	// Filter products based on selected criteria
-	$: filteredProducts = products.filter(product =>
-		(!selectedTag || product.tags.some(tag => tag.name === selectedTag)) &&
-		(!selectedCategory || product.categories.some(cat => cat.name === selectedCategory)) &&
-		(parseFloat(product.price) >= minPrice && parseFloat(product.price) <= maxPrice)
-	);
+	$: filteredProducts = products.filter(product => {
+		const matchesTag = !selectedTag || product.tags.some(tag => tag.name === selectedTag);
+		const matchesCategory = !selectedCategory || product.categories.some(cat => cat.name === selectedCategory);
+		const matchesArtist = !selectedArtist || product.attributes.some(attr => 
+			attr.name.toLowerCase() === 'artist' && attr.options.includes(selectedArtist)
+		);
+		const matchesPrice = parseFloat(product.price) >= minPrice && parseFloat(product.price) <= maxPrice;
+
+		return matchesTag && matchesCategory && matchesArtist && matchesPrice;
+	});
 
 	function handleTagClick(tag) {
 		selectedTag = selectedTag === tag ? null : tag;
@@ -47,6 +46,10 @@
 
 	function handleCategoryClick(category) {
 		selectedCategory = selectedCategory === category ? null : category;
+	}
+
+	function handleArtistClick(artist) {
+		selectedArtist = selectedArtist === artist ? null : artist;
 	}
 
 	function handlePriceChange(event, type) {
@@ -57,11 +60,11 @@
 			maxPrice = Math.max(value, minPrice);
 		}
 	}
-
 </script>
 
 <div class="space-y-lg py-lg mb-[var(--spacing-xl)]">
 	<div class="flex flex-col md:flex-row items-stretch gap-lg">
+		<!-- Filter Container -->
 		<aside class="filter-container p-md w-full md:w-1/4 bg-background text-text-color">
 			<h2 class="font-heading font-bold mb-sm text-large">Category</h2>
 			<div class="flex flex-wrap gap-sm mb-md">
@@ -81,6 +84,14 @@
 				{/each}
 			</div>
 
+			<h2 class="font-heading font-bold mb-sm text-large">Artist</h2>
+			<div class="flex flex-wrap gap-sm mb-md">
+				{#each uniqueArtists as artist}
+					<span on:click={() => handleArtistClick(artist)} class={`pill-button ${selectedArtist === artist ? 'pill-selected' : 'pill-default'}`}>
+						{artist}
+					</span>
+				{/each}
+			</div>
 
 			<!-- Price Filter -->
 			<h2 class="font-heading font-bold mb-sm text-large">Price Range</h2>
@@ -109,7 +120,9 @@
 		<!-- Product Grid -->
 		<div class="product-grid w-full flex flex-wrap gap-md">
 			{#each filteredProducts as product (product.id)}
-				<div in:fly={{ x: 20, duration: 400 }} out:fly={{ x: -20, duration: 300 }}
+				<div
+					in:fly={{ x: 20, duration: 400, opacity: 0 }}
+					out:fly={{ x: -20, duration: 300, opacity: 0 }}
 					class="featured-card group h-80 overflow-hidden bg-background transition-all cursor-pointer min-w-[200px] relative"
 					on:click={() => goto(`/shop/${product.id}`)}
 				>
@@ -131,8 +144,10 @@
 </div>
 
 <style>
-	/* Styling based on previous design */
 	.filter-container {
+		position: sticky;
+		top: 0;
+		max-height: 100vh;
 		background-color: var(--background-color);
 		color: var(--text-color);
 	}
@@ -166,10 +181,6 @@
 		transition: flex 0.3s ease;
 	}
 
-	.featured-card:hover {
-		flex: 1 1 600px;
-	}
-
 	.price-pill {
 		position: absolute;
 		bottom: var(--spacing-sm);
@@ -188,5 +199,6 @@
 		justify-content: center;
 		align-items: center;
 		flex-direction: column;
+		transition: opacity 0.3s ease;
 	}
 </style>
