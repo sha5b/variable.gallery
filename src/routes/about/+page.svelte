@@ -1,5 +1,5 @@
 <script>
-	import LegalInfoDropdown from '$src/lib/components/base/LegalInfoDropdown.svelte';
+	import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
 
 	let companyInfo = {
 	  name: "Your Company Name",
