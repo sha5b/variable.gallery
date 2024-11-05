@@ -1,36 +1,68 @@
-export async function fetchWooCommerceData(endpoint, options = {}) {
-    const apiUrl = import.meta.env.VITE_WP_API_URL;
-    const consumerKey = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_KEY;
-    const consumerSecret = import.meta.env.VITE_WOOCOMMERCE_CONSUMER_SECRET;
-    const url = `${apiUrl}/wc/v3/${endpoint}`;
+// Centralized fetch function with authorization options and error handling
+async function fetchData(baseURL, endpoint, options = {}, authType = null) {
+    const url = `${baseURL}/${endpoint}`;
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+    };
+
+    // Add authorization headers based on authType
+    if (authType === 'basic') {
+        const { consumerKey, consumerSecret } = options;
+        headers['Authorization'] = 'Basic ' + btoa(`${consumerKey}:${consumerSecret}`);
+    } else if (authType === 'bearer') {
+        headers['Authorization'] = `Bearer ${options.apiKey}`;
+    }
 
     const response = await fetch(url, {
         method: options.method || 'GET',
-        headers: {
-            'Authorization': 'Basic ' + btoa(`${consumerKey}:${consumerSecret}`),
-            'Content-Type': 'application/json',
-            ...options.headers
-        },
-        body: options.body || null
+        headers,
+        body: options.body || null,
     });
+
     if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);
+        throw new Error(`Error: ${response.status} - ${errorText}`);
     }
-
     return await response.json();
 }
 
-// api.js
+// Unified error handling function for fetch requests
+async function handleFetch(fetchFunction, fallback = {}) {
+    try {
+        return await fetchFunction();
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return fallback;
+    }
+}
+
+// Helper function to fetch WooCommerce data
+export function fetchWooCommerceData(endpoint, options = {}) {
+    return handleFetch(() => fetchData(
+        import.meta.env.VITE_WP_API_URL + '/wc/v3',
+        endpoint,
+        {
+            ...options,
+            consumerKey: import.meta.env.VITE_WOOCOMMERCE_CONSUMER_KEY,
+            consumerSecret: import.meta.env.VITE_WOOCOMMERCE_CONSUMER_SECRET,
+        },
+        'basic'
+    ));
+}
+
+// Helper function to fetch Stripe data
 export async function fetchStripeData(endpoint, options = {}) {
     const stripeSecretKey = import.meta.env.VITE_STRIPE_SECRET_KEY;
     const url = `https://api.stripe.com/v1/${endpoint}`;
 
-    // Convert JSON body to URL-encoded form data
+    // Convert JSON body to URL-encoded form data if provided
     const bodyData = new URLSearchParams();
-    const body = JSON.parse(options.body);
-    for (const [key, value] of Object.entries(body)) {
-        bodyData.append(key, value);
+    if (options.body) {
+        const body = JSON.parse(options.body);
+        for (const [key, value] of Object.entries(body)) {
+            bodyData.append(key, value);
+        }
     }
 
     const response = await fetch(url, {
@@ -40,7 +72,7 @@ export async function fetchStripeData(endpoint, options = {}) {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Stripe-Version': '2022-08-01', // Ensure the correct Stripe API version
         },
-        body: bodyData
+        body: options.body ? bodyData : null
     });
 
     if (!response.ok) {
@@ -51,23 +83,32 @@ export async function fetchStripeData(endpoint, options = {}) {
     return await response.json();
 }
 
-export async function fetchWordPressData(endpoint, options = {}) {
-    const apiUrl = import.meta.env.VITE_WP_API_URL;
-    const url = `${apiUrl}/wp/v2/${endpoint}`;
+// Helper function to fetch WordPress data
+export function fetchWordPressData(endpoint, options = {}) {
+    return handleFetch(() => fetchData(
+        import.meta.env.VITE_WP_API_URL + '/wp/v2',
+        endpoint,
+        options
+    ));
+}
 
-    const response = await fetch(url, {
-        method: options.method || 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
-        body: options.body || null
-    });
+// Additional utility functions for specific data fetching
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch data from ${endpoint}: ${response.statusText} - ${errorText}`);
-    }
+export async function fetchArtists() {
+    return await handleFetch(() => fetchWordPressData('artist'), []);
+}
 
-    return await response.json();
+export async function fetchProducts() {
+    return await handleFetch(() => fetchWooCommerceData('products'), []);
+}
+
+export async function fetchProductWithVariations(productId) {
+    const product = await handleFetch(() => fetchWooCommerceData(`products/${productId}`), null);
+    const variations = await handleFetch(() => fetchWooCommerceData(`products/${productId}/variations`), []);
+    return { product, variation: variations.length > 0 ? variations[0] : null };
+}
+
+export async function createPaymentIntent(amount, currency) {
+    const body = JSON.stringify({ amount, currency });
+    return await handleFetch(() => fetchStripeData('payment_intents', { method: 'POST', body }), {});
 }

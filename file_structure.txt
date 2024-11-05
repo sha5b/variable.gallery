@@ -6,17 +6,21 @@ src/
         api.js
         index.js
         components/
+            ArtistSlider.svelte
             CartSlider.svelte
             CategorySlider.svelte
             Contact.svelte
             ContactModal.svelte
             FeaturedSlider.svelte
             Footer.svelte
+            Gallery.svelte
             Header.svelte
             LegalInfoDropdown.svelte
+            Logo.svelte
             Modal.svelte
             Navbar.svelte
             Newsletter.svelte
+            ParallaxGrid.svelte
             ProductShowcase.svelte
             TagDisplay.svelte
         stores/
@@ -26,11 +30,18 @@ src/
             userInfoStore.js
         utils/
     routes/
+        +layout.server.js
         +layout.svelte
         +page.server.js
         +page.svelte
         about/
             +page.svelte
+        artist/
+            +page.server.js
+            +page.svelte
+            [title]/
+                +page.server.js
+                +page.svelte
         cart/
             +page.svelte
         checkout/

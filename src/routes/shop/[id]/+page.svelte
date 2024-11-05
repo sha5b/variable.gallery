@@ -106,7 +106,7 @@
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row  px-page">
+	<div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row  px-page pt-12">
 		<!-- First Column: Artist Image and Details -->
 		<div class="flex flex-col items-start md:w-1/2">
 			<!-- Artist Details -->

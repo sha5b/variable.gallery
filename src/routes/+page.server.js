@@ -1,25 +1,14 @@
-import { fetchWooCommerceData, fetchWordPressData } from '$lib/api';
+import { fetchArtists, fetchProducts } from '$lib/api';
 
 export async function load() {
-    try {
-        // Fetch all products
-        const products = await fetchWooCommerceData('products');
+    // Fetch products and artists concurrently
+    const [products, artists] = await Promise.all([
+        fetchProducts(), // Fetch limited product data
+        fetchArtists()
+    ]);
 
-        // Fetch artist data from WordPress API
-        const artists = await fetchWordPressData('artist');
-
-        // Fetch variations for each product
-        const productsWithVariations = await Promise.all(products.map(async (product) => {
-            const variations = await fetchWooCommerceData(`products/${product.id}/variations`);
-            return { ...product, variations };
-        }));
-
-        return { 
-            products: productsWithVariations,
-            artists // Pass artist data to the main page
-        };
-    } catch (error) {
-        console.error(error);
-        return { products: [], artists: [] }; // fallback in case of error
-    }
+    return {
+        products,
+        artists
+    };
 }
