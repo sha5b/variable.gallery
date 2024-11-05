@@ -1,5 +1,5 @@
 <script>
-	import Modal from '$lib/components/Modal.svelte';
+	import Modal from '$lib/components/modal/Modal.svelte';
 
 	// Props to accept an array of image URLs
 	export let images = [];

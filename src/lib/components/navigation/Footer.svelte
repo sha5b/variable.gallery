@@ -1,5 +1,5 @@
 <script>
-  import ContactModal from '$lib/components/ContactModal.svelte';
+  import ContactModal from '$lib/components/modal/ContactModal.svelte';
 
   const links = [
     { label: 'About Us', href: '/about' },

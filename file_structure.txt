@@ -6,29 +6,31 @@ src/
         api.js
         index.js
         components/
-            ArtistSlider.svelte
-            CartSlider.svelte
-            CategorySlider.svelte
             Contact.svelte
-            ContactModal.svelte
-            FeaturedSlider.svelte
-            Footer.svelte
+            Filter.svelte
             Gallery.svelte
             Header.svelte
-            LegalInfoDropdown.svelte
-            Logo.svelte
-            Modal.svelte
-            Navbar.svelte
-            Newsletter.svelte
-            ParallaxGrid.svelte
             ProductShowcase.svelte
-            TagDisplay.svelte
+            base/
+                LegalInfoDropdown.svelte
+            modal/
+                ContactModal.svelte
+                Modal.svelte
+            navigation/
+                CartSlider.svelte
+                Footer.svelte
+                Navbar.svelte
+            slider/
+                ArtistSlider.svelte
+                CategorySlider.svelte
+                FeaturedSlider.svelte
         stores/
             cartSliderStore.js
             cartStore.js
             productStore.js
             userInfoStore.js
         utils/
+            sliderHelper.js
     routes/
         +layout.server.js
         +layout.svelte

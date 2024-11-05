@@ -4,12 +4,11 @@
 	const { products, artists } = data;
 
 	// Import components
-	import FeaturedSlider from '$lib/components/FeaturedSlider.svelte';
+	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
 	import Contact from '$lib/components/Contact.svelte';
-	import TagDisplay from '$lib/components/TagDisplay.svelte';
+	import TagDisplay from '$lib/components/Filter.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
-	import Logo from '$lib/components/Logo.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -27,27 +26,26 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
-
+	console.log(artists)
+	console.log(products)
 </script>
 
 <div class="shop-container px-page bg-background">
-
-
-	<div class="content max-w-full mx-auto w-full">
+	<div class="content mx-auto w-full max-w-full">
 		<!-- Top Featured Slider -->
 		<div class="row-start-1 w-full">
 			<FeaturedSlider {products} />
 		</div>
 
 		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="gap-md row-start-2 flex flex-col md:flex-row w-full">
+		<div class="gap-md row-start-2 flex w-full flex-col md:flex-row">
 			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="bg-alt flex-1 w-full md:w-auto">
+			<div class="bg-alt w-full flex-1 md:w-auto">
 				<Header />
 			</div>
 
 			<!-- Category Display and Contact -->
-			<div class="gap-md flex flex-1 flex-col w-full md:w-auto">
+			<div class="gap-md flex w-full flex-1 flex-col md:w-auto">
 				<div class="bg-alt padding-lg"></div>
 				<Contact />
 			</div>
@@ -55,7 +53,7 @@
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
-	<ProductShowcase {products} {artists}/>
+	<ProductShowcase {products} {artists} />
 	<TagDisplay {products} />
 </div>
 
@@ -72,6 +70,4 @@
 		padding-inline: var(--page-padding); /* Adds padding on both sides */
 		box-sizing: border-box;
 	}
-
-
 </style>

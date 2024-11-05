@@ -1,7 +1,6 @@
 <script>
-	import { addItem } from '$lib/stores/cartStore';
-	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
-	import Gallery from './Gallery.svelte';
+
+	import Gallery from '$lib/components/Gallery.svelte';
 	export let products;
 	export let artists;
 	let gallery = []
