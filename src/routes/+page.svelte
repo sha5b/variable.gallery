@@ -9,7 +9,6 @@
 	import TagDisplay from '$lib/components/TagDisplay.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
-	import Logo from '$lib/components/Logo.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
