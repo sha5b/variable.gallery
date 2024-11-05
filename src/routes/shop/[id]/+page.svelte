@@ -1,7 +1,6 @@
 <script>
 	import { page } from '$app/stores';
-	import { addItem } from '$lib/stores/cartStore';
-	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
+	import { addItem, toggleCartSlider  } from '$lib/stores/cartStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';

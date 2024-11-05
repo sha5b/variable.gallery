@@ -1,7 +1,6 @@
 <script>
     import { handleMouseMove, handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
-    import { addItem } from '$lib/stores/cartStore';
-    import { toggleCartSlider, isCartSliderOpen } from '$lib/stores/cartSliderStore';
+    import {  isCartSliderOpen } from '$lib/stores/cartStore';
     import { goto } from '$app/navigation';
 
     export let products;

@@ -4,7 +4,7 @@
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Navbar from '$lib/components/navigation/Navbar.svelte';
 	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
-	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartSliderStore';
+	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
 
 	export let data;
 	const { artists } = data;

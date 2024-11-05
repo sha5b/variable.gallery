@@ -1,6 +1,5 @@
 <script>
-    import { isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartSliderStore';
-    import { cart } from '$lib/stores/cartStore';
+    import { cart , isCartSliderOpen, toggleCartSlider  } from '$lib/stores/cartStore';
     import { onMount } from 'svelte';
     
     export let artists = [];
