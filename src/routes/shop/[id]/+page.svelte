@@ -4,7 +4,7 @@
 	import { toggleCartSlider } from '$lib/stores/cartSliderStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
-	import ArtistSlider from '$src/lib/components/slider/ArtistSlider.svelte';
+	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 
 	export let data;
 	let { product, variation, products, artists } = data;
@@ -129,7 +129,7 @@
 
 		<!-- Second Column: Placeholder -->
 		<div class="placeholder-column flex-1 rounded-md ">
-			<ArtistSlider {products} artistName={artistName} />
+			<ArtistSlider {products} artistName={artistInfo.title.rendered}/>
 		</div>
 	</div>
 {:else}{/if}
