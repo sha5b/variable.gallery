@@ -2,11 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 
-	export let products;
+	export let products = [];
 	let selectedTag = null;
 	let selectedCategory = null;
 	let minPrice = 0;
-	let maxPrice = 1000; // Adjust as needed based on product price range
+	let maxPrice = 1000;
+	let minSize = 30;
+	let maxSize = 150;
 
 	// Initialize price range from products
 	const productPrices = products.map(product => parseFloat(product.price));
@@ -17,6 +19,22 @@
 	minPrice = initialMinPrice;
 	maxPrice = initialMaxPrice;
 
+	// Extract size values in cm and set initial range for size filter
+	const sizeValues = products
+		.flatMap(product => product.attributes?.filter(attr => attr.name.toLowerCase() === 'size'))
+		.flatMap(attr => attr?.options?.map(option => parseFloat(option.match(/\d+/)?.[0])) || [])
+		.filter(size => !isNaN(size));
+	const initialMinSize = Math.min(...sizeValues);
+	const initialMaxSize = Math.max(...sizeValues);
+
+	minSize = initialMinSize;
+	maxSize = initialMaxSize;
+
+	// Create lists of unique tags and categories
+	let uniqueTags = [...new Set(products.flatMap(product => product.tags?.map(tag => tag.name)))];
+	let uniqueCategories = [...new Set(products.flatMap(product => product.categories?.map(cat => cat.name)))];
+
+	// Filter products based on selected criteria
 	$: filteredProducts = products.filter(product =>
 		(!selectedTag || product.tags.some(tag => tag.name === selectedTag)) &&
 		(!selectedCategory || product.categories.some(cat => cat.name === selectedCategory)) &&
@@ -34,26 +52,21 @@
 	function handlePriceChange(event, type) {
 		const value = parseFloat(event.target.value);
 		if (type === 'min') {
-			minPrice = Math.min(value, maxPrice); // Ensure minPrice doesn't exceed maxPrice
+			minPrice = Math.min(value, maxPrice);
 		} else if (type === 'max') {
-			maxPrice = Math.max(value, minPrice); // Ensure maxPrice isn't below minPrice
+			maxPrice = Math.max(value, minPrice);
 		}
 	}
 
-	let uniqueTags = [...new Set(products.flatMap(product => product.tags.map(tag => tag.name)))];
-	let uniqueCategories = [...new Set(products.flatMap(product => product.categories.map(cat => cat.name)))];
 </script>
 
 <div class="space-y-lg py-lg mb-[var(--spacing-xl)]">
 	<div class="flex flex-col md:flex-row items-stretch gap-lg">
-		<aside class="filter-container p-md rounded-lg w-full md:w-1/4 bg-background text-text-color">
+		<aside class="filter-container p-md w-full md:w-1/4 bg-background text-text-color">
 			<h2 class="font-heading font-bold mb-sm text-large">Category</h2>
 			<div class="flex flex-wrap gap-sm mb-md">
 				{#each uniqueCategories as category}
-					<span
-						on:click={() => handleCategoryClick(category)}
-						class={`pill-button ${selectedCategory === category ? 'pill-selected' : 'pill-default'}`}
-					>
+					<span on:click={() => handleCategoryClick(category)} class={`pill-button ${selectedCategory === category ? 'pill-selected' : 'pill-default'}`}>
 						{category}
 					</span>
 				{/each}
@@ -62,14 +75,12 @@
 			<h2 class="font-heading font-bold mb-sm text-large">Tag</h2>
 			<div class="flex flex-wrap gap-sm mb-md">
 				{#each uniqueTags as tag}
-					<span
-						on:click={() => handleTagClick(tag)}
-						class={`pill-button ${selectedTag === tag ? 'pill-selected' : 'pill-default'}`}
-					>
+					<span on:click={() => handleTagClick(tag)} class={`pill-button ${selectedTag === tag ? 'pill-selected' : 'pill-default'}`}>
 						{tag}
 					</span>
 				{/each}
 			</div>
+
 
 			<!-- Price Filter -->
 			<h2 class="font-heading font-bold mb-sm text-large">Price Range</h2>
@@ -109,9 +120,7 @@
 						<h3 class="text-white text-large font-bold mb-sm">{product.name}</h3>
 						<div class="flex gap-xs flex-wrap justify-center">
 							{#each product.tags as tag}
-								<span class="tag">
-									{tag.name}
-								</span>
+								<span class="tag">{tag.name}</span>
 							{/each}
 						</div>
 					</div>
@@ -122,13 +131,12 @@
 </div>
 
 <style>
-	/* Filter Container Styling */
+	/* Styling based on previous design */
 	.filter-container {
 		background-color: var(--background-color);
 		color: var(--text-color);
 	}
 
-	/* Pill Button Styling */
 	.pill-button {
 		padding: var(--spacing-xs) var(--spacing-md);
 		border-radius: 9999px;
@@ -147,13 +155,11 @@
 		color: var(--background-color);
 	}
 
-	/* Product Grid */
 	.product-grid {
 		display: flex;
 		flex-wrap: wrap;
 	}
 
-	/* Featured Card */
 	.featured-card {
 		flex: 1 1 300px;
 		position: relative;
@@ -164,7 +170,6 @@
 		flex: 1 1 600px;
 	}
 
-	/* Price Pill Styling */
 	.price-pill {
 		position: absolute;
 		bottom: var(--spacing-sm);
@@ -177,7 +182,6 @@
 		font-weight: bold;
 	}
 
-	/* Overlay on Hover */
 	.overlay {
 		background-color: rgba(0, 0, 0, 0.5);
 		display: flex;

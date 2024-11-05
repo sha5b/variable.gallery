@@ -26,6 +26,8 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
+	console.log(artists)
+	console.log(products)
 </script>
 
 <div class="shop-container px-page bg-background">
