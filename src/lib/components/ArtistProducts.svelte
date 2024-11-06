@@ -95,7 +95,6 @@
 
   .sphere-item {
     position: absolute;
-    width: 25%; /* Adjust as needed */
     height: 25%; /* Adjust as needed */
     top: 0;
     left: 0;
@@ -106,7 +105,6 @@
   }
 
   .scale-wrapper {
-    width: 100%;
     height: 100%;
     transition: transform 0.3s ease, opacity 0.3s ease;
     transform: scale(0.5);
@@ -156,6 +154,6 @@
   .product-name,
   .product-category {
     margin: 0;
-    font-size: 1rem;
+    font-size: .75rem;
   }
 </style>

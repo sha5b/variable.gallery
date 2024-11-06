@@ -12,6 +12,7 @@ export function initialize3DParticles(
 ) {
   const particles = [];
   let time = 0;
+  let isAnyParticleHovered = false; // Global hover state
 
   // Initialize particles
   elements.forEach((el) => {
@@ -25,7 +26,9 @@ export function initialize3DParticles(
       noiseOffsetX: Math.random() * 10,
       noiseOffsetY: Math.random() * 10,
       noiseOffsetZ: Math.random() * 10,
-      isHovered: false, // Track hover state
+      isHovered: false, // Track hover state for each particle
+      currentScale: 1, // Store current scale
+      currentOpacity: 0.9, // Store current opacity
     };
 
     particles.push(particle);
@@ -51,85 +54,86 @@ export function initialize3DParticles(
   // Initialize positions
   initializePositions();
 
-  // Function to center the hovered particle
-  function centerParticle(particle) {
+  // Function to scale the hovered particle in place and halt others
+  function scaleParticle(particle) {
     particle.isHovered = true;
+    isAnyParticleHovered = true;
 
-    const centerX = containerWidth / 2 - particle.width / 2;
-    const centerY = containerHeight / 2 - particle.height / 2;
-
-    particle.el.style.transition = 'transform 0.3s ease, opacity 0.3s ease, left 0.3s ease, top 0.3s ease';
-    particle.el.style.left = `${centerX}px`;
-    particle.el.style.top = `${centerY}px`;
+    // Increase the scale and opacity
+    particle.el.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
     particle.el.style.transform = `scale(1.5)`;
     particle.el.style.opacity = '1';
     particle.el.style.zIndex = '1000';
   }
 
-  // Function to reset the hovered particle
+  // Function to reset the hovered particle and resume others
   function resetParticle(particle) {
     particle.isHovered = false;
+    isAnyParticleHovered = false;
 
-    const adjustedX = particle.originalX + containerWidth / 2 - particle.width / 2;
-    const adjustedY = particle.originalY + containerHeight / 2 - particle.height / 2;
-
-    particle.el.style.transition = 'transform 0.5s ease, opacity 0.5s ease, left 0.5s ease, top 0.5s ease';
+    // Reset the scale and opacity to the current animated values
+    particle.el.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+    particle.el.style.transform = `scale(${particle.currentScale || 1})`;
+    particle.el.style.opacity = particle.currentOpacity || '0.9';
     particle.el.style.zIndex = '';
-    particle.el.style.left = `${adjustedX}px`;
-    particle.el.style.top = `${adjustedY}px`;
-    particle.el.style.transform = `scale(1)`;
-    particle.el.style.opacity = '0.9';
   }
 
   // Attach event listeners
   particles.forEach((particle) => {
     const el = particle.el;
 
-    el.addEventListener('mouseenter', () => centerParticle(particle));
+    el.addEventListener('mouseenter', () => scaleParticle(particle));
     el.addEventListener('mouseleave', () => resetParticle(particle));
   });
 
   // Animation loop
   function animate() {
-    time += animationSpeed;
+    if (!isAnyParticleHovered) {
+      time += animationSpeed;
 
-    particles.forEach((particle) => {
-      if (particle.isHovered) {
-        // Skip updating hovered particles
-        return;
-      }
+      particles.forEach((particle) => {
+        // Only update particles that are not hovered
+        if (!particle.isHovered) {
+          // Normal animation based on noise functions
+          const offsetX =
+            noise3D(particle.noiseOffsetX + time, 0, 0) * (containerWidth / 2 - 40);
+          const offsetY =
+            noise3D(0, particle.noiseOffsetY + time, 0) * (containerHeight / 2 - 40);
+          const offsetZ = noise3D(0, 0, particle.noiseOffsetZ + time) * baseRadius;
 
-      const offsetX = noise3D(particle.noiseOffsetX + time, 0, 0) * (containerWidth / 2 - 40);
-      const offsetY = noise3D(0, particle.noiseOffsetY + time, 0) * (containerHeight / 2 - 40);
-      const offsetZ = noise3D(0, 0, particle.noiseOffsetZ + time) * baseRadius;
+          // Original positions centered at (0,0)
+          let x = particle.originalX + offsetX;
+          let y = particle.originalY + offsetY;
+          let z = particle.originalZ + offsetZ;
 
-      // Original positions centered at (0,0)
-      let x = particle.originalX + offsetX;
-      let y = particle.originalY + offsetY;
-      let z = particle.originalZ + offsetZ;
+          // Shift to container center and adjust for particle size
+          let adjustedX = x + containerWidth / 2 - particle.width / 2;
+          let adjustedY = y + containerHeight / 2 - particle.height / 2;
 
-      // Shift to container center and adjust for particle size
-      let adjustedX = x + containerWidth / 2 - particle.width / 2;
-      let adjustedY = y + containerHeight / 2 - particle.height / 2;
+          // Clamp positions to stay within the container
+          const minX = 0;
+          const maxX = containerWidth - particle.width;
+          const minY = 0;
+          const maxY = containerHeight - particle.height;
 
-      // Clamp positions to stay within the container
-      const minX = 0;
-      const maxX = containerWidth - particle.width;
-      const minY = 0;
-      const maxY = containerHeight - particle.height;
+          adjustedX = Math.min(Math.max(minX, adjustedX), maxX);
+          adjustedY = Math.min(Math.max(minY, adjustedY), maxY);
 
-      adjustedX = Math.min(Math.max(minX, adjustedX), maxX);
-      adjustedY = Math.min(Math.max(minY, adjustedY), maxY);
+          const scale = Math.max(0.8, 1 + z / (2 * baseRadius));
+          const opacity = scale * 0.9;
 
-      const scale = Math.max(0.8, 1 + z / (2 * baseRadius));
-      const opacity = scale * 0.9;
+          // Store the current scale and opacity for reset
+          particle.currentScale = scale;
+          particle.currentOpacity = opacity;
 
-      // Apply positioning and styles
-      particle.el.style.left = `${adjustedX}px`;
-      particle.el.style.top = `${adjustedY}px`;
-      particle.el.style.transform = `scale(${scale})`;
-      particle.el.style.opacity = opacity.toString();
-    });
+          // Apply positioning and styles
+          particle.el.style.left = `${adjustedX}px`;
+          particle.el.style.top = `${adjustedY}px`;
+          particle.el.style.transform = `scale(${scale})`;
+          particle.el.style.opacity = opacity.toString();
+        }
+      });
+    }
 
     requestAnimationFrame(animate);
   }
@@ -139,5 +143,10 @@ export function initialize3DParticles(
   // Return a cleanup function if needed
   return () => {
     // Clean up event listeners or other resources if necessary
+    particles.forEach((particle) => {
+      const el = particle.el;
+      el.removeEventListener('mouseenter', scaleParticle);
+      el.removeEventListener('mouseleave', resetParticle);
+    });
   };
 }
