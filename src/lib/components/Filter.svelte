@@ -64,7 +64,6 @@
 
 <div class="space-y-lg py-lg mb-[var(--spacing-xl)]">
 	<div class="flex flex-col md:flex-row items-stretch gap-lg">
-		<!-- Filter Container -->
 		<aside class="filter-container p-md w-full md:w-1/4 bg-background text-text-color">
 			<h2 class="font-heading font-bold mb-sm text-large">Category</h2>
 			<div class="flex flex-wrap gap-sm mb-md">
@@ -121,12 +120,12 @@
 		<div class="product-grid w-full flex flex-wrap gap-md">
 			{#each filteredProducts as product (product.id)}
 				<div
-					in:fly={{ x: 20, duration: 400, opacity: 0 }}
+					in:fly={{ x: 20, duration: 400, opacity: 0 }} 
 					out:fly={{ x: -20, duration: 300, opacity: 0 }}
-					class="featured-card group h-80 overflow-hidden bg-background transition-all cursor-pointer min-w-[200px] relative"
+					class="featured-card group overflow-hidden bg-background transition-all cursor-pointer min-w-[200px] relative"
 					on:click={() => goto(`/shop/${product.id}`)}
 				>
-					<img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover rounded-lg" />
+					<img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover" />
 					<!-- Price Pill in Bottom Left -->
 					<span class="price-pill">€{parseFloat(product.price).toFixed(2)}</span>
 					<div class="overlay absolute inset-0 bg-primary bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex-center text-center p-md">
@@ -145,9 +144,6 @@
 
 <style>
 	.filter-container {
-		position: sticky;
-		top: 0;
-		max-height: 100vh;
 		background-color: var(--background-color);
 		color: var(--text-color);
 	}
@@ -179,6 +175,7 @@
 		flex: 1 1 300px;
 		position: relative;
 		transition: flex 0.3s ease;
+		max-height: 600px;
 	}
 
 	.price-pill {
