@@ -53,8 +53,6 @@
     .artist-slider-container {
         width: 100%;
         overflow: hidden;
-        padding-left: var(--spacing-md);
-        padding-bottom: var(--spacing-lg);
         transition: all 0.3s ease;
     }
 

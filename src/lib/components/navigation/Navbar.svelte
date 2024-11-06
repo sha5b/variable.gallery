@@ -1,165 +1,216 @@
 <script>
-    import { cart , isCartSliderOpen, toggleCartSlider  } from '$lib/stores/cartStore';
-    import { onMount } from 'svelte';
-    
-    export let artists = [];
+	import { onMount } from 'svelte';
+	import { fetchArtists } from '$lib/api';
+	import { cart, isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
+	import { ShoppingCart } from 'svelte-heros';
+	import { ChevronDown } from 'svelte-heros';
 
-    let isCartOpen;
-    $: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
+	let artists = [];
+	let isCartOpen;
+	$: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
 
-    function handleCartIconClick() {
-        toggleCartSlider();
-    }
+	function handleCartIconClick() {
+		toggleCartSlider();
+	}
 
-    let isMenuOpen = false;
-    let isDropdownOpen = false;
+	let isMenuOpen = false;
+	let isDropdownOpen = false;
 
-    function toggleMenu() {
-        isMenuOpen = !isMenuOpen;
-    }
+	function toggleMenu() {
+		isMenuOpen = !isMenuOpen;
+	}
 
-    function toggleDropdown() {
-        isDropdownOpen = !isDropdownOpen;
-    }
+	function toggleDropdown(event) {
+		event.stopPropagation();
+		isDropdownOpen = !isDropdownOpen;
+	}
 
-    let totalItems = 0;
-    $: totalItems = $cart.reduce((sum, item) => sum + item.quantity, 0);
+	let totalItems = 0;
+	$: totalItems = $cart.reduce((sum, item) => sum + item.quantity, 0);
 
-    function closeMenu() {
-        isMenuOpen = false;
-    }
+	function closeMenu() {
+		isMenuOpen = false;
+	}
 
-    function handleClickOutside(event) {
-        const dropdown = document.querySelector('.dropdown-menu');
-        const mobileDropdown = document.querySelector('.dropdown-menu-mobile');
+	function handleClickOutside(event) {
+		const dropdown = document.querySelector('.dropdown-menu');
+		const dropdownButton = document.querySelector('.dropdown-button');
 
-        if (!dropdown.contains(event.target) && !mobileDropdown.contains(event.target)) {
-            isDropdownOpen = false;
-        }
-    }
+		if (
+			dropdown &&
+			dropdownButton &&
+			!dropdown.contains(event.target) &&
+			!dropdownButton.contains(event.target)
+		) {
+			isDropdownOpen = false;
+		}
+	}
 
-    onMount(() => {
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    });
+	onMount(async () => {
+		artists = await fetchArtists();
+		if (typeof document !== 'undefined') {
+			document.addEventListener('click', handleClickOutside);
+		}
+
+		return () => {
+			if (typeof document !== 'undefined') {
+				document.removeEventListener('click', handleClickOutside);
+			}
+		};
+	});
 </script>
 
-<nav class="navbar sticky top-0 bg-background px-page py-md flex w-full items-center justify-between z-50">
-    <!-- Logo -->
-    <div class="text-lg font-semibold">
-        <a href="/" class="text-text-color hover:text-primary-color">variable.gallery</a>
-    </div>
+<nav class="navbar bg-background px-page py-md z-50 flex w-full items-center justify-between">
+	<!-- Logo -->
+	<div class="text-lg font-semibold">
+		<a href="/" class="text-text-color hover:text-primary-color">variable.gallery</a>
+	</div>
 
-    <!-- Desktop Navigation Links -->
-    <ul class="hidden md:flex gap-6 list-none items-center">
-        <li><a href="/shop" class="text-text-color hover:text-primary-color">shop</a></li>
-        <li><a href="/about" class="text-text-color hover:text-primary-color">about</a></li>
+	<!-- Desktop Navigation Links -->
+	<ul class="hidden list-none items-center gap-12 md:flex">
+		<li><a href="/shop" class="text-text-color hover:text-primary-color">shop</a></li>
+		<li><a href="/about" class="text-text-color hover:text-primary-color">about</a></li>
 
-        <!-- Artists Dropdown Link -->
-        <li class="relative">
-            <button on:click={toggleDropdown} class="text-text-color hover:text-primary-color">
-                artists
-            </button>
-            {#if isDropdownOpen}
-                <ul class="dropdown-menu bg-background absolute mt-2 rounded-lg py-2">
-                    {#each artists as artist}
-                        <li>
-                            <a
-                                href={`/artist/${artist.slug}`}
-                                class="text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
-                                on:click={() => (isDropdownOpen = false)}
-                            >
-                                {artist.title.rendered}
-                            </a>
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
-        </li>
-    </ul>
+		<!-- Artists Dropdown with Icon -->
+		<li class="relative flex items-center gap-1">
+			<a href="/artist" class="text-text-color hover:text-primary-color">artists</a>
+			<button
+				class="dropdown-button icon text-text-color hover:text-primary-color ml-4"
+				on:click={toggleDropdown}
+			>
+				<ChevronDown class="icon" />
+			</button>
+			{#if isDropdownOpen}
+				<ul class="dropdown-menu bg-background absolute mt-2 py-2" style="left: 0;">
+					{#each artists as artist}
+						<li>
+							<a
+								href={`/artist/${artist.slug}`}
+								class="text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
+								on:click={() => (isDropdownOpen = false)}
+							>
+								{artist.title.rendered}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</li>
+	</ul>
 
-    <!-- Cart and Hamburger Menu -->
-    <div class="flex items-center gap-3">
-        <button class="relative text-2xl" on:click={handleCartIconClick}>
-            🛒
-            {#if totalItems > 0}
-                <span class="cart-badge">{totalItems}</span>
-            {/if}
-        </button>
+	<!-- Cart and Hamburger Menu -->
+	<div class="flex items-center gap-3">
+		<button class="cart-icon relative text-xl" on:click={handleCartIconClick}>
+			<ShoppingCart class="cart-icon" />
+			{#if totalItems > 0}
+				<span class="cart-badge">{totalItems}</span>
+			{/if}
+		</button>
 
-        <!-- Hamburger Menu (visible on mobile) -->
-        <div class="burger-icon flex flex-col gap-1 cursor-pointer md:hidden" on:click={toggleMenu}>
-            <div class="h-[2px] w-6 bg-text-color"></div>
-            <div class="h-[2px] w-6 bg-text-color"></div>
-            <div class="h-[2px] w-6 bg-text-color"></div>
-        </div>
-    </div>
+		<!-- Hamburger Menu (visible on mobile) -->
+		<div class="burger-icon flex cursor-pointer flex-col gap-1 md:hidden" on:click={toggleMenu}>
+			<div class="bg-text-color h-[2px] w-6"></div>
+			<div class="bg-text-color h-[2px] w-6"></div>
+			<div class="bg-text-color h-[2px] w-6"></div>
+		</div>
+	</div>
 
-    <!-- Mobile Menu -->
-    {#if isMenuOpen}
-        <div class="menu-container absolute right-4 mt-2 w-48 bg-background p-4 flex flex-col md:hidden z-40">
-            <ul class="flex flex-col gap-2">
-                <li><a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}>Shop</a></li>
-                <li><a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}>About</a></li>
-                <li class="relative">
-                    <button on:click={toggleDropdown} class="text-text-color hover:text-primary-color">
-                        Artists
-                    </button>
-                    {#if isDropdownOpen}
-                        <ul class="dropdown-menu-mobile bg-background border border-primary-color absolute mt-2 rounded-lg py-2">
-                            {#each artists as artist}
-                                <li>
-                                    <a
-                                        href={`/artist/${encodeURIComponent(artist.title.rendered)}`}
-                                        class="text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
-                                        on:click={() => {
-                                            closeMenu();
-                                            isDropdownOpen = false;
-                                        }}
-                                    >
-                                        {artist.title.rendered}
-                                    </a>
-                                </li>
-                            {/each}
-                        </ul>
-                    {/if}
-                </li>
-            </ul>
-        </div>
-    {/if}
+	<!-- Mobile Menu -->
+	{#if isMenuOpen}
+		<div
+			class="menu-container bg-background fixed inset-0 top-[4rem] z-40 flex flex-col overflow-y-auto p-4 md:hidden"
+		>
+			<ul class="flex flex-col gap-2">
+				<li>
+					<a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}
+						>shop</a
+					>
+				</li>
+				<li>
+					<a href="/about" class="text-text-color hover:text-primary-color" on:click={closeMenu}
+						>about</a
+					>
+				</li>
+				<li class="text-text-color">artists</li>
+				<ul class="ml-4">
+					{#each artists as artist}
+						<li>
+							<a
+								href={`/artist/${artist.slug}`}
+								class="text-text-color dropdown-item hover:bg-primary-color hover:text-background block px-4 py-2"
+								on:click={closeMenu}
+							>
+								{artist.title.rendered}
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</ul>
+		</div>
+	{/if}
 </nav>
 
 <style>
-    .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        background-color: var(--background-color);
-    }
+	.navbar {
+		position: fixed;
+		top: 0;
+		z-index: 50;
+		background-color: var(--background-color);
+		padding-bottom: 1rem;
+		padding-top: 1rem;
+	}
 
-    .cart-badge {
-        position: absolute;
-        top: -0.5rem;
-        right: -0.5rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 1.25rem;
-        height: 1.25rem;
-        background-color: var(--error-color);
-        color: var(--background-color);
-        font-size: 0.75rem;
-        border-radius: 9999px;
-    }
+	.cart-badge {
+		position: absolute;
+		top: -0.5rem;
+		right: -0.5rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		background-color: var(--secondary-color);
+		color: var(--background-color);
+		font-size: 0.75rem;
+		border-radius: 9999px;
+	}
 
-    .dropdown-menu, .dropdown-menu-mobile {
-        min-width: 150px;
-        border-radius: var(--rounded-md);
-    }
+	.dropdown-menu {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		padding-left: var(--spacing-md);
+	}
 
-    .burger-icon div {
-        background-color: var(--text-color);
-    }
+	.dropdown-button {
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+	}
+
+	.dropdown-item {
+		padding: var(--spacing-xs) 0;
+		text-align: left;
+	}
+
+	.burger-icon div {
+		background-color: var(--text-color);
+	}
+
+	.menu-container {
+		max-height: 100%;
+		overflow-y: auto;
+		padding-top: 1rem;
+	}
+
+	.icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.cart-icon {
+		width: 1.5rem;
+		height: 1.5rem;
+		color: var(--text-color);
+	}
 </style>

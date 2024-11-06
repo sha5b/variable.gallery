@@ -20,6 +20,7 @@
 <div class="relative min-h-screen flex flex-col">
 	<!-- Navbar and Cart Overlay -->
 	<Navbar  {artists}/>
+	<div class="nav-filler"/>
 	<div
 		class={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out ${isOpen ? 'visible z-50 opacity-100' : 'invisible opacity-0'}`}
 		on:click={closeCart}
@@ -44,5 +45,8 @@
 	/* Optional: Add styling for a smoother layout */
 	.flex-grow {
 		min-height: 100%;
+	}
+	.nav-filler {
+		height: 44px;
 	}
 </style>

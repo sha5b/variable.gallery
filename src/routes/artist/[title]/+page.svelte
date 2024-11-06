@@ -31,10 +31,10 @@
 
 <div class="artist-container px-4 md:px-8 my-8">
     {#if filteredArtist}
-        <div class="artist-info flex flex-col md:flex-row gap-8 items-start bg-white rounded-lg">
+        <div class="artist-info flex flex-col md:flex-row gap-8 items-start bg-white ">
             {#if filteredArtist.acf?.image}
                 <div class="artist-thumbnail w-full md:w-1/3">
-                    <img src={`/wp-content/uploads/${filteredArtist.acf.image}`} alt={filteredArtist.title.rendered} class="w-full h-auto object-cover rounded-lg" />
+                    <img src={`/wp-content/uploads/${filteredArtist.acf.image}`} alt={filteredArtist.title.rendered} class="w-full h-auto object-cover " />
                 </div>
             {/if}
 

@@ -31,7 +31,7 @@
 </script>
 
 <div class="shop-container px-page bg-background">
-	<div class="content mx-auto w-full max-w-full">
+	<div class="content w-full max-w-full">
 		<!-- Top Featured Slider -->
 		<div class="row-start-1 w-full">
 			<FeaturedSlider {products} />
@@ -67,7 +67,6 @@
 	.content {
 		max-width: 100%; /* Prevents child elements from expanding beyond container */
 		width: 100%; /* Full width to prevent overflow */
-		padding-inline: var(--page-padding); /* Adds padding on both sides */
 		box-sizing: border-box;
 	}
 </style>
