@@ -3,6 +3,10 @@
 
   const links = [
     { label: 'About Us', href: '/about' },
+    { label: 'FAQ', href: '/faq' },
+    { label: 'Privacy Policy', href: '/privacy-policy' },
+    { label: 'Terms and Conditions', href: '/terms-and-conditions' },
+    { label: 'Impressum', href: '/impressum' },
     { label: 'Contact', href: 'contact' },
   ];
 
@@ -22,12 +26,12 @@
   }
 </script>
 
-<footer class="footer-container bg-primary text-background px-page py-lg">
+<footer class="footer-container bg-primary text-background px-page py-lg border-t border-secondary-bg">
   <div class="container flex flex-col md:flex-row justify-between items-start gap-md">
     <div class="footer-links-social flex flex-col md:flex-row gap-lg">
       <!-- Quick Links Section -->
       <div class="footer-links flex-shrink-0 text-left">
-        <h2 class="text-large font-bold">Quick Links</h2>
+        <h2 class="text-large font-heading font-bold mb-sm">Quick Links</h2>
         <ul class="space-y-xs">
           {#each links as { label, href }}
             <li>
@@ -40,8 +44,8 @@
       </div>
 
       <!-- Social Media Links -->
-      <div class="footer-social flex-shrink-0 text-left">
-        <h2 class="text-large font-bold">Connect with Us</h2>
+      <div class="footer-social flex-shrink-0 text-left mt-md md:mt-0">
+        <h2 class="text-large font-heading font-bold mb-sm">Connect with Us</h2>
         <ul class="space-y-xs">
           {#each socialLinks as { label, href }}
             <li>
@@ -55,8 +59,11 @@
     </div>
   </div>
 
-  <!-- Copyright Section -->
-  <div class="footer-bottom text-small mt-md text-left px-page">
+  <!-- Horizontal Divider -->
+  <hr class="my-md border-secondary-bg">
+
+  <!-- Bottom Section -->
+  <div class="footer-bottom text-small mt-md text-center md:text-left">
     <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
   </div>
 
@@ -75,31 +82,20 @@
     max-width: 100%;
     display: flex;
     gap: var(--spacing-lg);
-    justify-content: space-between; /* Align items to left and right */
+    justify-content: space-between;
   }
 
-  .footer-links,
-  .footer-social,
-  .footer-bottom {
+  .footer-links, .footer-social, .footer-bottom {
     text-align: left;
   }
 
-  .footer-logo {
-    display: flex;
-    justify-content: flex-end; /* Aligns the logo to the right */
-    align-items: center;
-  }
-
-  .logo-image {
-    width: 160px; /* Adjust size as needed */
-    height: auto;
-    filter: invert(1) brightness(2); /* Changes the logo to white */
-  }
-
-  .footer-links ul,
-  .footer-social ul {
+  .footer-links ul, .footer-social ul {
     list-style: none;
     padding: 0;
+  }
+
+  h2 {
+    margin-bottom: var(--spacing-xs);
   }
 
   a {
@@ -113,8 +109,22 @@
   }
 
   .footer-bottom {
-    text-align: left; /* Align text to the left */
     margin-top: var(--spacing-md);
-    width: 100%; /* Ensure it takes full width */
+    width: 100%;
+  }
+
+  hr {
+    border-color: var(--secondary-bg-color);
+  }
+
+  /* Extra styling for spacing and alignment on mobile */
+  @media (max-width: 767px) {
+    .footer-links-social {
+      gap: var(--spacing-md);
+    }
+
+    .footer-bottom {
+      text-align: center;
+    }
   }
 </style>

@@ -95,6 +95,12 @@
 				</ul>
 			{/if}
 		</li>
+        <li>
+            <a href="/exhibitions" class="text-text-color hover:text-primary-color" on:click={closeMenu}
+                >exhibitions</a
+            >
+        </li>
+
 	</ul>
 
 	<!-- Cart and Hamburger Menu -->
@@ -144,6 +150,11 @@
 						</li>
 					{/each}
 				</ul>
+                <li>
+					<a href="/exhibitions" class="text-text-color hover:text-primary-color" on:click={closeMenu}
+						>exhibitions</a
+					>
+				</li>
 			</ul>
 		</div>
 	{/if}

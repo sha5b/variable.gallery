@@ -42,6 +42,7 @@
 	},
 	"dependencies": {
 		"@stripe/stripe-js": "^4.9.0",
+		"simplex-noise": "^4.0.3",
 		"svelte-heros": "^7.0.2"
 	}
 }

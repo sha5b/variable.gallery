@@ -1,24 +1,45 @@
 <script>
-    import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
-    export let data;
-    let { artists, products } = data;
+	import ArtistProducts from '$lib/components/ArtistProducts.svelte';
+	export let data;
+
+	let { artists, products } = data;
+
+	console.log('Artists data:', artists);
+	console.log('Products data:', products);
 </script>
 
-<div class="artist-page px-page-md space-y-lg">
-    {#each artists as artist}
-        <section class="space-y-md">
-            <h2 class="text-large font-heading font-bold text-text-color">{artist.title.rendered}</h2>
-            <!-- Pass artist.works if it exists, otherwise adapt to your data structure -->
-            <ArtistSlider {products} artistName={artist.title.rendered} />
-        </section>
-    {/each}
+<div class="artist-page px-page space-y-lg">
+	<div class="gap-lg grid md:grid-cols-2">
+		{#each artists as artist}
+			<section
+				class="artist-section space-y-md bg-background p-md flex flex-col justify-between rounded-lg"
+			>
+				<div class="artist-info text-text-color space-y-sm">
+					<h2 class="text-large font-heading text-text-color font-bold">{artist.title.rendered}</h2>
+					<p>{artist.description}</p>
+					<p>
+						<a
+							href={`/artist/${artist.slug}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-accent hover:underline">View Profile</a
+						>
+					</p>
+				</div>
+				<!-- Constrain 3D Sphere within a half-height container -->
+				<div class="sphere-container-wrapper flex items-center justify-center overflow-hidden">
+					<ArtistProducts {products} artistName={artist.title.rendered} />
+				</div>
+			</section>
+		{/each}
+	</div>
 </div>
 
 <style>
-    .artist-page {
-        padding-top: var(--spacing-xl);
-    }
-    section {
-        margin-bottom: var(--spacing-lg);
-    }
+	.sphere-container-wrapper {
+		height: 50vh;
+	}
+	.artist-page {
+		height: 100%;
+	}
 </style>
