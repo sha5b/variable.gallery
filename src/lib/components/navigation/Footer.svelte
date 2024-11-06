@@ -34,12 +34,24 @@
         <h2 class="text-large font-heading font-bold mb-sm">Quick Links</h2>
         <ul class="space-y-xs">
           {#each links as { label, href }}
-            <li>
-              <a href={href} class="hover:text-accent transition-default" on:click|preventDefault={label === 'Contact' ? openModal : null}>
+          <li>
+            {#if label === 'Contact'}
+              <!-- 'Contact' link: prevent default and open modal -->
+              <a
+                href={href}
+                class="hover:text-accent transition-default"
+                on:click|preventDefault={openModal}
+              >
                 {label}
               </a>
-            </li>
-          {/each}
+            {:else}
+              <!-- Other links: no event handler, allow default navigation -->
+              <a href={href} class="hover:text-accent transition-default">
+                {label}
+              </a>
+            {/if}
+          </li>
+        {/each}
         </ul>
       </div>
 
@@ -49,9 +61,13 @@
         <ul class="space-y-xs">
           {#each socialLinks as { label, href }}
             <li>
-              <a href={href} target="_blank" rel="noopener noreferrer" class="hover:text-accent transition-default">
-                {label}
-              </a>
+              <a
+              href={href}
+              class="hover:text-accent transition-default"
+              on:click|preventDefault={label === 'Contact' ? openModal : null}
+            >
+              {label}
+            </a>
             </li>
           {/each}
         </ul>

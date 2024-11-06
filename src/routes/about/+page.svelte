@@ -1,60 +1,49 @@
+<!-- About.svelte -->
 <script>
 	import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
-
+  
 	let companyInfo = {
-	  name: "Your Company Name",
-	  address: "123 Main Street, City, Country",
-	  phone: "+123 456 7890",
-	  email: "info@yourcompany.com",
-	  registrationNumber: "1234567890",
-	  vatNumber: "VAT123456789"
+	  name: "variable.gallerie",
+	  email: "support@variable.gallery",
 	};
-
+  
 	const legalInfoContent = `
 	  <h3 class="text-large font-semibold">Privacy Policy</h3>
-	  <p>This is our Privacy Policy, explaining how we handle your data. We are committed to protecting your privacy and ensuring that your data is secure.</p>
-
+	  <p>Our Privacy Policy explains how we handle your data. We are committed to protecting your privacy and ensuring that your data is secure.</p>
+  
 	  <h3 class="text-large font-semibold mt-4">Terms of Service</h3>
-	  <p>These are our Terms of Service. By using our website, you agree to follow these terms. Please read them carefully before accessing our services.</p>
-
+	  <p>By using our website, you agree to follow our terms. Please read them carefully before accessing our services.</p>
+  
 	  <h3 class="text-large font-semibold mt-4">Refund Policy</h3>
-	  <p>This is our Refund Policy. We offer a full refund within 30 days if you are not satisfied with your purchase. Contact us for assistance with returns or refunds.</p>
-
+	  <p>All sales are final. Due to the digital and custom nature of our products, we do not offer refunds or returns. If you have any issues with your purchase, please contact our support team.</p>
+  
 	  <h3 class="text-large font-semibold mt-4">Imprint</h3>
 	  <p><strong>Company Name:</strong> ${companyInfo.name}</p>
-	  <p><strong>Address:</strong> ${companyInfo.address}</p>
-	  <p><strong>Contact:</strong> ${companyInfo.email}, ${companyInfo.phone}</p>
-	  <p><strong>VAT Number:</strong> ${companyInfo.vatNumber}</p>
+	  <p><strong>Contact:</strong> ${companyInfo.email}</p>
 	`;
-
-	const googleMapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509486!2d144.95373531531732!3d-37.81720997975154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad65d43f1f0d183%3A0x5045675218cee7e0!2sMelbourne%20VIC%2C%20Australia!5e0!3m2!1sen!2sus!4v1632945465837!5m2!1sen!2sus";
-</script>
-
-<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
-	<!-- Main Flex Container to Arrange Items -->
+  </script>
+  
+  <div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
+	<!-- Main Flex Container -->
 	<div class="flex flex-col md:flex-row gap-lg items-start">
-	  
 	  <!-- Left Column: Company Information and Legal Information -->
 	  <div class="w-full md:w-1/2 space-y-md">
 		<!-- Company Overview -->
 		<section class="space-y-sm">
 		  <h1 class="text-xlarge font-bold text-[var(--text-color)]">About {companyInfo.name}</h1>
 		  <p class="text-base text-[var(--text-color)]">
-			Welcome to {companyInfo.name}! We are dedicated to providing the best products and services for our customers.
-			Our team works hard to meet your needs, and we are committed to offering exceptional support.
+			Welcome to {companyInfo.name}! We are a solely digital gallery for exploring and distributing new concepts of exhibiting in the digital world, connecting artists together, and providing the backend structure for sales. A community of young artists and creatives is behind this, founded by Shahab Nedaei.
 		  </p>
 		</section>
-	  
+  
 		<!-- Contact Information -->
 		<section class="space-y-sm">
 		  <h2 class="text-large font-semibold text-[var(--text-color)]">Contact Us</h2>
 		  <div class="space-y-xs text-base text-[var(--text-color)]">
-			<p><strong>Address:</strong> {companyInfo.address}</p>
-			<p><strong>Phone:</strong> {companyInfo.phone}</p>
 			<p><strong>Email:</strong> <a href={`mailto:${companyInfo.email}`} class="text-accent hover:underline">{companyInfo.email}</a></p>
 		  </div>
 		</section>
-	  
+  
 		<!-- Legal Information Dropdown -->
 		<section class="space-y-sm">
 		  <h2 class="text-large font-semibold text-[var(--text-color)]">Legal Information</h2>
@@ -62,28 +51,32 @@
 		</section>
 	  </div>
   
-	  <!-- Right Column: Map -->
-	  <div class="w-full md:w-1/2">
+	  <!-- Right Column: Our Vision and Founder -->
+	  <div class="w-full md:w-1/2 space-y-md">
+		<!-- Our Vision -->
 		<section class="space-y-sm">
-		  <h2 class="text-large font-semibold text-[var(--text-color)]">Our Location</h2>
-		  <iframe
-			src={googleMapUrl}
-			width="100%"
-			height="450"
-			allowfullscreen=""
-			loading="lazy"
-			style="border: none;"
-		  ></iframe>
+		  <h2 class="text-large font-semibold text-[var(--text-color)]">Our Vision</h2>
+		  <p class="text-base text-[var(--text-color)]">
+			At {companyInfo.name}, we aim to redefine the boundaries of art exhibitions by leveraging digital platforms. Our virtual gallery, located on a satellite orbiting the moon, provides a unique space for artists to showcase their work in innovative ways. We strive to connect artists and audiences from around the world, fostering a community of creativity and collaboration.
+		  </p>
+		</section>
+  
+		<!-- Meet the Founder -->
+		<section class="space-y-sm">
+		  <h2 class="text-large font-semibold text-[var(--text-color)]">Meet the Founder</h2>
+		  <p class="text-base text-[var(--text-color)]">
+			Shahab Nedaei, the visionary behind {companyInfo.name}, is dedicated to exploring new frontiers in the digital art world. With a passion for connecting artists and audiences, Shahab leads our community of young creatives in pushing the boundaries of traditional exhibitions.
+		  </p>
 		</section>
 	  </div>
-  
 	</div>
-</div>
-
-<style>
+  </div>
+  
+  <style>
 	.about-container {
-		padding-top: var(--spacing-xl);
-		padding-bottom: var(--spacing-xl);
-		line-height: 1.75;
+	  padding-top: var(--spacing-xl);
+	  padding-bottom: var(--spacing-xl);
+	  line-height: 1.75;
 	}
-</style>
+  </style>
+  

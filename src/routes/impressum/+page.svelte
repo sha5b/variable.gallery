@@ -1,47 +1,101 @@
-<div class="impressum-page px-page text-text-color">
-    <h1 class="text-xlarge font-heading margin-md">Impressum</h1>
+<!-- Impressum.svelte -->
+<script>
+    // No additional script needed unless you have interactive elements
+  </script>
+  
+  <div class="impressum-page px-page text-text-color">
+    <h1 class="text-xlarge font-heading margin-md text-primary-color text-left">
+      Impressum
+    </h1>
     
-    <h2 class="text-large font-heading text-primary-color margin-md">Gallery Name</h2>
-    <p class="text-base margin-sm">Variable Gallery</p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">Address</h2>
-    <p class="text-base margin-sm">
-        Variable Gallery GmbH<br>
-        Art Street 123<br>
-        12345 Art City<br>
-        Country
-    </p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">Contact</h2>
-    <p class="text-base margin-sm">
-        Phone: +49 123 456 789<br>
-        Email: support@variablegallery.com
-    </p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">Legal Representatives</h2>
-    <p class="text-base margin-sm">John Doe, Jane Smith</p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">Commercial Register</h2>
-    <p class="text-base margin-sm">
-        Registered in the Commercial Register of Art City<br>
-        Register Number: HRB 123456
-    </p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">VAT ID</h2>
-    <p class="text-base margin-sm">
-        VAT Identification Number according to §27 a of the German Value Added Tax Act: DE123456789
-    </p>
-
-    <h2 class="text-large font-heading text-primary-color margin-md">Responsible for Content</h2>
-    <p class="text-base margin-sm">
-        John Doe<br>
-        Art Street 123, 12345 Art City, Country
-    </p>
-</div>
-
-<style>
+    <div class="impressum-content">
+      <div class="impressum-section">
+        <h2 class="text-large font-heading text-primary-color margin-md">
+          Gallery Name
+        </h2>
+        <p class="text-base margin-sm">variable.gallerie</p>
+      </div>
+  
+      <div class="impressum-section">
+        <h2 class="text-large font-heading text-primary-color margin-md">
+          Address
+        </h2>
+        <p class="text-base margin-sm">
+          The gallery is on a satellite orbiting the moon.<br>
+          "Gallerie für provisorische Kunst und diverse Ausstellungen."
+        </p>
+      </div>
+  
+      <div class="impressum-section">
+        <h2 class="text-large font-heading text-primary-color margin-md">
+          Contact
+        </h2>
+        <p class="text-base margin-sm">
+          Email: <a href="mailto:support@variable.gallery">support@variable.gallery</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    /* Use your existing global CSS styles from app.css */
+  
+    /* Impressum Page Styles */
     .impressum-page {
-        background-color: var(--background-color);
-        color: var(--text-color);
+      max-width: 100%;
+      margin: 0 auto;
+      padding-top: var(--spacing-lg);
+      padding-bottom: var(--spacing-lg);
     }
-</style>
+  
+    .impressum-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-lg);
+    }
+  
+    .impressum-section {
+      flex: 1 1 calc(50% - var(--spacing-lg));
+      box-sizing: border-box;
+    }
+  
+    /* Adjust margin for odd items to align properly */
+    .impressum-section:nth-child(odd) {
+      margin-right: var(--spacing-lg);
+    }
+  
+    /* Remove margin-right for even items */
+    .impressum-section:nth-child(even) {
+      margin-right: 0;
+    }
+  
+    /* Responsive Adjustments */
+    @media (max-width: 767px) {
+      .impressum-content {
+        flex-direction: column;
+      }
+      .impressum-section {
+        flex: 1 1 100%;
+        margin-right: 0;
+      }
+    }
+  
+    .impressum-section h2 {
+      margin-top: 0;
+    }
+  
+    .impressum-section p {
+      margin-top: var(--spacing-sm);
+    }
+  
+    /* Link styling */
+    .impressum-page a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+  
+    .impressum-page a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  
