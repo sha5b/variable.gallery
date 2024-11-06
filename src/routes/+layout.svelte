@@ -47,6 +47,6 @@
 		min-height: 100%;
 	}
 	.nav-filler {
-		height: 44px;
+		height: 60px;
 	}
 </style>

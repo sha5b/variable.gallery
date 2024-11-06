@@ -2,8 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fetchArtists } from '$lib/api';
 	import { cart, isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
-	import { ShoppingCart } from 'svelte-heros';
-	import { ChevronDown } from 'svelte-heros';
+	import { ShoppingCart, ChevronDown } from 'svelte-heros';
 
 	let artists = [];
 	let isCartOpen;
@@ -72,13 +71,13 @@
 		<li><a href="/about" class="text-text-color hover:text-primary-color">about</a></li>
 
 		<!-- Artists Dropdown with Icon -->
-		<li class="relative flex items-center gap-1">
+		<li class="relative flex items-center">
 			<a href="/artist" class="text-text-color hover:text-primary-color">artists</a>
 			<button
-				class="dropdown-button icon text-text-color hover:text-primary-color ml-4"
+				class="dropdown-button text-text-color hover:text-primary-color ml-1"
 				on:click={toggleDropdown}
 			>
-				<ChevronDown class="icon" />
+				<ChevronDown class="icon ml-6" />
 			</button>
 			{#if isDropdownOpen}
 				<ul class="dropdown-menu bg-background absolute mt-2 py-2" style="left: 0;">
@@ -86,7 +85,7 @@
 						<li>
 							<a
 								href={`/artist/${artist.slug}`}
-								class="text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
+								class="dropdown-item text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
 								on:click={() => (isDropdownOpen = false)}
 							>
 								{artist.title.rendered}
@@ -100,7 +99,7 @@
 
 	<!-- Cart and Hamburger Menu -->
 	<div class="flex items-center gap-3">
-		<button class="cart-icon relative text-xl" on:click={handleCartIconClick}>
+		<button class="cart-icon relative text-xl mr-4" on:click={handleCartIconClick}>
 			<ShoppingCart class="cart-icon" />
 			{#if totalItems > 0}
 				<span class="cart-badge">{totalItems}</span>
@@ -118,9 +117,9 @@
 	<!-- Mobile Menu -->
 	{#if isMenuOpen}
 		<div
-			class="menu-container bg-background fixed inset-0 top-[4rem] z-40 flex flex-col overflow-y-auto p-4 md:hidden"
+			class="menu-container bg-background fixed inset-0 top-[60px] z-40 flex flex-col overflow-y-auto p-4 md:hidden"
 		>
-			<ul class="flex flex-col gap-2">
+			<ul class="flex flex-col gap-2 ">
 				<li>
 					<a href="/shop" class="text-text-color hover:text-primary-color" on:click={closeMenu}
 						>shop</a
@@ -137,7 +136,7 @@
 						<li>
 							<a
 								href={`/artist/${artist.slug}`}
-								class="text-text-color dropdown-item hover:bg-primary-color hover:text-background block px-4 py-2"
+								class="dropdown-item text-text-color hover:bg-primary-color hover:text-background block px-4 py-2"
 								on:click={closeMenu}
 							>
 								{artist.title.rendered}
@@ -159,6 +158,9 @@
 		padding-bottom: 1rem;
 		padding-top: 1rem;
 	}
+    li{
+        font-weight: bold;
+    }
 
 	.cart-badge {
 		position: absolute;
@@ -176,10 +178,15 @@
 	}
 
 	.dropdown-menu {
+		position: absolute;
+		top: 100%;
+		left: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
-		padding-left: var(--spacing-md);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		background-color: var(--background-color);
+		z-index: 10;
 	}
 
 	.dropdown-button {
@@ -191,6 +198,7 @@
 	.dropdown-item {
 		padding: var(--spacing-xs) 0;
 		text-align: left;
+		white-space: nowrap;
 	}
 
 	.burger-icon div {
@@ -198,7 +206,7 @@
 	}
 
 	.menu-container {
-		max-height: 100%;
+		max-height: 100vh;
 		overflow-y: auto;
 		padding-top: 1rem;
 	}
