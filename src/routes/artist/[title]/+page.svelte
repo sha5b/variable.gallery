@@ -38,7 +38,7 @@
 	}
 </script>
 
-<div class="artist-container my-8 px-4 md:px-8">
+<div class="artist-container px-page">
 	{#if filteredArtist}
 		<div class="artist-info flex flex-col items-start gap-8 bg-white md:flex-row">
 			{#if filteredArtist.acf?.image}
@@ -68,7 +68,7 @@
 	{/if}
 
 	{#if artistProducts && artistProducts.length > 0}
-		<section class="artist-products mt-8">
+		<section class="artist-products pb-10">
 			<!-- Integrate ArtistProducts here -->
 			<ArtistSlider products={artistProducts} artistName={filteredArtist.title.rendered} />
 		</section>
@@ -87,7 +87,6 @@
 		perspective: 1000px; /* Creates a 3D space for children */
 		transform-style: preserve-3d; /* Allows children to maintain their 3D position */
 		overflow: hidden; /* Hides overflow to contain particles within the container */
-		margin: 0 auto; /* Centers the container horizontally if it's a block-level element */
 	}
 
 	.artist-info {
