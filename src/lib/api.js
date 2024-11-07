@@ -97,6 +97,14 @@ export function fetchWordPressData(endpoint, options = {}) {
 export async function fetchArtists() {
     return await handleFetch(() => fetchWordPressData('artist'), []);
 }
+export async function fetchExhibitions() {
+    return await handleFetch(() => fetchWordPressData('exhibition'), []);
+}
+
+export async function fetchMedia() {
+    return await handleFetch(() => fetchWordPressData('media'), []);
+}
+
 
 export async function fetchProducts() {
     return await handleFetch(() => fetchWooCommerceData('products'), []);

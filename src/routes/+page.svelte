@@ -1,7 +1,7 @@
 <script>
 	// Accept data with products as a prop
 	export let data;
-	const { products, artists } = data;
+	const { products, artists, exhibitions, media } = data;
 
 	// Import components
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
@@ -9,6 +9,7 @@
 	import TagDisplay from '$lib/components/Filter.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
+	import LatestVirtualExhibition from '$lib/components/LatestVirtualExhibition.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -26,13 +27,17 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
-	console.log(artists)
-	console.log(products)
+	console.log(exhibitions)
+	console.log('media',media)
 </script>
 
 <div class="shop-container px-page bg-background">
 	<div class="content w-full max-w-full">
 		<!-- Top Featured Slider -->
+		<div class="row-start-1 w-full">
+			<LatestVirtualExhibition {exhibitions} {media} />
+		</div>
+
 		<div class="row-start-1 w-full">
 			<FeaturedSlider {products} />
 		</div>
