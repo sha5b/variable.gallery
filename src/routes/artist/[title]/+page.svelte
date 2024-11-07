@@ -1,6 +1,6 @@
 <script>
 	import { page } from '$app/stores';
-	import ArtistProducts from '$lib/components/ArtistProducts.svelte'; // Correctly import ArtistProducts
+	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 
 	export let data;
 	let { products, artists } = data;
@@ -70,12 +70,7 @@
 	{#if artistProducts && artistProducts.length > 0}
 		<section class="artist-products mt-8">
 			<!-- Integrate ArtistProducts here -->
-			<ArtistProducts
-				{products}
-				artistName={filteredArtist.title.rendered}
-				artistDescription={filteredArtist.acf?.description || ''}
-				{artistLink}
-			/>
+			<ArtistSlider products={artistProducts} artistName={filteredArtist.title.rendered} />
 		</section>
 	{:else if filteredArtist}
 		<p class="text-secondary mt-8 text-center">
@@ -104,7 +99,6 @@
 
 	.artist-thumbnail img {
 		border-radius: var(--rounded-md);
-
 	}
 
 	.artist-details {
@@ -115,8 +109,7 @@
 
 	.artist-products {
 		margin-top: var(--spacing-lg);
-        height: 50%;
-        width: 100%;
-        
+		height: 50%;
+		width: 100%;
 	}
 </style>

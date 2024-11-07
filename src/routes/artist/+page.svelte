@@ -1,5 +1,5 @@
 <script>
-	import ArtistProducts from '$lib/components/ArtistProducts.svelte';
+	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	export let data;
 
 	let { artists, products } = data;
@@ -28,7 +28,7 @@
 				</div>
 				<!-- Constrain 3D Sphere within a half-height container -->
 				<div class="sphere-container-wrapper flex items-center justify-center overflow-hidden">
-					<ArtistProducts {products} artistName={artist.title.rendered} />
+					<ArtistSlider {products} artistName={artist.title.rendered} />
 				</div>
 			</section>
 		{/each}

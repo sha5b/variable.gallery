@@ -28,11 +28,7 @@
     }
 </script>
 
-<section class='artist-slider-section'>
-    <div class="artist-slider-header pl-page py-page">
-        <h1 class="artist-slider-title text-large font-bold">more from {artistName}</h1>
-    </div>
-
+<section class='artist-slider-section '>
     <div class="artist-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
         <div class="artist-slider gap-lg flex">
             {#each filteredProducts as product}
