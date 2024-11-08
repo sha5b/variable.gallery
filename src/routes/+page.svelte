@@ -10,6 +10,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
 	import LatestVirtualExhibition from '$lib/components/LatestVirtualExhibition.svelte';
+	import VirtualExhibitionGrid from '$lib/components/VirtualExhibitionGrid.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -58,6 +59,7 @@
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
+	<VirtualExhibitionGrid {exhibitions} {media} />
 	<ProductShowcase {products} {artists} />
 	<TagDisplay {products} />
 </div>

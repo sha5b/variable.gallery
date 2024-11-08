@@ -62,7 +62,7 @@
 	}
 </script>
 
-<div class="space-y-lg py-lg mb-[var(--spacing-xl)]">
+<div class="wrapper space-y-lg py-lg mb-[var(--spacing-xl)] ">
 	<div class="flex flex-col md:flex-row items-stretch gap-lg">
 		<aside class="filter-container p-md w-full md:w-1/4 bg-background text-text-color">
 			<h2 class="font-heading font-bold mb-sm text-large">Category</h2>
@@ -143,9 +143,14 @@
 </div>
 
 <style>
+	.wrapper {
+		padding-top: 5rem;
+		padding-bottom: 5rem;
+	}
 	.filter-container {
 		background-color: var(--background-color);
 		color: var(--text-color);
+
 	}
 
 	.pill-button {

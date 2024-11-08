@@ -74,7 +74,7 @@
 		<li class="relative flex items-center">
 			<a href="/artist" class="text-text-color hover:text-primary-color">artists</a>
 			<button
-				class="dropdown-button text-text-color hover:text-primary-color ml-1"
+				class="dropdown-button text-text-color hover:text-primary-color"
 				on:click={toggleDropdown}
 			>
 				<ChevronDown class="icon ml-6" />

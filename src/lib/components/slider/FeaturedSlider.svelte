@@ -58,6 +58,8 @@
         width: 100%;
         overflow: hidden;
         transition: all 0.3s ease;
+        padding-top: 5rem;
+        padding-top: 5rem;
     }
 
     @media (max-width: 767px) {

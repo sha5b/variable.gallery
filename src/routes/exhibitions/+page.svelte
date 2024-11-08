@@ -1,6 +1,7 @@
 <script>
     // Import the component to display exhibitions
     import LatestVirtualExhibition from '$lib/components/LatestVirtualExhibition.svelte';
+	import VirtualExhibitionGrid from '$lib/components/VirtualExhibitionGrid.svelte';
     
     // Load data from the server (exhibitions and media)
     export let data;
@@ -10,6 +11,7 @@
 <div class="exhibitions-page">
     <!-- Pass all exhibitions and media to LatestVirtualExhibition -->
     <LatestVirtualExhibition {exhibitions} {media} />
+    <VirtualExhibitionGrid {exhibitions} {media} />
 </div>
 
 <style>

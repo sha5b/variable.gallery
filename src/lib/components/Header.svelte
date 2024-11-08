@@ -5,7 +5,7 @@
 
 <style>
 	.header-container {
-		height: 20vh;
+		height: 30vh;
 		/* Background color, padding, etc., can be customized here if needed */
 	}
 
@@ -26,7 +26,7 @@
 			font-size: 8rem;
 		}
 		.header-container {
-			height: 20vh;
+			height: 30vh;
 			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}
@@ -36,7 +36,7 @@
 			font-size: 10rem;
 		}
 		.header-container {
-			height: 30vh;
+			height: 40vh;
 			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}
@@ -46,7 +46,7 @@
 			font-size: 14rem;
 		}
 		.header-container {
-			height: 30vh;
+			height: 40vh;
 			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}

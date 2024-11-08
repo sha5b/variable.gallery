@@ -92,6 +92,8 @@
         flex-direction: column;
         gap: var(--spacing-md);
         width: 100%;
+        padding-top: 5rem;
+        padding-bottom: 5rem;
     }
 
     .gallery-section {
