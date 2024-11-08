@@ -41,7 +41,7 @@
 							<p><strong>artist(s):</strong> {exhibition.acf.artist.join(', ')}</p>
 						{/if}
 						<p><strong>date:</strong> {exhibition.date}</p>
-						<p><strong>Location:</strong> {exhibition.acf.location || 'Unknown'}</p>
+						<p><strong>location:</strong> {exhibition.acf.location || 'Unknown'}</p>
 					</div>
 					<h2 class="text-4xl font-bold">{exhibition.title.rendered}</h2>
 				</div>
