@@ -28,7 +28,7 @@
     }
 
     function getImageSrc(src) {
-        return preloadImage(src, '/path/to/fallback.jpg');
+        return preloadImage(src, '/static/placeholder.jpg');
     }
 </script>
 

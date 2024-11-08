@@ -8,7 +8,7 @@
     const { exhibitions, media } = data;
 </script>
 
-<div class="exhibitions-page">
+<div class="exhibitions-page px-page">
     <!-- Pass all exhibitions and media to LatestVirtualExhibition -->
     <LatestVirtualExhibition {exhibitions} {media} />
     <VirtualExhibitionGrid {exhibitions} {media} />
@@ -16,7 +16,6 @@
 
 <style>
     .exhibitions-page {
-        padding: 2rem;
     }
     .page-title {
         font-size: 2.5rem;
