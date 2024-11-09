@@ -3,150 +3,74 @@
     import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes';
     import { createNoise3D } from 'simplex-noise';
     import { onMount, onDestroy } from 'svelte';
-    import { scene, camera, chunkSize, renderDistance, voxelSize } from '../store/faunaStore';
+    import { scene, camera } from '../store/faunaStore';
 
     const noise3D = createNoise3D();
-    let meshes = new Map();
+    let effect;
     let clock = new THREE.Clock();
     let time = 0;
-    let lastUpdate = 0;
-    const UPDATE_INTERVAL = 100;
 
     const material = new THREE.MeshPhongMaterial({
         color: 0x4444ff,
         specular: 0x111111,
-        shininess: 150,
+        shininess: 100,
         side: THREE.DoubleSide
     });
 
-    class TerrainChunk {
-        constructor(chunkX, chunkY, chunkZ) {
-            this.position = { x: chunkX, y: chunkY, z: chunkZ };
-            this.resolution = 48;
-        }
+    onMount(() => {
+        effect = new MarchingCubes(64, material, true, true);
+        effect.position.set(0, 0, 0);
+        effect.scale.set(32, 32, 32);
+        
+        $scene.add(effect);
 
-        createMesh() {
-            const effect = new MarchingCubes(this.resolution, material, true, true);
+        function animate() {
+            requestAnimationFrame(animate);
+            time += clock.getDelta();
             
-            effect.position.set(
-                this.position.x * chunkSize,
-                this.position.y * chunkSize,
-                this.position.z * chunkSize
-            );
+            effect.reset();
 
-            effect.scale.set(chunkSize, chunkSize, chunkSize);
+            // Create a more subtle base layer
+            for (let x = 0.3; x <= 0.7; x += 0.05) {
+                for (let z = 0.3; z <= 0.7; z += 0.05) {
+                    const height = 0.5 + noise3D(x * 3, time * 0.1, z * 3) * 0.05;
+                    effect.addBall(x, height, z, 0.6, 12);
+                }
+            }
 
-            this.updateCubes(effect);
-            return effect;
-        }
-
-        updateCubes(object) {
-            object.reset();
-
-            const numblobs = 80;
-            const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1);
-            const subtract = 12;
-
-            const terrainScale = 0.015;
-            const heightScale = 0.5;
-
-            for (let i = 0; i < numblobs; i++) {
-                const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5;
-                const ballz = Math.cos(i + 1.32 * time * 0.1 * Math.sin((0.92 + 0.53 * i))) * 0.27 + 0.5;
+            // Add smaller, more subtle animated metaballs
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                const radius = 0.15 + Math.sin(time + i) * 0.02;
                 
-                const worldX = (this.position.x + ballx) * chunkSize;
-                const worldZ = (this.position.z + ballz) * chunkSize;
+                const x = Math.cos(angle + time * 0.3) * radius + 0.5;
+                const z = Math.sin(angle + time * 0.3) * radius + 0.5;
+                const y = 0.5 + noise3D(x, time * 0.2, z) * 0.08;
                 
-                const terrainHeight = noise3D(
-                    worldX * terrainScale,
-                    0,
-                    worldZ * terrainScale
-                ) * heightScale + 0.5;
-
-                const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.3 + terrainHeight;
-
-                object.addBall(
-                    ballx,
-                    bally,
-                    ballz,
-                    strength,
-                    subtract
-                );
+                effect.addBall(x, y, z, 0.4, 12);
             }
 
-            object.isolation = 80;
-            object.update();
-        }
-    }
-
-    function updateChunks(cameraPos) {
-        if (!cameraPos) return;
-
-        const currentTime = Date.now();
-        if (currentTime - lastUpdate < UPDATE_INTERVAL) return;
-        lastUpdate = currentTime;
-
-        time += clock.getDelta();
-
-        const chunkX = Math.floor(cameraPos.x / chunkSize);
-        const chunkZ = Math.floor(cameraPos.z / chunkSize);
-
-        const neededChunks = new Set();
-        const reducedRenderDistance = Math.max(2, renderDistance - 1);
-
-        for (let y = -1; y < 1; y++) {
-            for (let x = -reducedRenderDistance; x <= reducedRenderDistance; x++) {
-                for (let z = -reducedRenderDistance; z <= reducedRenderDistance; z++) {
-                    const distance = Math.sqrt(x * x + z * z);
-                    if (distance > reducedRenderDistance) continue;
-
-                    const cx = chunkX + x;
-                    const cy = y;
-                    const cz = chunkZ + z;
-                    const key = `${cx},${cy},${cz}`;
-                    neededChunks.add(key);
-
-                    if (!meshes.has(key)) {
-                        const chunk = new TerrainChunk(cx, cy, cz);
-                        const mesh = chunk.createMesh();
-                        meshes.set(key, mesh);
-                        $scene.add(mesh);
-                    }
-                }
+            // Fewer random movement metaballs
+            for (let i = 0; i < 8; i++) {
+                const x = 0.5 + noise3D(i, time, 0) * 0.15;
+                const z = 0.5 + noise3D(0, time, i) * 0.15;
+                const y = 0.5 + noise3D(i, time * 0.1, i) * 0.05;
+                
+                effect.addBall(x, y, z, 0.3, 12);
             }
+
+            effect.isolation = 40;
+            effect.update();
         }
 
-        if (time % 2 < 0.1) {
-            meshes.forEach((mesh, key) => {
-                if (neededChunks.has(key)) {
-                    const [cx, cy, cz] = key.split(',').map(Number);
-                    const chunk = new TerrainChunk(cx, cy, cz);
-                    chunk.updateCubes(mesh);
-                }
-            });
-        }
-
-        if (time % 2 < 0.1) {
-            for (const [key, mesh] of meshes) {
-                if (!neededChunks.has(key)) {
-                    $scene.remove(mesh);
-                    mesh.geometry?.dispose();
-                    mesh.material?.dispose();
-                    meshes.delete(key);
-                }
-            }
-        }
-    }
-
-    $: if ($camera) {
-        updateChunks($camera.position);
-    }
+        animate();
+    });
 
     onDestroy(() => {
-        meshes.forEach(mesh => {
-            $scene.remove(mesh);
-            mesh.geometry?.dispose();
-            mesh.material?.dispose();
-        });
+        if (effect) {
+            effect.geometry?.dispose();
+            effect.material?.dispose();
+            $scene.remove(effect);
+        }
     });
 </script>
