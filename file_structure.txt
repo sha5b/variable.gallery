@@ -10,7 +10,10 @@ src/
             Filter.svelte
             Gallery.svelte
             Header.svelte
+            LatestArtistExhibition.svelte
+            LatestVirtualExhibition.svelte
             ProductShowcase.svelte
+            VirtualExhibitionGrid.svelte
             base/
                 LegalInfoDropdown.svelte
             modal/
@@ -24,14 +27,23 @@ src/
                 ArtistSlider.svelte
                 CategorySlider.svelte
                 FeaturedSlider.svelte
+        exhbitions/
+            components/
+                stores/
+            fauna/
+                FaunaPage.svelte
+                3d/
+                    Box.Svelte
+                    Camera.svelte
+                    Light.Svelte
+                    Scene.svelte
         stores/
-            cartSliderStore.js
             cartStore.js
-            productStore.js
             userInfoStore.js
         utils/
             sliderHelper.js
     routes/
+        +error.svelte
         +layout.server.js
         +layout.svelte
         +page.server.js
@@ -49,7 +61,19 @@ src/
         checkout/
             +page.svelte
             +server.js
+        exhibitions/
+            +page.server.js
+            +page.svelte
+            [title]/
+                +page.server.js
+                +page.svelte
+        faq/
+            +page.svelte
+        impressum/
+            +page.svelte
         order-confirmation/
+            +page.svelte
+        privacy-policy/
             +page.svelte
         shop/
             +page.server.js
@@ -57,3 +81,5 @@ src/
             [id]/
                 +page.server.js
                 +page.svelte
+        terms-and-conditions/
+            +page.svelte
