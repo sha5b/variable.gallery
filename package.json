@@ -42,6 +42,7 @@
 	},
 	"dependencies": {
 		"@stripe/stripe-js": "^4.9.0",
+		"alea": "^1.0.1",
 		"simplex-noise": "^4.0.3",
 		"svelte-heros": "^7.0.2",
 		"three": "^0.170.0"
