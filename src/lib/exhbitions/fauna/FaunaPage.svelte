@@ -31,11 +31,11 @@
     />
 	<Box position={[0, 15, 0]} color={0x00ff00} />
 	<OrbitCamera
-		target={cameraTarget}
+		target={[0, 0, 0]}
 		mode={cameraMode}
 		speed={cameraSpeed}
-		radius={cameraRadius}
-		height={25}
+		radius={100}
+		height={50}
 		{autoRotate}
 	/>
 </Scene>

@@ -25,170 +25,107 @@
         }
 
         generate() {
+            const scale = 0.03;  // Terrain scale
+            const caveScale = 0.07;  // Cave noise scale
+            const heightScale = 32;  // Terrain height
+
             for (let x = 0; x < chunkSize; x++) {
                 for (let z = 0; z < chunkSize; z++) {
-                    // Generate a height value for this x,z coordinate
-                    const worldX = (this.position.x * chunkSize + x) * voxelSize;
-                    const worldZ = (this.position.z * chunkSize + z) * voxelSize;
-                    
-                    // Base terrain height (normalized to 0-chunkSize)
-                    const baseHeight = Math.floor((noise3D(worldX * 0.02, 0, worldZ * 0.02) + 1) * chunkSize * 0.3);
-                    
-                    // Fill from bottom to height
+                    const worldX = this.position.x * chunkSize + x;
+                    const worldZ = this.position.z * chunkSize + z;
+
+                    // Base terrain height
+                    const height = Math.floor((noise3D(worldX * scale, 0, worldZ * scale) + 1) * heightScale);
+
                     for (let y = 0; y < chunkSize; y++) {
-                        const worldY = (this.position.y * chunkSize + y) * voxelSize;
-                        
-                        // Cave noise
-                        const cave = noise3D(worldX * 0.05, worldY * 0.05, worldZ * 0.05);
-                        const detail = noise3D(worldX * 0.1, worldY * 0.1, worldZ * 0.1) * 0.3;
-                        
-                        // Determine if this should be solid
-                        const heightDifference = y - baseHeight;
-                        const isSolid = heightDifference < 0; // Below surface
-                        const hasCave = cave + detail > 0.6;
-                        
-                        this.setVoxel(x, y, z, isSolid && !hasCave);
+                        const worldY = this.position.y * chunkSize + y;
+
+                        // 3D noise for caves
+                        const cave = noise3D(
+                            worldX * caveScale,
+                            worldY * caveScale,
+                            worldZ * caveScale
+                        );
+
+                        // Combine surface and cave noise
+                        const surface = worldY < height;
+                        const hasCave = cave > 0.3; // Adjust for more/less caves
+
+                        this.setVoxel(x, y, z, surface && !hasCave);
                     }
                 }
             }
         }
 
         createMesh() {
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            const indices = [];
-            let vertexIndex = 0;
-
-            // Generate faces for visible voxels
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshPhongMaterial({ color });
+            const mesh = new THREE.InstancedMesh(geometry, material, chunkSize * chunkSize * chunkSize);
+            
+            let count = 0;
+            const matrix = new THREE.Matrix4();
+            const scale = new THREE.Matrix4().makeScale(1, 1, 1);
+            
             for (let x = 0; x < chunkSize; x++) {
                 for (let y = 0; y < chunkSize; y++) {
                     for (let z = 0; z < chunkSize; z++) {
                         if (this.getVoxel(x, y, z)) {
-                            // Only create faces where there's no adjacent voxel
-                            if (!this.getVoxel(x + 1, y, z)) this.addFace('right', vertices, indices, x, y, z, vertexIndex++);
-                            if (!this.getVoxel(x - 1, y, z)) this.addFace('left', vertices, indices, x, y, z, vertexIndex++);
-                            if (!this.getVoxel(x, y + 1, z)) this.addFace('top', vertices, indices, x, y, z, vertexIndex++);
-                            if (!this.getVoxel(x, y - 1, z)) this.addFace('bottom', vertices, indices, x, y, z, vertexIndex++);
-                            if (!this.getVoxel(x, y, z + 1)) this.addFace('front', vertices, indices, x, y, z, vertexIndex++);
-                            if (!this.getVoxel(x, y, z - 1)) this.addFace('back', vertices, indices, x, y, z, vertexIndex++);
+                            const worldX = (this.position.x * chunkSize + x);
+                            const worldY = (this.position.y * chunkSize + y);
+                            const worldZ = (this.position.z * chunkSize + z);
+                            
+                            matrix.makeTranslation(worldX, worldY, worldZ);
+                            matrix.multiply(scale);
+                            mesh.setMatrixAt(count, matrix);
+                            count++;
                         }
                     }
                 }
             }
 
-            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-            geometry.setIndex(indices);
-            geometry.computeVertexNormals();
-
-            return geometry;
+            mesh.count = count;
+            mesh.instanceMatrix.needsUpdate = true;
+            return mesh;
         }
 
-        addFace(direction, vertices, indices, x, y, z, vertexIndex) {
-            const worldX = (this.position.x * chunkSize + x) * voxelSize;
-            const worldY = (this.position.y * chunkSize + y) * voxelSize;
-            const worldZ = (this.position.z * chunkSize + z) * voxelSize;
-
-            const v = [];
-            switch (direction) {
-                case 'right':
-                    v.push(
-                        worldX + voxelSize, worldY, worldZ,
-                        worldX + voxelSize, worldY, worldZ + voxelSize,
-                        worldX + voxelSize, worldY + voxelSize, worldZ + voxelSize,
-                        worldX + voxelSize, worldY + voxelSize, worldZ
-                    );
-                    break;
-                case 'left':
-                    v.push(
-                        worldX, worldY, worldZ + voxelSize,
-                        worldX, worldY, worldZ,
-                        worldX, worldY + voxelSize, worldZ,
-                        worldX, worldY + voxelSize, worldZ + voxelSize
-                    );
-                    break;
-                case 'top':
-                    v.push(
-                        worldX, worldY + voxelSize, worldZ,
-                        worldX + voxelSize, worldY + voxelSize, worldZ,
-                        worldX + voxelSize, worldY + voxelSize, worldZ + voxelSize,
-                        worldX, worldY + voxelSize, worldZ + voxelSize
-                    );
-                    break;
-                case 'bottom':
-                    v.push(
-                        worldX, worldY, worldZ + voxelSize,
-                        worldX + voxelSize, worldY, worldZ + voxelSize,
-                        worldX + voxelSize, worldY, worldZ,
-                        worldX, worldY, worldZ
-                    );
-                    break;
-                case 'front':
-                    v.push(
-                        worldX, worldY, worldZ + voxelSize,
-                        worldX, worldY + voxelSize, worldZ + voxelSize,
-                        worldX + voxelSize, worldY + voxelSize, worldZ + voxelSize,
-                        worldX + voxelSize, worldY, worldZ + voxelSize
-                    );
-                    break;
-                case 'back':
-                    v.push(
-                        worldX + voxelSize, worldY, worldZ,
-                        worldX + voxelSize, worldY + voxelSize, worldZ,
-                        worldX, worldY + voxelSize, worldZ,
-                        worldX, worldY, worldZ
-                    );
-                    break;
+        addSmoothVoxel(x, y, z, positions, normals, indices, vertexIndex) {
+            // Add smoothed vertices with interpolated positions
+            const smooth = 0.1; // Smoothing factor
+            
+            for (let dx = -1; dx <= 1; dx += 2) {
+                for (let dy = -1; dy <= 1; dy += 2) {
+                    for (let dz = -1; dz <= 1; dz += 2) {
+                        const nx = x + dx * smooth;
+                        const ny = y + dy * smooth;
+                        const nz = z + dz * smooth;
+                        
+                        positions.push(nx, ny, nz);
+                        normals.push(dx, dy, dz);
+                    }
+                }
             }
 
-            vertices.push(...v);
-
-            const baseIndex = vertexIndex * 4;
-            indices.push(
-                baseIndex, baseIndex + 1, baseIndex + 2,
-                baseIndex, baseIndex + 2, baseIndex + 3
-            );
-        }
-    }
-
-    function generateChunkGeometry(chunkX, chunkZ) {
-        // Create chunks vertically
-        const chunks = [];
-        for (let y = 0; y < 2; y++) { // Generate 2 vertical chunks
-            const chunk = new VoxelChunk(chunkX, y, chunkZ);
-            chunk.generate();
-            chunks.push(chunk);
+            // Add indices for smoothed faces
+            this.addSmoothFaces(indices, vertexIndex);
         }
 
-        // Combine geometries
-        const geometry = new THREE.BufferGeometry();
-        const vertices = [];
-        const indices = [];
-        let vertexIndex = 0;
+        addSmoothFaces(indices, vertexIndex) {
+            // Add triangles for each face with smooth interpolation
+            const faces = [
+                [0, 1, 2], [2, 1, 3], // front
+                [4, 6, 5], [6, 7, 5], // back
+                [0, 4, 1], [1, 4, 5], // left
+                [2, 3, 6], [3, 7, 6], // right
+                [0, 2, 4], [2, 6, 4], // top
+                [1, 5, 3], [3, 5, 7]  // bottom
+            ];
 
-        chunks.forEach(chunk => {
-            const chunkGeometry = chunk.createMesh();
-            const chunkVertices = chunkGeometry.attributes.position.array;
-            const chunkIndices = chunkGeometry.index.array;
-
-            // Add vertices
-            for (let i = 0; i < chunkVertices.length; i++) {
-                vertices.push(chunkVertices[i]);
-            }
-
-            // Add indices with offset
-            const indexOffset = vertexIndex;
-            for (let i = 0; i < chunkIndices.length; i++) {
-                indices.push(chunkIndices[i] + indexOffset);
-            }
-
-            vertexIndex += chunkVertices.length / 3;
-        });
-
-        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-        geometry.setIndex(indices);
-        geometry.computeVertexNormals();
-
-        return geometry;
+            faces.forEach(face => {
+                face.forEach(index => {
+                    indices.push(vertexIndex + index);
+                });
+            });
+        }
     }
 
     function updateChunks(cameraPos) {
@@ -197,56 +134,36 @@
         const chunkX = Math.floor(cameraPos.x / (chunkSize * voxelSize));
         const chunkZ = Math.floor(cameraPos.z / (chunkSize * voxelSize));
 
-        // Calculate visible chunks
-        for(let x = -renderDistance; x <= renderDistance; x++) {
-            for(let z = -renderDistance; z <= renderDistance; z++) {
-                const cx = chunkX + x;
-                const cz = chunkZ + z;
-                const key = `${cx},${cz}`;
+        // Generate chunks in vertical layers
+        for (let y = -1; y < 2; y++) {
+            for (let x = -renderDistance; x <= renderDistance; x++) {
+                for (let z = -renderDistance; z <= renderDistance; z++) {
+                    const cx = chunkX + x;
+                    const cy = y;
+                    const cz = chunkZ + z;
+                    const key = `${cx},${cy},${cz}`;
 
-                if(!meshes.has(key)) {
-                    const geometry = generateChunkGeometry(cx, cz);
-                    const material = new THREE.MeshPhongMaterial({
-                        color: color,
-                        wireframe: false,
-                        flatShading: true,
-                        side: THREE.DoubleSide,
-                        shininess: 0
-                    });
-
-                    const mesh = new THREE.Mesh(geometry, material);
-                    meshes.set(key, mesh);
-                    $scene.add(mesh);
+                    if (!meshes.has(key)) {
+                        const chunk = new VoxelChunk(cx, cy, cz);
+                        chunk.generate();
+                        const mesh = chunk.createMesh();
+                        meshes.set(key, mesh);
+                        $scene.add(mesh);
+                    }
                 }
             }
         }
-
-        // Remove far chunks
-        for(const [key, mesh] of meshes) {
-            const [x, z] = key.split(',').map(Number);
-            if(Math.abs(x - chunkX) > renderDistance || Math.abs(z - chunkZ) > renderDistance) {
-                $scene.remove(mesh);
-                mesh.geometry.dispose();
-                mesh.material.dispose();
-                meshes.delete(key);
-            }
-        }
     }
 
-    $: if ($camera && $camera.position) {
+    $: if ($camera) {
         updateChunks($camera.position);
     }
 
-    onMount(() => {
-        updateChunks(new THREE.Vector3(0, 0, 0));
-    });
-
     onDestroy(() => {
-        for(const mesh of meshes.values()) {
+        meshes.forEach(mesh => {
+            $scene.remove(mesh);
             mesh.geometry.dispose();
             mesh.material.dispose();
-            $scene.remove(mesh);
-        }
-        meshes.clear();
+        });
     });
 </script>
