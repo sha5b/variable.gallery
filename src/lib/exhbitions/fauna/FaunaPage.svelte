@@ -9,31 +9,33 @@
 	let cameraMode = 'orbit';
 	let cameraSpeed = 100;
 	let autoRotate = true;
-	let radius = 20;
+	let cameraRadius = 50;
 	let height = 10;
 
 	function handleZoomIn() {
-		radius = Math.max(5, radius - 5);
+		cameraRadius = Math.max(5, cameraRadius - 5);
 	}
 
 	function handleZoomOut() {
-		radius = Math.min(100, radius + 5);
+		cameraRadius = Math.min(100, cameraRadius + 5);
 	}
 </script>
 
 <Scene>
     <Light />
     <Terrain 
-        size={50}
+        size={100}
+        segments={50}
+        height={10}
         color={0x3366ff}
     />
-	<Box position={[0, 0, 0]} color={0x00ff00} />
+	<Box position={[0, 15, 0]} color={0x00ff00} />
 	<OrbitCamera
 		target={cameraTarget}
 		mode={cameraMode}
 		speed={cameraSpeed}
-		{radius}
-		{height}
+		radius={cameraRadius}
+		height={25}
 		{autoRotate}
 	/>
 </Scene>
