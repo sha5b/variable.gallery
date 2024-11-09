@@ -6,7 +6,7 @@
     import { onMount, onDestroy } from 'svelte';
 
     export let position = [0, 0, 0];
-    export let scale = 1;
+    export let scale = 100;
 
     let vegetation;
     let time = 0;

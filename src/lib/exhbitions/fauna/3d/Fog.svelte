@@ -12,7 +12,7 @@
 
     onMount(() => {
         // Create exponential fog for smoother falloff
-        fog = new THREE.FogExp2(color, 0.015);
+        fog = new THREE.FogExp2(color, 0.01);
         $scene.fog = fog;
     });
 

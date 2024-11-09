@@ -8,13 +8,14 @@ export const camera = writable(null);
 export const terrainConfig = writable({
     // Chunk settings
     chunkSize: 32,
-    renderDistance: 2,
+    renderDistance: 4,
 
     // Metaball settings
     gridSize: 32,
-    metaballRadius: 0.1,
-    metaballStrength: 8,
-    isolation: 1.5,
+    metaballRadius: 0.2,
+    metaballStrength: 20,
+    isolation: 5.0,
+    noiseScale: 0.05,
 
     // Visual settings
     color: 0xffffff,
