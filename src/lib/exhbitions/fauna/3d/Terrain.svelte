@@ -3,62 +3,150 @@
     import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes';
     import { createNoise3D } from 'simplex-noise';
     import { onMount, onDestroy } from 'svelte';
-    import { scene, camera, terrainConfig } from '../store/faunaStore';
+    import { scene, terrainConfig } from '../store/faunaStore';
 
+    export let target = [0, 0, 0];
+    
     const noise3D = createNoise3D();
-    let effect;
-    let clock = new THREE.Clock();
-    let time = 0;
+    let chunks = new Map();
+    let lastChunkX = null;
+    let lastChunkZ = null;
+    let config;
+
+    terrainConfig.subscribe(value => {
+        config = value;
+        if (chunks.size > 0) {
+            regenerateChunks();
+        }
+    });
 
     const material = new THREE.MeshPhongMaterial({
-        color: 0x4444ff,
+        color: 0x3366ff,
         specular: 0x111111,
         shininess: 100,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide  // Changed to DoubleSide for cave interiors
     });
 
-    onMount(() => {
-        effect = new MarchingCubes(48, material, true, true);
-        effect.position.set(-16, -16, -16);
-        effect.scale.set(32, 32, 32);
+    function createChunk(chunkX, chunkZ) {
+        const key = `${chunkX},${chunkZ}`;
         
-        $scene.add(effect);
+        if (chunks.has(key)) {
+            return chunks.get(key);
+        }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            time += clock.getDelta() * 0.5;
-            
-            effect.reset();
+        const effect = new MarchingCubes(32, material, true, false);
+        effect.position.set(
+            chunkX * config.chunkSize,
+            0,
+            chunkZ * config.chunkSize
+        );
+        effect.scale.set(config.chunkSize, config.chunkSize, config.chunkSize);
 
-            for (let x = 0; x < 8; x++) {
-                for (let z = 0; z < 8; z++) {
-                    const px = x / 8 + 0.06;
-                    const pz = z / 8 + 0.06;
+        effect.reset();
+
+        // Create a 3D grid of metaballs
+        for (let x = 0; x <= config.gridSize; x++) {
+            for (let y = 0; y <= config.gridSize; y++) {
+                for (let z = 0; z <= config.gridSize; z++) {
+                    const localX = x / config.gridSize;
+                    const localY = y / config.gridSize;
+                    const localZ = z / config.gridSize;
                     
-                    const height = 0.5 + noise3D(px * 4, time * 0.2, pz * 4) * 0.1;
+                    const worldX = (chunkX * config.chunkSize) + (x * (config.chunkSize/config.gridSize));
+                    const worldY = y * (config.chunkSize/config.gridSize);
+                    const worldZ = (chunkZ * config.chunkSize) + (z * (config.chunkSize/config.gridSize));
                     
-                    effect.addBall(
-                        px, 
-                        height, 
-                        pz, 
-                        0.2,
-                        12
+                    // Generate 3D noise value
+                    const noiseValue = noise3D(
+                        worldX * config.noiseScale,
+                        worldY * config.noiseScale,
+                        worldZ * config.noiseScale
                     );
+
+                    // Only place metaball if noise value is above threshold
+                    if (noiseValue > 0.1) {
+                        effect.addBall(
+                            localX,
+                            localY,
+                            localZ,
+                            config.metaballRadius,
+                            config.metaballStrength
+                        );
+                    }
                 }
             }
-
-            effect.isolation = 30;
-            effect.update();
         }
 
-        animate();
-    });
+        effect.isolation = config.isolation;
+        effect.update();
+        $scene.add(effect);
+        chunks.set(key, effect);
+        return effect;
+    }
+
+    function regenerateChunks() {
+        // Clean up existing chunks
+        chunks.forEach(chunk => {
+            $scene.remove(chunk);
+            chunk.geometry?.dispose();
+            chunk.material?.dispose();
+        });
+        chunks.clear();
+
+        // Reset tracking variables
+        lastChunkX = null;
+        lastChunkZ = null;
+
+        // Force update if we have a target
+        if (target) {
+            updateChunks(target[0], target[2]);
+        }
+    }
+
+    function updateChunks(targetX, targetZ) {
+        const centerChunkX = Math.floor(targetX / config.chunkSize);
+        const centerChunkZ = Math.floor(targetZ / config.chunkSize);
+
+        if (centerChunkX === lastChunkX && centerChunkZ === lastChunkZ) return;
+
+        lastChunkX = centerChunkX;
+        lastChunkZ = centerChunkZ;
+
+        const neededChunks = new Set();
+
+        for (let x = -config.renderDistance; x <= config.renderDistance; x++) {
+            for (let z = -config.renderDistance; z <= config.renderDistance; z++) {
+                const chunkX = centerChunkX + x;
+                const chunkZ = centerChunkZ + z;
+                const key = `${chunkX},${chunkZ}`;
+                neededChunks.add(key);
+
+                if (!chunks.has(key)) {
+                    createChunk(chunkX, chunkZ);
+                }
+            }
+        }
+
+        for (const [key, chunk] of chunks) {
+            if (!neededChunks.has(key)) {
+                $scene.remove(chunk);
+                chunk.geometry?.dispose();
+                chunk.material?.dispose();
+                chunks.delete(key);
+            }
+        }
+    }
+
+    $: if (target) {
+        updateChunks(target[0], target[2]);
+    }
 
     onDestroy(() => {
-        if (effect) {
-            effect.geometry?.dispose();
-            effect.material?.dispose();
-            $scene.remove(effect);
-        }
+        chunks.forEach(chunk => {
+            chunk.geometry?.dispose();
+            chunk.material?.dispose();
+            $scene.remove(chunk);
+        });
+        chunks.clear();
     });
 </script>
