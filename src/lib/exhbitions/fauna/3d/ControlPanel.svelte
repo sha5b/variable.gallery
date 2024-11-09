@@ -1,7 +1,6 @@
 <script>
     import { terrainConfig, cameraConfig } from '../store/faunaStore';
 
-    // Local copies for two-way binding
     let terrain;
     let camera;
 
@@ -16,7 +15,6 @@
         cameraConfig.set(camera);
     }
 </script>
-
 
 <div class="controls">
     <div class="camera-controls">
@@ -33,7 +31,55 @@
     </div>
 
     <div class="terrain-controls">
-        <!-- Terrain controls here -->
+        <label>
+            Grid Size
+            <input type="range" 
+                min="8" max="32" step="4" 
+                bind:value={terrain.gridSize} 
+                on:change={updateTerrain}
+            />
+            {terrain.gridSize}
+        </label>
+
+        <label>
+            Metaball Radius
+            <input type="range" 
+                min="0.05" max="0.3" step="0.05" 
+                bind:value={terrain.metaballRadius} 
+                on:change={updateTerrain}
+            />
+            {terrain.metaballRadius.toFixed(2)}
+        </label>
+
+        <label>
+            Metaball Strength
+            <input type="range" 
+                min="1" max="10" step="1" 
+                bind:value={terrain.metaballStrength} 
+                on:change={updateTerrain}
+            />
+            {terrain.metaballStrength}
+        </label>
+
+        <label>
+            Isolation
+            <input type="range" 
+                min="0.5" max="2" step="0.1" 
+                bind:value={terrain.isolation} 
+                on:change={updateTerrain}
+            />
+            {terrain.isolation.toFixed(1)}
+        </label>
+
+        <label>
+            Noise Scale
+            <input type="range" 
+                min="0.01" max="0.2" step="0.01" 
+                bind:value={terrain.noiseScale} 
+                on:change={updateTerrain}
+            />
+            {terrain.noiseScale.toFixed(2)}
+        </label>
     </div>
 </div>
 
@@ -45,13 +91,31 @@
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 20px;
         z-index: 1000;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 8px;
     }
 
-    .camera-controls {
+    .camera-controls, .terrain-controls {
         display: flex;
         gap: 10px;
+    }
+
+    .terrain-controls {
+        flex-direction: column;
+    }
+
+    label {
+        display: flex;
+        flex-direction: column;
+        color: white;
+        font-size: 14px;
+    }
+
+    input[type="range"] {
+        width: 200px;
     }
 
     button {
