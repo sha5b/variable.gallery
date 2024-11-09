@@ -49,23 +49,15 @@
             }
             
             cameraInstance.lookAt(targetVector);
-            camera.set(cameraInstance);
+            camera.set(cameraInstance); // Trigger terrain update
             animationId = requestAnimationFrame(animate);
         }
         
         animate();
     });
 
-    $: if (cameraInstance && radius) {
-        // Update camera position when radius changes
-        if (mode === 'orbit') {
-            cameraInstance.position.x = targetVector.x + radius * Math.cos(angle);
-            cameraInstance.position.z = targetVector.z + radius * Math.sin(angle);
-        } else {
-            cameraInstance.position.x = targetVector.x + radius * Math.sin(angle);
-            cameraInstance.position.z = radius;
-        }
-        cameraInstance.lookAt(targetVector);
+    $: if (cameraInstance && target) {
+        targetVector = new THREE.Vector3(...target);
     }
 
     onDestroy(() => {

@@ -34,23 +34,34 @@
                     const worldX = this.position.x * chunkSize + x;
                     const worldZ = this.position.z * chunkSize + z;
 
-                    // Base terrain height
-                    const height = Math.floor((noise3D(worldX * scale, 0, worldZ * scale) + 1) * heightScale);
+                    // Base terrain height with smoother interpolation
+                    const height = Math.floor(
+                        (noise3D(worldX * scale, 0, worldZ * scale) * 0.6 + 
+                         noise3D(worldX * scale * 2, 0, worldZ * scale * 2) * 0.3 +
+                         noise3D(worldX * scale * 4, 0, worldZ * scale * 4) * 0.1) * heightScale
+                    );
 
                     for (let y = 0; y < chunkSize; y++) {
                         const worldY = this.position.y * chunkSize + y;
 
-                        // 3D noise for caves
+                        // Cave generation with size limitation
                         const cave = noise3D(
-                            worldX * caveScale,
-                            worldY * caveScale,
+                            worldX * caveScale, 
+                            worldY * caveScale, 
                             worldZ * caveScale
                         );
 
-                        // Combine surface and cave noise
-                        const surface = worldY < height;
-                        const hasCave = cave > 0.3; // Adjust for more/less caves
+                        // Check surrounding points to prevent large holes
+                        const surroundingCave = 
+                            noise3D((worldX + 1) * caveScale, worldY * caveScale, worldZ * caveScale) +
+                            noise3D((worldX - 1) * caveScale, worldY * caveScale, worldZ * caveScale) +
+                            noise3D(worldX * caveScale, worldY * caveScale, (worldZ + 1) * caveScale) +
+                            noise3D(worldX * caveScale, worldY * caveScale, (worldZ - 1) * caveScale);
 
+                        // Only create a cave if surrounding points also support it
+                        const hasCave = cave > 0.3 && surroundingCave > 0.8;
+                        const surface = worldY < height;
+                        
                         this.setVoxel(x, y, z, surface && !hasCave);
                     }
                 }

@@ -7,17 +7,21 @@
 
 	let cameraTarget = [0, 0, 0];
 	let cameraMode = 'orbit';
-	let cameraSpeed = 100;
+	let cameraSpeed = 20;
 	let autoRotate = true;
 	let cameraRadius = 50;
 	let height = 10;
 
+	function handleSpeedChange(delta) {
+		cameraSpeed = Math.max(5, Math.min(50, cameraSpeed + delta));
+	}
+
 	function handleZoomIn() {
-		cameraRadius = Math.max(5, cameraRadius - 5);
+		cameraRadius = Math.max(20, cameraRadius - 10);
 	}
 
 	function handleZoomOut() {
-		cameraRadius = Math.min(100, cameraRadius + 5);
+		cameraRadius = Math.min(200, cameraRadius + 10);
 	}
 </script>
 
@@ -41,11 +45,11 @@
 </Scene>
 
 <div class="controls">
-	<button on:click={() => (cameraSpeed += 50)}>Faster</button>
+	<button on:click={() => handleSpeedChange(5)}>Faster</button>
 	<button on:click={() => (autoRotate = !autoRotate)}>
 		{autoRotate ? 'Stop' : 'Start'}
 	</button>
-	<button on:click={() => (cameraSpeed -= 50)}>Slower</button>
+	<button on:click={() => handleSpeedChange(-5)}>Slower</button>
 	<button on:click={() => (cameraMode = cameraMode === 'orbit' ? 'pan' : 'orbit')}>
 		{cameraMode === 'orbit' ? 'Pan' : 'Orbit'}
 	</button>
