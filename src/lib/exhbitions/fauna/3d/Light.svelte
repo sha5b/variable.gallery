@@ -6,17 +6,18 @@
     let lights = [];
 
     onMount(() => {
-        // Ambient light
-        const ambient = new THREE.AmbientLight(0x444444);
+        // Stronger ambient light
+        const ambient = new THREE.AmbientLight(0x666666);
         
-        // Directional lights
-        const light1 = new THREE.DirectionalLight(0xffffff, 1);
-        light1.position.set(1, 1, 1);
+        // Main directional light from top-front
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        mainLight.position.set(1, 2, 1);
         
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
-        light2.position.set(-1, -1, -1);
+        // Fill light from opposite direction
+        const fillLight = new THREE.DirectionalLight(0x4477ff, 0.4);
+        fillLight.position.set(-1, 0.5, -1);
 
-        lights = [ambient, light1, light2];
+        lights = [ambient, mainLight, fillLight];
         lights.forEach(light => $scene.add(light));
     });
 
