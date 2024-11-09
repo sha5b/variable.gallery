@@ -5,9 +5,19 @@
     import { onMount, onDestroy } from 'svelte';
     import { scene, camera, chunkSize, renderDistance, voxelSize } from '../store/faunaStore';
 
-    export let color = 0x3366ff;
     const noise3D = createNoise3D();
     let meshes = new Map();
+    let clock = new THREE.Clock();
+    let time = 0;
+    let lastUpdate = 0;
+    const UPDATE_INTERVAL = 100;
+
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x4444ff,
+        specular: 0x111111,
+        shininess: 150,
+        side: THREE.DoubleSide
+    });
 
     class TerrainChunk {
         constructor(chunkX, chunkY, chunkZ) {
@@ -16,82 +26,85 @@
         }
 
         createMesh() {
-            const effect = new MarchingCubes(this.resolution, new THREE.MeshPhongMaterial({
-                color: color,
-                specular: 0x111111,
-                shininess: 50
-            }), true, true);
-
+            const effect = new MarchingCubes(this.resolution, material, true, true);
+            
             effect.position.set(
-                this.position.x * chunkSize * voxelSize,
-                this.position.y * chunkSize * voxelSize,
-                this.position.z * chunkSize * voxelSize
+                this.position.x * chunkSize,
+                this.position.y * chunkSize,
+                this.position.z * chunkSize
             );
 
-            const scale = chunkSize * voxelSize;
-            effect.scale.set(scale, scale, scale);
+            effect.scale.set(chunkSize, chunkSize, chunkSize);
 
-            // Keep your existing noise parameters as they work well
-            const terrainScale = 0.03;
-            const caveScale = 0.07;
-            const heightScale = 32;
+            this.updateCubes(effect);
+            return effect;
+        }
 
-            effect.reset();
+        updateCubes(object) {
+            object.reset();
 
-            for (let i = 0; i < this.resolution; i++) {
-                for (let j = 0; j < this.resolution; j++) {
-                    for (let k = 0; k < this.resolution; k++) {
-                        const worldX = this.position.x * chunkSize + (i / this.resolution) * chunkSize;
-                        const worldY = this.position.y * chunkSize + (j / this.resolution) * chunkSize;
-                        const worldZ = this.position.z * chunkSize + (k / this.resolution) * chunkSize;
+            const numblobs = 80;
+            const strength = 1.2 / ((Math.sqrt(numblobs) - 1) / 4 + 1);
+            const subtract = 12;
 
-                        // Use your existing terrain generation
-                        const height = (
-                            noise3D(worldX * terrainScale, 0, worldZ * terrainScale) * 0.6 + 
-                            noise3D(worldX * terrainScale * 2, 0, worldZ * terrainScale * 2) * 0.3 +
-                            noise3D(worldX * terrainScale * 4, 0, worldZ * terrainScale * 4) * 0.1
-                        ) * heightScale;
+            const terrainScale = 0.015;
+            const heightScale = 0.5;
 
-                        const cave = noise3D(
-                            worldX * caveScale, 
-                            worldY * caveScale, 
-                            worldZ * caveScale
-                        );
+            for (let i = 0; i < numblobs; i++) {
+                const ballx = Math.sin(i + 1.26 * time * (1.03 + 0.5 * Math.cos(0.21 * i))) * 0.27 + 0.5;
+                const ballz = Math.cos(i + 1.32 * time * 0.1 * Math.sin((0.92 + 0.53 * i))) * 0.27 + 0.5;
+                
+                const worldX = (this.position.x + ballx) * chunkSize;
+                const worldZ = (this.position.z + ballz) * chunkSize;
+                
+                const terrainHeight = noise3D(
+                    worldX * terrainScale,
+                    0,
+                    worldZ * terrainScale
+                ) * heightScale + 0.5;
 
-                        // Convert to metaball field values
-                        const surfaceValue = (height - worldY) * 0.1;
-                        const caveValue = (cave - 0.3) * 3;
+                const bally = Math.abs(Math.cos(i + 1.12 * time * Math.cos(1.22 + 0.1424 * i))) * 0.3 + terrainHeight;
 
-                        // Combine values for final field
-                        const fieldValue = Math.max(surfaceValue, -caveValue);
-
-                        const index = i + j * this.resolution + k * this.resolution * this.resolution;
-                        effect.field[index] = fieldValue;
-                    }
-                }
+                object.addBall(
+                    ballx,
+                    bally,
+                    ballz,
+                    strength,
+                    subtract
+                );
             }
 
-            effect.isolation = 0.0;
-            effect.update();
-
-            return effect;
+            object.isolation = 80;
+            object.update();
         }
     }
 
-    // Keep your existing chunk management code
     function updateChunks(cameraPos) {
         if (!cameraPos) return;
 
-        const chunkX = Math.floor(cameraPos.x / (chunkSize * voxelSize));
-        const chunkZ = Math.floor(cameraPos.z / (chunkSize * voxelSize));
+        const currentTime = Date.now();
+        if (currentTime - lastUpdate < UPDATE_INTERVAL) return;
+        lastUpdate = currentTime;
 
-        for (let y = -1; y < 2; y++) {
-            for (let x = -renderDistance; x <= renderDistance; x++) {
-                for (let z = -renderDistance; z <= renderDistance; z++) {
+        time += clock.getDelta();
+
+        const chunkX = Math.floor(cameraPos.x / chunkSize);
+        const chunkZ = Math.floor(cameraPos.z / chunkSize);
+
+        const neededChunks = new Set();
+        const reducedRenderDistance = Math.max(2, renderDistance - 1);
+
+        for (let y = -1; y < 1; y++) {
+            for (let x = -reducedRenderDistance; x <= reducedRenderDistance; x++) {
+                for (let z = -reducedRenderDistance; z <= reducedRenderDistance; z++) {
+                    const distance = Math.sqrt(x * x + z * z);
+                    if (distance > reducedRenderDistance) continue;
+
                     const cx = chunkX + x;
                     const cy = y;
                     const cz = chunkZ + z;
                     const key = `${cx},${cy},${cz}`;
+                    neededChunks.add(key);
 
                     if (!meshes.has(key)) {
                         const chunk = new TerrainChunk(cx, cy, cz);
@@ -99,6 +112,27 @@
                         meshes.set(key, mesh);
                         $scene.add(mesh);
                     }
+                }
+            }
+        }
+
+        if (time % 2 < 0.1) {
+            meshes.forEach((mesh, key) => {
+                if (neededChunks.has(key)) {
+                    const [cx, cy, cz] = key.split(',').map(Number);
+                    const chunk = new TerrainChunk(cx, cy, cz);
+                    chunk.updateCubes(mesh);
+                }
+            });
+        }
+
+        if (time % 2 < 0.1) {
+            for (const [key, mesh] of meshes) {
+                if (!neededChunks.has(key)) {
+                    $scene.remove(mesh);
+                    mesh.geometry?.dispose();
+                    mesh.material?.dispose();
+                    meshes.delete(key);
                 }
             }
         }
