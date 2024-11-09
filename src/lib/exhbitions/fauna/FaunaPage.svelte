@@ -38,7 +38,7 @@
 		target={[0, 0, 0]}
 		mode={cameraMode}
 		speed={cameraSpeed}
-		radius={100}
+		radius={cameraRadius}
 		height={50}
 		{autoRotate}
 	/>
