@@ -33,7 +33,7 @@
         height={10}
         color={0x3366ff}
     />
-	<Box position={[0, 15, 0]} color={0x00ff00} />
+	<Box position={[0, 0, 0]} color={0x00ff00} />
 	<OrbitCamera
 		target={[0, 0, 0]}
 		mode={cameraMode}

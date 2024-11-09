@@ -3,7 +3,7 @@
     import { MarchingCubes } from 'three/examples/jsm/objects/MarchingCubes';
     import { createNoise3D } from 'simplex-noise';
     import { onMount, onDestroy } from 'svelte';
-    import { scene, camera } from '../store/faunaStore';
+    import { scene, camera, terrainConfig } from '../store/faunaStore';
 
     const noise3D = createNoise3D();
     let effect;
@@ -18,48 +18,36 @@
     });
 
     onMount(() => {
-        effect = new MarchingCubes(64, material, true, true);
-        effect.position.set(0, 0, 0);
+        effect = new MarchingCubes(48, material, true, true);
+        effect.position.set(-16, -16, -16);
         effect.scale.set(32, 32, 32);
         
         $scene.add(effect);
 
         function animate() {
             requestAnimationFrame(animate);
-            time += clock.getDelta();
+            time += clock.getDelta() * 0.5;
             
             effect.reset();
 
-            // Create a more subtle base layer
-            for (let x = 0.3; x <= 0.7; x += 0.05) {
-                for (let z = 0.3; z <= 0.7; z += 0.05) {
-                    const height = 0.5 + noise3D(x * 3, time * 0.1, z * 3) * 0.05;
-                    effect.addBall(x, height, z, 0.6, 12);
+            for (let x = 0; x < 8; x++) {
+                for (let z = 0; z < 8; z++) {
+                    const px = x / 8 + 0.06;
+                    const pz = z / 8 + 0.06;
+                    
+                    const height = 0.5 + noise3D(px * 4, time * 0.2, pz * 4) * 0.1;
+                    
+                    effect.addBall(
+                        px, 
+                        height, 
+                        pz, 
+                        0.2,
+                        12
+                    );
                 }
             }
 
-            // Add smaller, more subtle animated metaballs
-            for (let i = 0; i < 16; i++) {
-                const angle = (i / 16) * Math.PI * 2;
-                const radius = 0.15 + Math.sin(time + i) * 0.02;
-                
-                const x = Math.cos(angle + time * 0.3) * radius + 0.5;
-                const z = Math.sin(angle + time * 0.3) * radius + 0.5;
-                const y = 0.5 + noise3D(x, time * 0.2, z) * 0.08;
-                
-                effect.addBall(x, y, z, 0.4, 12);
-            }
-
-            // Fewer random movement metaballs
-            for (let i = 0; i < 8; i++) {
-                const x = 0.5 + noise3D(i, time, 0) * 0.15;
-                const z = 0.5 + noise3D(0, time, i) * 0.15;
-                const y = 0.5 + noise3D(i, time * 0.1, i) * 0.05;
-                
-                effect.addBall(x, y, z, 0.3, 12);
-            }
-
-            effect.isolation = 40;
+            effect.isolation = 30;
             effect.update();
         }
 
