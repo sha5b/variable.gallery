@@ -1,74 +1,44 @@
 <script>
-    import { terrainConfig, cameraConfig } from '../store/faunaStore';
+    import { terrainConfig } from '../store/faunaStore';
+    
+    let terrain = {
+        isolation: 1.5,
+        noiseScale: 0.02,
+        metaballRadius: 0.1,
+        metaballStrength: 8
+    };
 
-    let terrain;
-    let camera;
-
-    terrainConfig.subscribe(value => terrain = value);
-    cameraConfig.subscribe(value => camera = value);
+    // Subscribe to terrainConfig and update local values
+    terrainConfig.subscribe(config => {
+        terrain = {
+            isolation: config.isolation ?? terrain.isolation,
+            noiseScale: config.noiseScale ?? terrain.noiseScale,
+            metaballRadius: config.metaballRadius ?? terrain.metaballRadius,
+            metaballStrength: config.metaballStrength ?? terrain.metaballStrength
+        };
+    });
 
     function updateTerrain() {
-        terrainConfig.set(terrain);
-    }
-
-    function updateCamera() {
-        cameraConfig.set(camera);
+        terrainConfig.update(config => ({
+            ...config,
+            isolation: terrain.isolation,
+            noiseScale: terrain.noiseScale,
+            metaballRadius: terrain.metaballRadius,
+            metaballStrength: terrain.metaballStrength
+        }));
     }
 </script>
 
 <div class="controls">
-    <div class="camera-controls">
-        <button on:click={() => camera.speed = Math.min(50, camera.speed + 5)}>Faster</button>
-        <button on:click={() => camera.autoRotate = !camera.autoRotate}>
-            {camera.autoRotate ? 'Stop' : 'Start'}
-        </button>
-        <button on:click={() => camera.speed = Math.max(5, camera.speed - 5)}>Slower</button>
-        <button on:click={() => camera.mode = camera.mode === 'orbit' ? 'pan' : 'orbit'}>
-            {camera.mode === 'orbit' ? 'Pan' : 'Orbit'}
-        </button>
-        <button on:click={() => camera.radius = Math.max(20, camera.radius - 10)}>Zoom In</button>
-        <button on:click={() => camera.radius = Math.min(200, camera.radius + 10)}>Zoom Out</button>
-    </div>
-
     <div class="terrain-controls">
-        <label>
-            Grid Size
-            <input type="range" 
-                min="8" max="32" step="4" 
-                bind:value={terrain.gridSize} 
-                on:change={updateTerrain}
-            />
-            {terrain.gridSize}
-        </label>
-
-        <label>
-            Metaball Radius
-            <input type="range" 
-                min="0.05" max="0.3" step="0.05" 
-                bind:value={terrain.metaballRadius} 
-                on:change={updateTerrain}
-            />
-            {terrain.metaballRadius.toFixed(2)}
-        </label>
-
-        <label>
-            Metaball Strength
-            <input type="range" 
-                min="1" max="10" step="1" 
-                bind:value={terrain.metaballStrength} 
-                on:change={updateTerrain}
-            />
-            {terrain.metaballStrength}
-        </label>
-
         <label>
             Isolation
             <input type="range" 
-                min="0.5" max="2" step="0.1" 
+                min="0.1" max="5" step="0.1" 
                 bind:value={terrain.isolation} 
                 on:change={updateTerrain}
             />
-            {terrain.isolation.toFixed(1)}
+            {terrain.isolation?.toFixed(1)}
         </label>
 
         <label>
@@ -78,7 +48,27 @@
                 bind:value={terrain.noiseScale} 
                 on:change={updateTerrain}
             />
-            {terrain.noiseScale.toFixed(2)}
+            {terrain.noiseScale?.toFixed(2)}
+        </label>
+
+        <label>
+            Metaball Radius
+            <input type="range" 
+                min="0.01" max="0.2" step="0.01" 
+                bind:value={terrain.metaballRadius} 
+                on:change={updateTerrain}
+            />
+            {terrain.metaballRadius?.toFixed(2)}
+        </label>
+
+        <label>
+            Metaball Strength
+            <input type="range" 
+                min="1" max="20" step="1" 
+                bind:value={terrain.metaballStrength} 
+                on:change={updateTerrain}
+            />
+            {terrain.metaballStrength?.toFixed(0)}
         </label>
     </div>
 </div>
@@ -88,7 +78,7 @@
         position: fixed;
         bottom: 20px;
         left: 50%;
-        transform: translateX(+50%);
+        transform: translateX(-50%);
         display: flex;
         flex-direction: column;
         gap: 20px;
@@ -98,13 +88,10 @@
         border-radius: 8px;
     }
 
-    .camera-controls, .terrain-controls {
-        display: flex;
-        gap: 10px;
-    }
-
     .terrain-controls {
         flex-direction: column;
+        gap: 10px;
+        display: flex;
     }
 
     label {
@@ -116,18 +103,5 @@
 
     input[type="range"] {
         width: 200px;
-    }
-
-    button {
-        padding: 8px 16px;
-        background: #333;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #444;
     }
 </style> 

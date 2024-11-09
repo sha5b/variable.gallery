@@ -9,6 +9,7 @@
     import Fog from './3d/Fog.svelte';
 
 	let cameraTarget = [0, 0, 0];
+	let terrainComponent;
 
 	function updateCameraTarget(newPosition) {
 		cameraTarget = newPosition;
@@ -19,11 +20,15 @@
     <Skybox />
     <Fog />
     <Light />
-    <Terrain target={cameraTarget} />
+    <Terrain 
+        target={cameraTarget}
+        bind:this={terrainComponent}
+    />
     <Box 
         position={[0, 0, 0]} 
         color={0x00ff00} 
         onPositionChange={updateCameraTarget}
+        terrain={terrainComponent}
     />
     <OrbitCamera target={cameraTarget} />
 </Scene>
