@@ -39,9 +39,15 @@ async function handleFetch(fetchFunction, fallback = {}) {
 
 // Helper function to fetch WooCommerce data
 export function fetchWooCommerceData(endpoint, options = {}) {
+    const params = new URLSearchParams(options.params || {});
+    // Set per_page to 100 (max allowed) if not specified
+    if (!params.has('per_page')) params.set('per_page', '100');
+    
+    const endpointWithParams = `${endpoint}${params.toString() ? '?' + params.toString() : ''}`;
+    
     return handleFetch(() => fetchData(
         import.meta.env.VITE_WP_API_URL + '/wc/v3',
-        endpoint,
+        endpointWithParams,
         {
             ...options,
             consumerKey: import.meta.env.VITE_WOOCOMMERCE_CONSUMER_KEY,
@@ -85,9 +91,15 @@ export async function fetchStripeData(endpoint, options = {}) {
 
 // Helper function to fetch WordPress data
 export function fetchWordPressData(endpoint, options = {}) {
+    const params = new URLSearchParams(options.params || {});
+    // Set per_page to 100 (max allowed) if not specified
+    if (!params.has('per_page')) params.set('per_page', '100');
+    
+    const endpointWithParams = `${endpoint}${params.toString() ? '?' + params.toString() : ''}`;
+    
     return handleFetch(() => fetchData(
         import.meta.env.VITE_WP_API_URL + '/wp/v2',
-        endpoint,
+        endpointWithParams,
         options
     ));
 }

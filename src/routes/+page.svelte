@@ -3,6 +3,29 @@
 	export let data;
 	const { products, artists, exhibitions, media } = data;
 
+	// Log data points with clear formatting
+	console.log('Products:', {
+		count: products.length,
+		sample: products[0],
+		types: [...new Set(products.map(p => p.type))]
+	});
+
+	console.log('Artists:', {
+		count: artists.length,
+		names: artists.map(a => a.name)
+	});
+
+	console.log('Exhibitions:', {
+		count: exhibitions.length,
+		titles: exhibitions.map(e => e.title.rendered),
+		virtualCount: exhibitions.filter(e => e.acf.virtual === true).length
+	});
+
+	console.log('Media:', {
+		count: media.length,
+		types: [...new Set(media.map(m => m.media_type))]
+	});
+
 	// Import components
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
 	import Contact from '$lib/components/Contact.svelte';
@@ -28,8 +51,6 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
-	console.log(exhibitions)
-	console.log('media',media)
 </script>
 
 <div class="shop-container px-page bg-background">
