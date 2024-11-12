@@ -1,6 +1,7 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { fly } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 
 	export let products = [];
 	let selectedTag = null;
@@ -8,6 +9,9 @@
 	let selectedArtist = null;
 	let minPrice = 0;
 	let maxPrice = 1000;
+	let currentPage = 1;
+	let itemsPerPage = 25;
+	let sortBy = 'newest';
 
 	// Initialize price range from products
 	const productPrices = products.map(product => parseFloat(product.price));
@@ -28,7 +32,7 @@
 		)
 	)];
 
-	// Filter products based on selected criteria
+	// Filter and sort products
 	$: filteredProducts = products.filter(product => {
 		const matchesTag = !selectedTag || product.tags.some(tag => tag.name === selectedTag);
 		const matchesCategory = !selectedCategory || product.categories.some(cat => cat.name === selectedCategory);
@@ -38,18 +42,33 @@
 		const matchesPrice = parseFloat(product.price) >= minPrice && parseFloat(product.price) <= maxPrice;
 
 		return matchesTag && matchesCategory && matchesArtist && matchesPrice;
+	}).sort((a, b) => {
+		if (sortBy === 'newest') return new Date(b.date_created) - new Date(a.date_created);
+		if (sortBy === 'price-low') return parseFloat(a.price) - parseFloat(b.price);
+		if (sortBy === 'price-high') return parseFloat(b.price) - parseFloat(a.price);
+		return 0;
 	});
+
+	// Pagination
+	$: totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+	$: paginatedProducts = filteredProducts.slice(
+		(currentPage - 1) * itemsPerPage,
+		currentPage * itemsPerPage
+	);
 
 	function handleTagClick(tag) {
 		selectedTag = selectedTag === tag ? null : tag;
+		currentPage = 1;
 	}
 
 	function handleCategoryClick(category) {
 		selectedCategory = selectedCategory === category ? null : category;
+		currentPage = 1;
 	}
 
 	function handleArtistClick(artist) {
 		selectedArtist = selectedArtist === artist ? null : artist;
+		currentPage = 1;
 	}
 
 	function handlePriceChange(event, type) {
@@ -59,134 +78,331 @@
 		} else if (type === 'max') {
 			maxPrice = Math.max(value, minPrice);
 		}
+		currentPage = 1;
+	}
+
+	function changePage(page) {
+		if (page >= 1 && page <= totalPages) {
+			currentPage = page;
+		}
 	}
 </script>
 
-<div class="wrapper space-y-lg py-lg mb-[var(--spacing-xl)] ">
-	<div class="flex flex-col md:flex-row items-stretch gap-lg">
-		<aside class="filter-container p-md w-full md:w-1/4 bg-background text-text-color">
-			<h2 class="font-heading font-bold mb-sm text-large">Category</h2>
-			<div class="flex flex-wrap gap-sm mb-md">
-				{#each uniqueCategories as category}
-					<span on:click={() => handleCategoryClick(category)} class={`pill-button ${selectedCategory === category ? 'pill-selected' : 'pill-default'}`}>
-						{category}
+<div class="wrapper space-y-lg py-lg mb-[var(--spacing-xl)]">
+	<div class="flex flex-col gap-lg">
+		<!-- Filter Controls -->
+		<div class="filter-controls bg-background p-md rounded-lg">
+			<div class="flex flex-wrap gap-md justify-between items-center mb-md">
+			</div>
+
+			<div class="filter-tags flex flex-wrap gap-sm">
+				{#if selectedCategory}
+					<span class="active-filter" on:click={() => handleCategoryClick(selectedCategory)}>
+						Category: {selectedCategory} ×
 					</span>
-				{/each}
-			</div>
-
-			<h2 class="font-heading font-bold mb-sm text-large">Tag</h2>
-			<div class="flex flex-wrap gap-sm mb-md">
-				{#each uniqueTags as tag}
-					<span on:click={() => handleTagClick(tag)} class={`pill-button ${selectedTag === tag ? 'pill-selected' : 'pill-default'}`}>
-						{tag}
+				{/if}
+				{#if selectedTag}
+					<span class="active-filter" on:click={() => handleTagClick(selectedTag)}>
+						Tag: {selectedTag} ×
 					</span>
-				{/each}
-			</div>
-
-			<h2 class="font-heading font-bold mb-sm text-large">Artist</h2>
-			<div class="flex flex-wrap gap-sm mb-md">
-				{#each uniqueArtists as artist}
-					<span on:click={() => handleArtistClick(artist)} class={`pill-button ${selectedArtist === artist ? 'pill-selected' : 'pill-default'}`}>
-						{artist}
+				{/if}
+				{#if selectedArtist}
+					<span class="active-filter" on:click={() => handleArtistClick(selectedArtist)}>
+						Artist: {selectedArtist} ×
 					</span>
-				{/each}
+				{/if}
 			</div>
+		</div>
 
-			<!-- Price Filter -->
-			<h2 class="font-heading font-bold mb-sm text-large">Price Range</h2>
-			<div class="flex flex-col gap-sm">
-				<label for="min-price">Min Price: €{minPrice}</label>
-				<input
-					id="min-price"
-					type="range"
-					min={initialMinPrice}
-					max={initialMaxPrice}
-					bind:value={minPrice}
-					on:input={(event) => handlePriceChange(event, 'min')}
-				/>
-				<label for="max-price">Max Price: €{maxPrice}</label>
-				<input
-					id="max-price"
-					type="range"
-					min={initialMinPrice}
-					max={initialMaxPrice}
-					bind:value={maxPrice}
-					on:input={(event) => handlePriceChange(event, 'max')}
-				/>
-			</div>
-		</aside>
-
-		<!-- Product Grid -->
-		<div class="product-grid w-full flex flex-wrap gap-md">
-			{#each filteredProducts as product (product.id)}
-				<div
-					in:fly={{ x: 20, duration: 400, opacity: 0 }} 
-					out:fly={{ x: -20, duration: 300, opacity: 0 }}
-					class="featured-card group overflow-hidden bg-background transition-all cursor-pointer min-w-[200px] relative"
-					on:click={() => goto(`/shop/${product.id}`)}
-				>
-					<img src={product.images[0]?.src} alt={product.name} class="product-image w-full h-full object-cover" />
-					<!-- Price Pill in Bottom Left -->
-					<span class="price-pill">€{parseFloat(product.price).toFixed(2)}</span>
-					<div class="overlay absolute inset-0 bg-primary bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex-center text-center p-md">
-						<h3 class="text-white text-large font-bold mb-sm">{product.name}</h3>
-						<div class="flex gap-xs flex-wrap justify-center">
-							{#each product.tags as tag}
-								<span class="tag">{tag.name}</span>
-							{/each}
+		<div class="flex flex-col md:flex-row gap-lg">
+			<!-- Sidebar Filters -->
+			<aside class="filter-sidebar w-full md:w-1/4 bg-background p-md">
+				<!-- Sort and Items Per Page Controls -->
+				<div class="filter-section">
+					<h2 class="font-heading font-bold mb-sm">Display Options</h2>
+					<div class="flex flex-col gap-sm">
+						<div class="flex flex-col gap-xs">
+							<label for="sort-select" class="font-bold">Sort by:</label>
+							<select 
+								id="sort-select"
+								bind:value={sortBy}
+								class="sort-select"
+							>
+								<option value="newest">Newest</option>
+								<option value="price-low">Price: Low to High</option>
+								<option value="price-high">Price: High to Low</option>
+							</select>
+						</div>
+						
+						<div class="flex flex-col gap-xs">
+							<label for="items-select" class="font-bold">Items per page:</label>
+							<select 
+								id="items-select"
+								bind:value={itemsPerPage}
+								class="items-select"
+								on:change={() => currentPage = 1}
+							>
+								<option value={25}>25</option>
+								<option value={50}>50</option>
+								<option value={100}>100</option>
+							</select>
 						</div>
 					</div>
 				</div>
-			{/each}
+
+				<div class="filter-section">
+					<h2 class="font-heading font-bold mb-sm">Category</h2>
+					<div class="flex flex-wrap gap-sm mb-md">
+						{#each uniqueCategories as category}
+							<button 
+								on:click={() => handleCategoryClick(category)}
+								class={`pill-button ${selectedCategory === category ? 'pill-selected' : 'pill-default'}`}
+							>
+								{category}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<div class="filter-section">
+					<h2 class="font-heading font-bold mb-sm">Tags</h2>
+					<div class="flex flex-wrap gap-sm mb-md">
+						{#each uniqueTags as tag}
+							<button 
+								on:click={() => handleTagClick(tag)}
+								class={`pill-button ${selectedTag === tag ? 'pill-selected' : 'pill-default'}`}
+							>
+								{tag}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<div class="filter-section">
+					<h2 class="font-heading font-bold mb-sm">Artist</h2>
+					<div class="flex flex-wrap gap-sm mb-md">
+						{#each uniqueArtists as artist}
+							<button 
+								on:click={() => handleArtistClick(artist)}
+								class={`pill-button ${selectedArtist === artist ? 'pill-selected' : 'pill-default'}`}
+							>
+								{artist}
+							</button>
+						{/each}
+					</div>
+				</div>
+
+				<div class="filter-section">
+					<h2 class="font-heading font-bold mb-sm">Price Range</h2>
+					<div class="flex flex-col gap-sm">
+						<label for="min-price">Min Price: €{minPrice}</label>
+						<input
+							id="min-price"
+							type="range"
+							min={initialMinPrice}
+							max={initialMaxPrice}
+							bind:value={minPrice}
+							on:input={(event) => handlePriceChange(event, 'min')}
+							class="price-slider"
+						/>
+						<label for="max-price">Max Price: €{maxPrice}</label>
+						<input
+							id="max-price"
+							type="range"
+							min={initialMinPrice}
+							max={initialMaxPrice}
+							bind:value={maxPrice}
+							on:input={(event) => handlePriceChange(event, 'max')}
+							class="price-slider"
+						/>
+					</div>
+				</div>
+			</aside>
+
+			<!-- Product Grid -->
+			<div class="product-grid-container flex-1">
+				<div class="product-grid">
+					{#each paginatedProducts as product (product.id)}
+						<div
+							in:fly={{ y: 20, duration: 400, delay: 200, easing: quintOut }}
+							out:fade={{ duration: 200 }}
+							class="product-card"
+							on:click={() => goto(`/shop/${product.id}`)}
+						>
+							<div class="product-image-container">
+								<img 
+									src={product.images[0]?.src} 
+									alt={product.name} 
+									class="product-image"
+								/>
+								<div class="product-overlay">
+									<div class="product-tags absolute top-2 left-2 flex flex-wrap gap-1">
+										{#each product.tags as tag}
+											<span class="tag">{tag.name}</span>
+										{/each}
+									</div>
+									<div class="product-info">
+										<h3 class="product-title">{product.name}</h3>
+										<span class="price-pill">€{parseFloat(product.price).toFixed(2)}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					{/each}
+				</div>
+
+				<!-- Pagination -->
+				{#if totalPages > 1}
+					<div class="pagination">
+						<button 
+							class="pagination-button" 
+							disabled={currentPage === 1}
+							on:click={() => changePage(currentPage - 1)}
+						>
+							Previous
+						</button>
+						
+						{#each Array(totalPages) as _, i}
+							<button 
+								class="pagination-button ${currentPage === i + 1 ? 'active' : ''}"
+								on:click={() => changePage(i + 1)}
+							>
+								{i + 1}
+							</button>
+						{/each}
+						
+						<button 
+							class="pagination-button"
+							disabled={currentPage === totalPages}
+							on:click={() => changePage(currentPage + 1)}
+						>
+							Next
+						</button>
+					</div>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>
 
 <style>
 	.wrapper {
-		padding-top: 5rem;
-		padding-bottom: 5rem;
+		max-width: 100%;
+		margin: 0 auto;
 	}
-	.filter-container {
+
+	.filter-controls {
+		position: sticky;
+		top: 0;
+		z-index: 10;
 		background-color: var(--background-color);
-		color: var(--text-color);
-
 	}
 
-	.pill-button {
-		padding: var(--spacing-xs) var(--spacing-md);
-		border-radius: 9999px;
-		font-size: var(--font-size-small);
-		cursor: pointer;
-		transition: background-color 0.3s ease, color 0.3s ease;
+	.sort-select,
+	.items-select {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		background-color: var(--background-color);
 	}
 
-	.pill-default {
-		background-color: var(--secondary-bg-color);
-		color: var(--primary-color);
-	}
-
-	.pill-selected {
+	.active-filter {
 		background-color: var(--primary-color);
 		color: var(--background-color);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+	}
+
+	.active-filter:hover {
+		background-color: var(--error-color);
+	}
+
+	.filter-sidebar {
+		height: fit-content;
+		position: sticky;
+		top: 80px;
+		background-color: var(--background-color);
+	}
+
+	.filter-section {
+		margin-bottom: var(--spacing-lg);
+	}
+
+	.price-slider {
+		width: 100%;
+		accent-color: var(--primary-color);
 	}
 
 	.product-grid {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+		gap: var(--spacing-md);
 	}
 
-	.featured-card {
-		flex: 1 1 300px;
+	.product-card {
 		position: relative;
-		transition: flex 0.3s ease;
-		max-height: 600px;
+		background: var(--background-color);
+		overflow: hidden;
+		cursor: pointer;
+		transition: transform 0.3s ease;
+	}
+
+	.product-card:hover {
+		transform: translateY(-4px);
+	}
+
+	.product-card:hover .product-info {
+		opacity: 1;
+	}
+
+	.product-image-container {
+		position: relative;
+		padding-top: 100%;
+	}
+
+	.product-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.product-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: var(--spacing-sm);
+	}
+
+	.product-info {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		padding: var(--spacing-sm);
+		background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+	}
+
+	.product-title {
+		color: var(--background-color);
+		font-size: var(--font-size-base);
+		font-weight: bold;
+		margin: 0;
 	}
 
 	.price-pill {
-		position: absolute;
-		bottom: var(--spacing-sm);
-		left: var(--spacing-sm);
 		background-color: var(--primary-color);
 		color: var(--background-color);
 		padding: var(--spacing-xs) var(--spacing-md);
@@ -195,12 +411,73 @@
 		font-weight: bold;
 	}
 
-	.overlay {
-		background-color: rgba(0, 0, 0, 0.5);
+	.pagination {
 		display: flex;
 		justify-content: center;
-		align-items: center;
-		flex-direction: column;
-		transition: opacity 0.3s ease;
+		gap: var(--spacing-xs);
+		margin-top: var(--spacing-lg);
+		padding: var(--spacing-md);
+	}
+
+	.pagination-button {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		background-color: var(--background-color);
+		color: var(--primary-color);
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	.pagination-button:hover:not(:disabled) {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+	}
+
+	.pagination-button.active {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+	}
+
+	.pagination-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	@media (max-width: 768px) {
+		.filter-sidebar {
+			position: relative;
+			top: 0;
+			width: 100%;
+		}
+
+		.product-grid {
+			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+		}
+
+		.pagination {
+			flex-wrap: wrap;
+		}
+	}
+
+	.pill-button {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: 9999px;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-size: var(--font-size-small);
+	}
+
+	.pill-default {
+		background-color: var(--background-color);
+		color: var(--primary-color);
+	}
+
+	.pill-selected {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+	}
+
+	.pill-button:hover {
+		background-color: var(--primary-color);
+		color: var(--background-color);
 	}
 </style>

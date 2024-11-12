@@ -8,7 +8,9 @@
     $: filteredProducts = products.filter(product =>
         product.attributes.some(attr => attr.name.toLowerCase() === 'artist' && attr.options.includes(artistName))
     );
-
+    console.log('Filtered Products:', filteredProducts);
+    console.log('Artist Name:', artistName);
+    console.log('Products:', products);
     let slider;
     let scrollState = {
         scrollTarget: 0,

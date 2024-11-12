@@ -80,7 +80,6 @@
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
-	<VirtualExhibitionGrid {exhibitions} {media} />
 	<ProductShowcase {products} {artists} />
 	<TagDisplay {products} />
 </div>
