@@ -49,7 +49,7 @@
     }
 </script>
 
-<div class="product-container px-page gap-md flex w-full flex-col items-stretch md:flex-row">
+<div class="product-container gap-md flex w-full flex-col items-stretch md:flex-row">
     <!-- Product Details Section with 1/3 width -->
     <div class="product-details space-y-md bg-background p-lg flex-col md:w-1/3">
         <h1 class="product-title text-xlarge text-primary font-bold">{latestProduct.name}</h1>
@@ -140,7 +140,7 @@
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-    <div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row px-page pt-12">
+    <div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row pt-12">
         <div class="flex flex-col items-start md:w-1/2">
             <div class="artist-details space-y-md mt-4 md:mt-0">
                 <h3 class="text-large text-primary font-bold">about the artist</h3>

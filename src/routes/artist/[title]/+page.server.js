@@ -1,11 +1,11 @@
-import { fetchArtists, fetchProducts } from '$lib/api';
+import { fetchArtists, fetchProducts, fetchExhibitions } from '$lib/api';
 
 export async function load() {
-    // Fetch artists and products concurrently
-    const [artists, products] = await Promise.all([
+    const [artists, products, exhibitions] = await Promise.all([
         fetchArtists(),
-        fetchProducts()
+        fetchProducts(),
+        fetchExhibitions()
     ]);
 
-    return { artists, products };
+    return { artists, products, exhibitions };
 }

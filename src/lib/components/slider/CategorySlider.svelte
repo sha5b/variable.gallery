@@ -32,7 +32,7 @@
     }
 </script>
 
-<section class='px-page mt-4'>
+<section class='mt-4'>
     <div class="category-header pl-page py-page">
         <h1 class="category-title text-large font-bold">{category}</h1>
     </div>

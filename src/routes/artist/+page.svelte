@@ -24,7 +24,7 @@
             {#if getLatestVirtualExhibitionForArtist(artist.id) !== undefined}
                 <section class="artist-section space-y-md bg-background p-md flex flex-col justify-between rounded-lg">
                     <div class="artist-info text-text-color space-y-sm">
-                        <a href={`/artist/${artist.slug}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`/artist/${artist.slug}`}>
                             <h2 class="text-large font-heading text-text-color font-bold">
                                 {artist.title.rendered}
                             </h2>

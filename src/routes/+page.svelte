@@ -15,11 +15,7 @@
 		names: artists.map(a => a.name)
 	});
 
-	console.log('Exhibitions:', {
-		count: exhibitions.length,
-		titles: exhibitions.map(e => e.title.rendered),
-		virtualCount: exhibitions.filter(e => e.acf.virtual === true).length
-	});
+	console.log('Exhibitions:', exhibitions);
 
 	console.log('Media:', {
 		count: media.length,
