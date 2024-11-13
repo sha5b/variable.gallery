@@ -32,9 +32,9 @@
     }
 </script>
 
-<section class='mt-4'>
+<section class='mt-12 '>
     <div class="category-header pl-page py-page">
-        <h1 class="category-title text-large font-bold">{category}</h1>
+        <h1 class="category-title text-6xl font-bold">{category}</h1>
     </div>
 
     <div class="category-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
@@ -80,7 +80,7 @@
 
     .category-card {
         flex: 0 0 300px;
-        height: 300px;
+        height: 750px;
         position: relative;
         overflow: hidden;
         transition: flex 0.9s ease;
