@@ -95,11 +95,11 @@
 				</ul>
 			{/if}
 		</li>
-        <li>
+        <!-- <li>
             <a href="/exhibitions" class="text-text-color hover:text-primary-color" on:click={closeMenu}
                 >exhibitions</a
             >
-        </li>
+        </li> -->
 
 	</ul>
 
@@ -150,11 +150,11 @@
 						</li>
 					{/each}
 				</ul>
-                <li>
+                <!-- <li>
 					<a href="/exhibitions" class="text-text-color hover:text-primary-color" on:click={closeMenu}
 						>exhibitions</a
 					>
-				</li>
+				</li> -->
 			</ul>
 		</div>
 	{/if}
