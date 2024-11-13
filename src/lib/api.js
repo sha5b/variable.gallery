@@ -1,3 +1,32 @@
+import { browser } from '$app/environment';
+
+// Cache storage
+const cache = {
+    data: new Map(),
+    timestamp: new Map()
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+async function fetchWithCache(cacheKey, fetchFunction) {
+    // Check if we have cached data and it's still valid
+    const cachedData = cache.data.get(cacheKey);
+    const cachedTime = cache.timestamp.get(cacheKey);
+    
+    if (cachedData && cachedTime && (Date.now() - cachedTime < CACHE_DURATION)) {
+        return cachedData;
+    }
+
+    // Fetch fresh data
+    const data = await fetchFunction();
+    
+    // Update cache
+    cache.data.set(cacheKey, data);
+    cache.timestamp.set(cacheKey, Date.now());
+    
+    return data;
+}
+
 // Centralized fetch function with authorization options and error handling
 async function fetchData(baseURL, endpoint, options = {}, authType = null) {
     const url = `${baseURL}/${endpoint}`;
@@ -106,9 +135,11 @@ export function fetchWordPressData(endpoint, options = {}) {
 
 // Additional utility functions for specific data fetching
 
-export async function fetchArtists() {
-    return await handleFetch(() => fetchWordPressData('artist'), []);
+export async function fetchArtists(params = {}) {
+    const cacheKey = `artists-${JSON.stringify(params)}`;
+    return await fetchWithCache(cacheKey, () => fetchWordPressData('artist', { params }));
 }
+
 export async function fetchExhibitions() {
     return await handleFetch(() => fetchWordPressData('exhibition'), []);
 }
@@ -117,9 +148,9 @@ export async function fetchMedia() {
     return await handleFetch(() => fetchWordPressData('media'), []);
 }
 
-
-export async function fetchProducts() {
-    return await handleFetch(() => fetchWooCommerceData('products'), []);
+export async function fetchProducts(params = {}) {
+    const cacheKey = `products-${JSON.stringify(params)}`;
+    return await fetchWithCache(cacheKey, () => fetchWooCommerceData('products', { params }));
 }
 
 export async function fetchProductWithVariations(productId) {
@@ -131,4 +162,27 @@ export async function fetchProductWithVariations(productId) {
 export async function createPaymentIntent(amount, currency) {
     const body = JSON.stringify({ amount, currency });
     return await handleFetch(() => fetchStripeData('payment_intents', { method: 'POST', body }), {});
+}
+
+// Add new optimized fetch functions for partial data
+export async function fetchProductPreview(productId) {
+    const cacheKey = `product-preview-${productId}`;
+    return await fetchWithCache(cacheKey, () => 
+        fetchWooCommerceData(`products/${productId}`, {
+            params: {
+                _fields: 'id,name,price,images,categories'
+            }
+        })
+    );
+}
+
+export async function fetchArtistPreview(artistId) {
+    const cacheKey = `artist-preview-${artistId}`;
+    return await fetchWithCache(cacheKey, () => 
+        fetchWordPressData(`artist/${artistId}`, {
+            params: {
+                _fields: 'id,title,acf.image'
+            }
+        })
+    );
 }
