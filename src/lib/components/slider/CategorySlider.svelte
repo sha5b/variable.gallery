@@ -28,7 +28,7 @@
     }
 
     function getImageSrc(src) {
-        return preloadImage(src, '/static/placeholder.jpg');
+        return preloadImage(src, '/placeholder.jpg');
     }
 </script>
 
