@@ -25,17 +25,17 @@
                 <section class="artist-section space-y-md bg-background p-md flex flex-col justify-between rounded-lg">
                     <div class="artist-info text-text-color space-y-sm">
                         <a href={`/artist/${artist.slug}`}>
-                            <h2 class="text-large font-heading text-text-color font-bold">
+                            <h2 class="text-6xl font-heading text-text-color font-bold">
                                 {artist.title.rendered}
                             </h2>
                         </a>
                     </div>
 
                     <!-- Pass the latest virtual exhibition for each artist to the component -->
-                    <LatestArtistExhibition
+                    <!-- <LatestArtistExhibition
                         exhibition={getLatestVirtualExhibitionForArtist(artist.id)}
                         media={media}
-                    />
+                    /> -->
 
                     <div class="sphere-container-wrapper flex items-center justify-center overflow-hidden">
                         <ArtistSlider {products} artistName={artist.title.rendered} />
@@ -48,7 +48,7 @@
 
 <style>
     .sphere-container-wrapper {
-        height: 50vh;
+
     }
     .artist-page {
         height: 100%;

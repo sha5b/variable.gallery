@@ -32,7 +32,7 @@
     <div class="grid grid-cols-1 gap-md md:grid-cols-2 mb-8">
       {#each Object.keys(productsByCategory) as categoryName}
         <div class="category-container w-full transition-default">
-          <h2 class="text-xl font-semibold my-sm text-primary">
+          <h2 class="text-6xl font-semibold my-sm text-primary">
             {categoryName}
           </h2>
           
