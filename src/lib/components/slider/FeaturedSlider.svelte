@@ -125,4 +125,27 @@
         font-size: 0.75rem;
         font-weight: 600;
     }
+
+    .exhibition-card {
+        @apply bg-white p-4 rounded-lg border border-gray-200;
+        transition: transform 0.2s ease;
+    }
+
+    .exhibition-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .virtual-badge {
+        @apply inline-block mt-3 px-2 py-1 text-xs font-medium rounded-full;
+        background-color: var(--primary-color);
+        color: var(--background-color);
+    }
+
+    /* Make the artist info sticky on desktop */
+    @media (min-width: 1024px) {
+        .artist-info {
+            position: sticky;
+            top: 2rem;
+        }
+    }
 </style>

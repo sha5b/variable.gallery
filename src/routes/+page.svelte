@@ -28,8 +28,6 @@
 	import TagDisplay from '$lib/components/Filter.svelte';
 	import Header from '$lib/components/Header.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
-	import LatestVirtualExhibition from '$lib/components/LatestVirtualExhibition.svelte';
-	import VirtualExhibitionGrid from '$lib/components/VirtualExhibitionGrid.svelte';
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -52,10 +50,6 @@
 <div class="shop-container px-page bg-background">
 	<div class="content w-full max-w-full">
 		<!-- Top Featured Slider -->
-		<div class="row-start-1 w-full">
-			<LatestVirtualExhibition {exhibitions} {media} />
-		</div>
-
 		<div class="row-start-1 w-full">
 			<FeaturedSlider {products} />
 		</div>
