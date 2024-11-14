@@ -175,6 +175,8 @@
 <style>
 	.product-container {
 		display: flex;
+		margin-top: 7.5rem;
+
 		width: 100%;
 		overflow: hidden;
 		padding-top: var(--spacing-lg);

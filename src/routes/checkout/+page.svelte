@@ -5,47 +5,19 @@
 	import { cart } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
 	import { fetchWooCommerceData } from '$lib/api';
-	import { goto } from '$app/navigation';
 
-	export let data
-	const { products } = data
-	
 	let stripe, elements, cardElement, paymentRequest, prButton;
-	let amount;
-	let shippingCost = 1000; // 10.00 in cents
+	let amount = 1000; // Example amount in cents
 	let currency = 'usd';
 	let paymentSuccess = false;
 	let paymentError = '';
 	let cartItems = [];
 	let validationErrors = {};
-	let selectedCountry = '';
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 		elements = stripe.elements();
 		cartItems = get(cart);
-
-		// Log initial cart and user data
-		console.log('Cart Items:', {
-			items: cartItems,
-			count: cartItems.length,
-			itemDetails: cartItems.map(item => ({
-				id: item.id,
-				title: item.title?.rendered,
-				name: item.name,
-				price: item.price,
-				quantity: item.quantity
-			}))
-		});
-
-		console.log('User Info:', get(userInfo));
-		console.log('Products:', products);
-
-		// Calculate total including shipping
-		amount = Math.round(cartItems.reduce((sum, item) => {
-			const itemPrice = parseFloat(item.price);
-			return sum + (item.quantity * (itemPrice * 100));
-		}, 0) + shippingCost);
 
 		paymentRequest = stripe.paymentRequest({
 			country: 'US',
@@ -66,7 +38,7 @@
 				base: {
 					color: 'var(--text-color)',
 					fontFamily: 'var(--font-primary)',
-					fontSize: '14px',
+					fontSize: '16px',
 					'::placeholder': { color: 'var(--secondary-color)' }
 				}
 			}
@@ -90,67 +62,23 @@
 			paymentSuccess = true;
 			event.complete('success');
 		});
-
-		// Log price calculations
-		const subtotal = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-		console.log('Price Breakdown:', {
-			subtotal: subtotal,
-			shippingCost: shippingCost/100,
-			total: (subtotal + shippingCost/100),
-			rawAmount: amount
-		});
-
-		// Log Stripe setup
-		console.log('Stripe Config:', {
-			currency,
-			totalAmount: amount,
-			paymentRequestAvailable: !!paymentRequest
-		});
-
-		// Log validation state
-		console.log('Validation Errors:', validationErrors);
 	});
 
 	function validateForm() {
 		validationErrors = {};
 		const user = get(userInfo);
 
-		// Email validation (more strict)
-		const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-		if (!user.email || !emailRegex.test(user.email)) {
-			validationErrors.email = 'Please enter a valid email address';
-		}
-
-		// Phone validation (international format)
-		const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-		if (!user.phone || !phoneRegex.test(user.phone.replace(/\s+/g, ''))) {
-			validationErrors.phone = 'Please enter a valid international phone number (e.g., +49123456789)';
-		}
-
-		// Address validation (more comprehensive)
-		if (!user.address || user.address.length < 5) {
-			validationErrors.address = 'Please enter a complete street address (minimum 5 characters)';
-		}
-
-		// Postal code validation (customize for target countries)
-		const postalRegex = /^[0-9]{4,6}$/;
-		if (!user.postalCode || !postalRegex.test(user.postalCode)) {
-			validationErrors.postalCode = 'Please enter a valid postal code (4-6 digits)';
-		}
-
-		// Name validation (more strict)
-		const nameRegex = /^[a-zA-ZäöüßÄÖÜ\s-]{2,}$/;
-		if (!user.firstName || !nameRegex.test(user.firstName)) {
-			validationErrors.firstName = 'Please enter a valid first name (minimum 2 characters, letters only)';
-		}
-		if (!user.lastName || !nameRegex.test(user.lastName)) {
-			validationErrors.lastName = 'Please enter a valid last name (minimum 2 characters, letters only)';
-		}
-
-		// City validation
-		if (!user.city || !nameRegex.test(user.city)) {
-			validationErrors.city = 'Please enter a valid city name';
-		}
+		// Validation logic for each required field
+		if (!user.firstName) validationErrors.firstName = 'First name is required.';
+		if (!user.lastName) validationErrors.lastName = 'Last name is required.';
+		if (!user.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email))
+			validationErrors.email = 'Valid email is required.';
+		if (!user.address) validationErrors.address = 'Address is required.';
+		if (!user.city) validationErrors.city = 'City is required.';
+		if (!user.postalCode || !/^\d{5}(-\d{4})?$/.test(user.postalCode))
+			validationErrors.postalCode = 'Valid postal code is required.';
+		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
+			validationErrors.phone = 'Valid phone number is required.';
 
 		return Object.keys(validationErrors).length === 0;
 	}
@@ -256,34 +184,6 @@
 			return null;
 		}
 	}
-
-	// Helper function to safely format price
-	function formatPrice(price) {
-		const numPrice = parseFloat(price);
-		return !isNaN(numPrice) ? numPrice.toFixed(2) : '0.00';
-	}
-
-	function goToProduct(productId) {
-		goto(`/shop/${productId}`);
-	}
-
-	$: cartItems = get(cart).map(item => {
-		const matchingProduct = products.find(p => p.id === (item.parent_id || item.id));
-		return {
-			...item,
-			displayName: matchingProduct?.name || item.name,
-			price: parseFloat(item.price)
-		};
-	});
-
-	// Debug log to verify the mapping
-	console.log('Cart Items with Product Names:', cartItems.map(item => ({
-		id: item.id,
-		productId: item.id,
-		matchingProductName: products.find(p => p.id === item.id)?.name,
-		finalName: item.displayName,
-		price: item.price
-	})));
 </script>
 
 <div class="checkout-wrapper">
@@ -372,165 +272,102 @@
 			{#if validationErrors.phone}
 				<p class="error">{validationErrors.phone}</p>
 			{/if}
-
-			<div class="form-group">
-				<label for="country">Country</label>
-				<select 
-					id="country" 
-					bind:value={selectedCountry}
-					class="input-field"
-					required
-				>
-					<option value="">Select a country</option>
-					<option value="GB">United Kingdom</option>
-					<option value="DE">Germany</option>
-					<option value="FR">France</option>
-					<option value="US">United States</option>
-					<option value="other">Other</option>
-				</select>
-			</div>
 		</form>
 	</div>
 
 	<!-- Right Column: Cart Summary and Payment -->
-	<div class="order-summary-container bg-background p-lg rounded-lg">
-		<h2 class="text-xlarge font-bold mb-lg text-primary">Order Summary</h2>
-		
-		{#each cartItems as item}
-			<div class="cart-item flex items-start mb-md p-md border-b border-border-color">
-				<!-- Clickable image -->
-				<div class="cursor-pointer" on:click={() => goToProduct(item.parent_id || item.id)}>
-					<img 
-						src={item.images[0]?.src || '/placeholder.jpg'} 
-						alt={item.displayName}
-						class="product-image rounded-sm hover:opacity-80 transition-opacity"
-					/>
+	<div class="order-summary-container">
+		<!-- Cart Summary -->
+		<div class="cart-summary pb-12 pt-8">
+			<h3 class="font-heading text-secondary-color text-lg">Cart Summary</h3>
+			{#each cartItems as item}
+				<div class="cart-item gap-sm flex items-center">
+					<a href={`/shop/${item.id}`} class="product-image-link">
+						<img
+							src={item.images[0]?.src || '/placeholder.jpg'}
+							alt={item.name}
+							class="product-image-large"
+						/>
+					</a>
+					<div class="item-details">
+						<p class="font-heading text-lg">{item.name}</p>
+						<p class="text-secondary-color text-sm">Quantity: {item.quantity}</p>
+						<p class="text-primary-color text-sm">Price: ${(item.price / 1).toFixed(2)}</p>
+					</div>
 				</div>
-				
-				<div class="item-details ml-md">
-					<h3 class="text-base font-semibold text-primary">{item.displayName}</h3>
-					<p class="text-sm text-secondary-color">Quantity: {item.quantity}</p>
-					<p class="text-base font-medium">€{formatPrice(item.price)}</p>
-				</div>
-			</div>
-		{/each}
+			{/each}
+		</div>
 
-		<div class="cost-breakdown bg-lighter p-md rounded-sm mt-lg">
-			<div class="flex justify-between mb-sm">
-				<span class="text-secondary-color">Subtotal</span>
-				<span class="font-medium">€{formatPrice(amount/100 - shippingCost/100)}</span>
-			</div>
-			<div class="flex justify-between mb-sm">
-				<span class="text-secondary-color">Shipping</span>
-				<span class="font-medium">€{formatPrice(shippingCost/100)}</span>
-			</div>
-			<div class="flex justify-between text-lg font-bold mt-md pt-md border-t border-border-color">
-				<span>Total</span>
-				<span>€{formatPrice(amount/100)}</span>
-			</div>
+		<!-- Payment Section -->
+		<div class="payment-section">
+			{#if paymentSuccess}
+				<p class="text-accent-color font-heading text-lg">
+					Payment successful! Thank you for your purchase.
+				</p>
+			{:else}
+				<div id="payment-request-button" class="payment-request-button mb-8"></div>
+				<form on:submit|preventDefault={handlePayment} class="payment-form">
+					<label for="card-element" class="font-heading text-secondary-color block text-base"
+						>Credit or Debit Card</label
+					>
+					<div id="card-element" class="card-element padding-sm"></div>
+					{#if paymentError}
+						<p class="error text-error-color text-sm">{paymentError}</p>
+					{/if}
+					<button type="submit" class="button-primary w-full">Pay Now</button>
+				</form>
+			{/if}
 		</div>
 	</div>
 </div>
 
 <style>
 	.checkout-wrapper {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--spacing-xl);
+		display: flex;
+		gap: var(--spacing-lg);
 		max-width: 1200px;
-		margin: 2rem auto;
-		padding: var(--spacing-lg);
+		margin: auto;
+		padding: var(--page-padding-md);
 	}
-
-	.user-info-container, .order-summary-container {
-		padding: var(--spacing-lg);
+	.user-info-container,
+	.order-summary-container {
+		flex: 1;
 	}
-
-	.input-field {
-		border: 1px solid var(--border-color);
-		padding: var(--spacing-sm);
-		margin-bottom: var(--spacing-md);
+	.user-info-form,
+	.cart-summary,
+	.payment-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-sm);
+	}
+	.input-field,
+	.card-element,
+	.button-primary {
 		width: 100%;
-		background-color: var(--bg-lighter-color);
+		padding: var(--spacing-sm);
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		font-size: var(--font-size-base);
 	}
-
-	.input-field:focus {
-		outline: none;
-		border-color: var(--primary-color);
-	}
-
-	.product-image {
+	.product-image-large {
 		width: 80px;
 		height: 80px;
 		object-fit: cover;
+		border-radius: 4px;
+		margin-right: var(--spacing-sm);
 	}
-
+	.button-primary {
+		background-color: var(--primary-color);
+		color: #fff;
+		border: none;
+		cursor: pointer;
+		padding: var(--spacing-sm) var(--spacing-md);
+		transition: background-color 0.3s ease;
+	}
+	.button-primary:hover {
+		background-color: var(--secondary-color);
+	}
 	.error {
 		color: var(--error-color);
-		font-size: 0.875rem;
-		margin-top: -0.5rem;
-		margin-bottom: var(--spacing-sm);
-	}
-
-	.cost-breakdown {
-		padding: var(--spacing-md);
-	}
-
-	label {
-		display: block;
-		margin-bottom: var(--spacing-xs);
-		color: var(--text-color);
-	}
-
-	@media (max-width: 768px) {
-		.checkout-wrapper {
-			grid-template-columns: 1fr;
-			padding: var(--spacing-md);
-		}
-	}
-
-	.cart-item {
-		padding: 1rem 0;
-		border-bottom: 1px solid var(--border-color);
-	}
-
-	.cost-breakdown {
-		background-color: var(--bg-lighter-color);
-		padding: 1rem;
-		border-radius: 4px;
-	}
-
-	.product-image {
-		width: 60px;
-		height: 60px;
-		object-fit: cover;
-	}
-
-	.item-details {
-		flex: 1;
-	}
-
-	.cost-breakdown {
-		margin-top: 1rem;
-		padding: 1rem 0;
-		border-top: 1px solid var(--border-color);
-	}
-
-	.product-image {
-		width: 48px;
-		height: 48px;
-		object-fit: cover;
-	}
-
-	.item-details {
-		flex: 1;
-	}
-
-	.order-summary-container {
-		box-shadow: var(--shadow-sm);
-	}
-
-	.cart-item:hover {
-		background-color: var(--bg-lighter-color);
 	}
 </style>

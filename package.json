@@ -45,7 +45,6 @@
 		"alea": "^1.0.1",
 		"simplex-noise": "^4.0.3",
 		"svelte-heros": "^7.0.2",
-		"svelte-meta-tags": "^4.0.4",
 		"three": "^0.170.0"
 	}
 }

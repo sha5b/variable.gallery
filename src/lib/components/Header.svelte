@@ -1,55 +1,53 @@
-<script>
-	export let minimal = false;
-</script>
-
-<div class="header-wrapper">
-	<div class="header-container">
-		<h2 class="subheadline">gallerie fuer provisorische kunst und diverse austellungen.</h2>
-		<h1 class="headline font-heading">variable.</h1>
-	</div>
+<div class="header-container flex h-full w-full flex-col items-start justify-end p-0">
+	<h2 class="subheadline text-large md:text-xlarge m-0">gallerie fuer provisorische kunst und diverse austellungen.</h2>
+	<h1 class="headline m-0 font-bold leading-none">variable.</h1>
 </div>
 
 <style>
-	.header-wrapper {
-		width: 100%;
-		position: relative;
-		min-height: 40vh;
-		display: flex;
-		align-items: flex-end;
-		margin-bottom: var(--spacing-xl);
-	}
-
 	.header-container {
-		width: 100%;
-		padding: var(--spacing-lg) var(--spacing-page);
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-sm);
+		height: 30vh;
+		/* Background color, padding, etc., can be customized here if needed */
 	}
 
 	.subheadline {
 		font-family: var(--font-primary);
 		color: var(--text-color);
-		font-size: var(--font-size-base);
-		margin: 0;
 	}
 
 	.headline {
-		color: var(--primary-color);
-		font-size: clamp(4rem, 15vw, 14rem);
-		line-height: 0.9;
+		font-family: var(--font-heading);
 		font-weight: 900;
-		margin: 0;
-		padding: 0;
+		color: var(--primary-color);
+		font-size: 6rem; /* Default for mobile */
 	}
 
-	@media (max-width: 767px) {
-		.header-wrapper {
-			min-height: 30vh;
+	@media (min-width: 768px) {
+		.headline {
+			font-size: 8rem;
 		}
-		
 		.header-container {
-			padding: var(--spacing-md) var(--spacing-page-sm);
+			height: 30vh;
+			/* Background color, padding, etc., can be customized here if needed */
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.headline {
+			font-size: 10rem;
+		}
+		.header-container {
+			height: 40vh;
+			/* Background color, padding, etc., can be customized here if needed */
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.headline {
+			font-size: 14rem;
+		}
+		.header-container {
+			height: 40vh;
+			/* Background color, padding, etc., can be customized here if needed */
 		}
 	}
 </style>
