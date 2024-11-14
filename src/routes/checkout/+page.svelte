@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { loadStripe } from '@stripe/stripe-js';
 	import { userInfo } from '$lib/stores/userInfoStore';
-	import { cart } from '$lib/stores/cartStore';
+	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
 	export let data;
 	const {products} = data
@@ -62,6 +62,15 @@
 			paymentSuccess = true;
 			event.complete('success');
 		});
+
+		// Subscribe to cart changes
+		const unsubscribe = cart.subscribe(value => {
+			cartItems = value;
+		});
+
+		return () => {
+			unsubscribe(); // Cleanup subscription on component destroy
+		};
 	});
 
 	function validateForm() {
@@ -133,6 +142,24 @@
 			paymentError =
 				error.message || 'An error occurred during the payment process. Please try again.';
 		}
+	}
+
+	function increaseQuantity(item) {
+		addItem(item);
+		cartItems = get(cart); // Update local cartItems
+	}
+
+	function decreaseQuantity(item) {
+		cart.update((items) => {
+			const existingItem = items.find((i) => i.id === item.id);
+			if (existingItem.quantity > 1) {
+				existingItem.quantity -= 1;
+			} else {
+				return items.filter((i) => i.id !== item.id);
+			}
+			return [...items];
+		});
+		cartItems = get(cart); // Update local cartItems
 	}
 
 </script>
@@ -246,7 +273,7 @@
 		<div class="cart-summary pb-12 pt-8">
 			<h3 class="font-heading text-secondary-color text-lg">Cart Summary</h3>
 			{#each cartItems as item}
-				<div class="cart-item gap-sm flex items-center">
+				<div class="cart-item gap-sm flex items-center p-2 hover:bg-gray-50 rounded-lg">
 					<a href={`/shop/${item.id}`} class="product-image-link">
 						<img
 							src={item.images[0]?.src || '/placeholder.jpg'}
@@ -254,13 +281,37 @@
 							class="product-image-large"
 						/>
 					</a>
-					<div class="item-details">
+					<div class="item-details flex-1">
 						<p class="font-heading text-lg">{item.name}</p>
-						<p class="text-secondary-color text-sm">Quantity: {item.quantity}</p>
-						<p class="text-primary-color text-sm">Price: ${(item.price / 1).toFixed(2)}</p>
+						<div class="flex items-center gap-2 mt-2">
+							<div class="flex items-center border rounded-md">
+								<button 
+									class="px-3 py-1 hover:bg-gray-100"
+									on:click={() => decreaseQuantity(item)}
+								>-</button>
+								<span class="px-3 border-x">{item.quantity}</span>
+								<button 
+									class="px-3 py-1 hover:bg-gray-100"
+									on:click={() => increaseQuantity(item)}
+								>+</button>
+							</div>
+							<p class="text-primary-color text-sm ml-auto">€{(item.price * item.quantity).toFixed(2)}</p>
+							<button 
+								class="text-error-color hover:text-red-700 ml-2"
+								on:click={() => removeItem(item.id)}
+							>
+								✕
+							</button>
+						</div>
 					</div>
 				</div>
 			{/each}
+			<div class="mt-4 pt-4 border-t">
+				<div class="flex justify-between font-bold">
+					<span>Total:</span>
+					<span>€{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+				</div>
+			</div>
 		</div>
 
 		<!-- Payment Section -->
@@ -334,5 +385,11 @@
 	}
 	.error {
 		color: var(--error-color);
+	}
+	.cart-item {
+		transition: background-color 0.2s ease;
+	}
+	button {
+		transition: color 0.2s ease;
 	}
 </style>
