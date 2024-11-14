@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { loadStripe } from '@stripe/stripe-js';
 	import { userInfo } from '$lib/stores/userInfoStore';
-	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
+	import { cart } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
 	export let data;
 	const {products} = data
@@ -14,6 +14,7 @@
 	let paymentError = '';
 	let cartItems = [];
 	let validationErrors = {};
+	const shippingCost = 15.00; // You can adjust this or make it dynamic
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -62,15 +63,6 @@
 			paymentSuccess = true;
 			event.complete('success');
 		});
-
-		// Subscribe to cart changes
-		const unsubscribe = cart.subscribe(value => {
-			cartItems = value;
-		});
-
-		return () => {
-			unsubscribe(); // Cleanup subscription on component destroy
-		};
 	});
 
 	function validateForm() {
@@ -144,29 +136,15 @@
 		}
 	}
 
-	function increaseQuantity(item) {
-		addItem(item);
-		cartItems = get(cart); // Update local cartItems
-	}
-
-	function decreaseQuantity(item) {
-		cart.update((items) => {
-			const existingItem = items.find((i) => i.id === item.id);
-			if (existingItem.quantity > 1) {
-				existingItem.quantity -= 1;
-			} else {
-				return items.filter((i) => i.id !== item.id);
-			}
-			return [...items];
-		});
-		cartItems = get(cart); // Update local cartItems
-	}
+	$: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+	$: total = subtotal + shippingCost;
 
 </script>
 
 <div class="checkout-wrapper">
 	<!-- Left Column: User Information Form -->
-	<div class="user-info-container">
+	<div class="user-info-container bg-background rounded-lg p-lg">
+		<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Shipping Information</h2>
 		<form class="user-info-form">
 			<div class="form-group">
 				<label for="firstName">First Name</label>
@@ -270,10 +248,10 @@
 	<!-- Right Column: Cart Summary and Payment -->
 	<div class="order-summary-container">
 		<!-- Cart Summary -->
-		<div class="cart-summary pb-12 pt-8">
-			<h3 class="font-heading text-secondary-color text-lg">Cart Summary</h3>
+		<div class="cart-summary bg-background rounded-lg p-lg mb-lg">
+			<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Cart Summary</h2>
 			{#each cartItems as item}
-				<div class="cart-item gap-sm flex items-center p-2 hover:bg-gray-50 rounded-lg">
+				<div class="cart-item gap-sm flex items-center">
 					<a href={`/shop/${item.id}`} class="product-image-link">
 						<img
 							src={item.images[0]?.src || '/placeholder.jpg'}
@@ -281,41 +259,34 @@
 							class="product-image-large"
 						/>
 					</a>
-					<div class="item-details flex-1">
+					<div class="item-details">
 						<p class="font-heading text-lg">{item.name}</p>
-						<div class="flex items-center gap-2 mt-2">
-							<div class="flex items-center border rounded-md">
-								<button 
-									class="px-3 py-1 hover:bg-gray-100"
-									on:click={() => decreaseQuantity(item)}
-								>-</button>
-								<span class="px-3 border-x">{item.quantity}</span>
-								<button 
-									class="px-3 py-1 hover:bg-gray-100"
-									on:click={() => increaseQuantity(item)}
-								>+</button>
-							</div>
-							<p class="text-primary-color text-sm ml-auto">€{(item.price * item.quantity).toFixed(2)}</p>
-							<button 
-								class="text-error-color hover:text-red-700 ml-2"
-								on:click={() => removeItem(item.id)}
-							>
-								✕
-							</button>
-						</div>
+						<p class="text-secondary-color text-sm">Quantity: {item.quantity}</p>
+						<p class="text-primary-color text-sm">Price: ${(item.price / 1).toFixed(2)}</p>
 					</div>
 				</div>
 			{/each}
-			<div class="mt-4 pt-4 border-t">
-				<div class="flex justify-between font-bold">
-					<span>Total:</span>
+
+			<!-- Price Breakdown -->
+			<div class="price-breakdown mt-4 pt-4 border-t space-y-2">
+				<div class="flex justify-between text-base">
+					<span class="text-secondary-color">Subtotal</span>
 					<span>€{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+				</div>
+				<div class="flex justify-between text-base">
+					<span class="text-secondary-color">Shipping</span>
+					<span>€15.00</span>
+				</div>
+				<div class="flex justify-between text-large font-bold mt-4 pt-4 border-t">
+					<span>Total</span>
+					<span>€{(cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 15).toFixed(2)}</span>
 				</div>
 			</div>
 		</div>
 
 		<!-- Payment Section -->
-		<div class="payment-section">
+		<div class="payment-section bg-background rounded-lg p-lg">
+			<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Payment Details</h2>
 			{#if paymentSuccess}
 				<p class="text-accent-color font-heading text-lg">
 					Payment successful! Thank you for your purchase.
@@ -385,11 +356,5 @@
 	}
 	.error {
 		color: var(--error-color);
-	}
-	.cart-item {
-		transition: background-color 0.2s ease;
-	}
-	button {
-		transition: color 0.2s ease;
 	}
 </style>
