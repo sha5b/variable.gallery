@@ -4,6 +4,7 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
+	import { fetchWooCommerceData } from '$lib/api';
 	export let data;
 	const {products} = data
 
@@ -14,7 +15,6 @@
 	let paymentError = '';
 	let cartItems = [];
 	let validationErrors = {};
-	const shippingCost = 15.00; // You can adjust this or make it dynamic
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -39,6 +39,7 @@
 			style: {
 				base: {
 					color: 'var(--text-color)',
+					fontFamily: 'var(--font-primary)',
 					fontSize: '16px',
 					'::placeholder': { color: 'var(--secondary-color)' }
 				}
@@ -115,29 +116,83 @@
 			if (confirmation.error) {
 				paymentError = confirmation.error.message;
 			} else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
-				paymentSuccess = true;
-
-				// Step 3: Create WooCommerce Order
+				// Payment successful, now create WooCommerce order
+				console.log('Payment successful, creating WooCommerce order...');
 				const orderId = await createWooCommerceOrder();
-				if (!orderId) throw new Error('Failed to create WooCommerce order.');
+				
+				if (!orderId) {
+					throw new Error('Failed to create WooCommerce order.');
+				}
 
-				// Store orderId in userInfo
+				// Store orderId in userInfo and sessionStorage
 				userInfo.update((info) => {
 					const updatedInfo = { ...info, orderId };
-					sessionStorage.setItem('orderId', orderId); // Save to sessionStorage
+					sessionStorage.setItem('orderId', orderId);
 					return updatedInfo;
 				});
+
+				// Set payment success and clear cart
+				paymentSuccess = true;
+				cart.set([]); // Clear the cart after successful order
+
 				// Redirect to order confirmation page
-				// window.location.href = `/order-confirmation`;
+				window.location.href = `/order-confirmation/${orderId}`;
 			}
 		} catch (error) {
-			paymentError =
-				error.message || 'An error occurred during the payment process. Please try again.';
+			console.error('Payment/Order Creation Error:', error);
+			paymentError = error.message || 'An error occurred during the payment process. Please try again.';
 		}
 	}
 
-	$: subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-	$: total = subtotal + shippingCost;
+	async function createWooCommerceOrder() {
+		try {
+			const user = get(userInfo);
+			const cartData = get(cart).map((item) => ({
+				product_id: item.id,
+				quantity: item.quantity
+			}));
+
+			const orderData = {
+				payment_method: 'stripe',
+				payment_method_title: 'Stripe',
+				set_paid: true,
+				billing: {
+					first_name: user.firstName,
+					last_name: user.lastName,
+					address_1: user.address,
+					city: user.city,
+					postcode: user.postalCode,
+					country: 'US',
+					email: user.email,
+					phone: user.phone
+				},
+				shipping: {
+					first_name: user.firstName,
+					last_name: user.lastName,
+					address_1: user.address,
+					city: user.city,
+					postcode: user.postalCode,
+					country: 'US'
+				},
+				line_items: cartData,
+				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }]
+			};
+
+			const result = await fetchWooCommerceData('orders', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(orderData)
+			});
+
+			if (!result.id) throw new Error('Order creation failed in WooCommerce');
+			console.log('Order created in WooCommerce:', result);
+			return result.id; // Return orderId for confirmation page
+		} catch (error) {
+			console.error('WooCommerce Order Creation Error:', error);
+			paymentError = 'Failed to create order in WooCommerce. Please contact support.';
+			return null;
+		}
+	}
 
 </script>
 
