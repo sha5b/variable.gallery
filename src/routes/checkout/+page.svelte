@@ -199,7 +199,7 @@
 <div class="checkout-wrapper">
 	<!-- Left Column: User Information Form -->
 	<div class="user-info-container bg-background rounded-lg p-lg">
-		<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Shipping Information</h2>
+		<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Shipping Information</h2>
 		<form class="user-info-form">
 			<div class="form-group">
 				<label for="firstName">First Name</label>
@@ -304,7 +304,7 @@
 	<div class="order-summary-container">
 		<!-- Cart Summary -->
 		<div class="cart-summary bg-background rounded-lg p-lg mb-lg">
-			<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Cart Summary</h2>
+			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Cart Summary</h2>
 			{#each cartItems as item}
 				<div class="cart-item gap-sm flex items-center">
 					<a href={`/shop/${item.id}`} class="product-image-link">
@@ -323,7 +323,7 @@
 			{/each}
 
 			<!-- Price Breakdown -->
-			<div class="price-breakdown mt-4 pt-4 border-t space-y-2">
+			<div class="price-breakdown mt-4 pt-4  space-y-2">
 				<div class="flex justify-between text-base">
 					<span class="text-secondary-color">Subtotal</span>
 					<span>€{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
@@ -332,7 +332,7 @@
 					<span class="text-secondary-color">Shipping</span>
 					<span>€15.00</span>
 				</div>
-				<div class="flex justify-between text-large font-bold mt-4 pt-4 border-t">
+				<div class="flex justify-between text-large font-bold mt-4 pt-4 ">
 					<span>Total</span>
 					<span>€{(cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 15).toFixed(2)}</span>
 				</div>
@@ -341,7 +341,7 @@
 
 		<!-- Payment Section -->
 		<div class="payment-section bg-background rounded-lg p-lg">
-			<h2 class="text-xlarge font-heading text-primary mb-lg border-b pb-md">Payment Details</h2>
+			<h2 class="text-xlarge font-heading text-primary mb-lg  pb-md">Payment Details</h2>
 			{#if paymentSuccess}
 				<p class="text-accent-color font-heading text-lg">
 					Payment successful! Thank you for your purchase.

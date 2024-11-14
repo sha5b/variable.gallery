@@ -10,17 +10,18 @@ export async function load() {
             fetchMedia(),
         ]);
 
-        // Fetch variations for each product
-        const products = await Promise.all(
-            baseProducts.map(async (product) => {
-                const variations = await fetchWooCommerceData(`products/${product.id}/variations`);
-                const variation = variations.length > 0 ? variations[0] : null;
-                return {
-                    ...product,
-                    variation
-                };
-            })
-        );
+        // Batch fetch variations instead of individual requests
+        const productIds = baseProducts.map(product => product.id);
+        const allVariations = await fetchWooCommerceData(`products/variations/batch`, {
+            method: 'POST',
+            body: JSON.stringify({ product_ids: productIds })
+        });
+
+        // Map variations back to products
+        const products = baseProducts.map(product => ({
+            ...product,
+            variation: allVariations[product.id]?.[0] || null
+        }));
 
         return {
             products,

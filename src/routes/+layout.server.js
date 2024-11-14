@@ -1,7 +1,26 @@
-import { fetchArtists } from '$lib/api';
+import { fetchArtists, fetchExhibitions, fetchMedia } from '$lib/api';
 
 export async function load() {
-    // Fetch artist data
-    const artists = await fetchArtists();
-    return { artists };
+    try {
+        const [artists, exhibitions, media] = await Promise.all([
+            fetchArtists(),
+            fetchExhibitions(),
+            fetchMedia()
+        ]);
+
+        return {
+            artists,
+            exhibitions,
+            media,
+            timestamp: Date.now()
+        };
+    } catch (error) {
+        console.error("Root layout fetch error:", error);
+        return {
+            artists: [],
+            exhibitions: [],
+            media: [],
+            timestamp: Date.now()
+        };
+    }
 }

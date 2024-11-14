@@ -6,21 +6,23 @@ const cache = {
     timestamp: new Map()
 };
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = {
+    products: 5 * 60 * 1000,      // 5 minutes
+    variations: 5 * 60 * 1000,    // 5 minutes
+    artists: 30 * 60 * 1000,      // 30 minutes
+    exhibitions: 60 * 60 * 1000,  // 1 hour
+    media: 24 * 60 * 60 * 1000    // 24 hours
+};
 
-async function fetchWithCache(cacheKey, fetchFunction) {
-    // Check if we have cached data and it's still valid
+async function fetchWithCache(cacheKey, fetchFunction, type = 'products') {
     const cachedData = cache.data.get(cacheKey);
     const cachedTime = cache.timestamp.get(cacheKey);
     
-    if (cachedData && cachedTime && (Date.now() - cachedTime < CACHE_DURATION)) {
+    if (cachedData && cachedTime && (Date.now() - cachedTime < CACHE_DURATION[type])) {
         return cachedData;
     }
 
-    // Fetch fresh data
     const data = await fetchFunction();
-    
-    // Update cache
     cache.data.set(cacheKey, data);
     cache.timestamp.set(cacheKey, Date.now());
     
@@ -137,7 +139,7 @@ export function fetchWordPressData(endpoint, options = {}) {
 
 export async function fetchArtists(params = {}) {
     const cacheKey = `artists-${JSON.stringify(params)}`;
-    return await fetchWithCache(cacheKey, () => fetchWordPressData('artist', { params }));
+    return await fetchWithCache(cacheKey, () => fetchWordPressData('artist', { params }), 'artists');
 }
 
 export async function fetchExhibitions() {
@@ -150,7 +152,7 @@ export async function fetchMedia() {
 
 export async function fetchProducts(params = {}) {
     const cacheKey = `products-${JSON.stringify(params)}`;
-    return await fetchWithCache(cacheKey, () => fetchWooCommerceData('products', { params }));
+    return await fetchWithCache(cacheKey, () => fetchWooCommerceData('products', { params }), 'products');
 }
 
 export async function fetchProductWithVariations(productId) {
