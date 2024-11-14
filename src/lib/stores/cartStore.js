@@ -14,6 +14,15 @@ function persistedWritable(key, startValue) {
 export const cart = persistedWritable('cart', []);
 
 export const addItem = (product) => {
+    console.log('Adding item to cart:', {
+        receivedProduct: product,
+        id: product.id,
+        name: product.name || product.title,
+        price: product.price,
+        images: product.images,
+        variation: product.variation || null
+    });
+
     const cartItem = {
         id: product.id,
         name: product.name || product.title,
@@ -25,6 +34,9 @@ export const addItem = (product) => {
 
     cart.update((items) => {
         const existingItem = items.find((item) => item.id === cartItem.id);
+        console.log('Existing cart items:', items);
+        console.log('Found existing item:', existingItem);
+        
         if (existingItem) {
             existingItem.quantity += 1;
             return [...items];

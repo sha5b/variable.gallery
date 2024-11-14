@@ -25,8 +25,19 @@
 	}
 
 	function addToCart() {
-		if (product || variation) {
-			addItem({ ...product, ...variation });
+		if (product) {
+			const cartItem = {
+				...product,
+				price: variation?.regular_price || product.regular_price,
+				variation: variation ? {
+					id: variation.id,
+					name: variation.name,
+					price: variation.regular_price,
+					stock_quantity: variation.stock_quantity,
+					stock_status: variation.stock_status
+				} : null
+			};
+			addItem(cartItem);
 			toggleCartSlider();
 		}
 	}

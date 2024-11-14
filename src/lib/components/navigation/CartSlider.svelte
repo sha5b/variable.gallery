@@ -13,6 +13,7 @@
       });
       
       total = $cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      console.log('Current cart items:', $cart);
   }
 
   function closeCart() {

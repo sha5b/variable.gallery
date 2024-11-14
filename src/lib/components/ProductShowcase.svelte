@@ -45,7 +45,18 @@
 
 	function addToCart() {
 		if (latestProduct) {
-			addItem({ ...latestProduct, ...latestProduct.variation });
+			const cartItem = {
+				...latestProduct,
+				price: latestProduct.variation?.regular_price || latestProduct.regular_price,
+				variation: latestProduct.variation ? {
+					id: latestProduct.variation.id,
+					name: latestProduct.variation.name,
+					price: latestProduct.variation.regular_price,
+					stock_quantity: latestProduct.variation.stock_quantity,
+					stock_status: latestProduct.variation.stock_status
+				} : null
+			};
+			addItem(cartItem);
 			toggleCartSlider();
 		}
 	}
