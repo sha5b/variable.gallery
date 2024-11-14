@@ -14,13 +14,22 @@ function persistedWritable(key, startValue) {
 export const cart = persistedWritable('cart', []);
 
 export const addItem = (product) => {
+    const cartItem = {
+        id: product.id,
+        name: product.name || product.title,
+        price: product.price,
+        images: product.images,
+        quantity: 1,
+        variation: product.variation || null
+    };
+
     cart.update((items) => {
-        const existingItem = items.find((item) => item.id === product.id);
+        const existingItem = items.find((item) => item.id === cartItem.id);
         if (existingItem) {
             existingItem.quantity += 1;
             return [...items];
         } else {
-            return [...items, { ...product, quantity: 1 }];
+            return [...items, cartItem];
         }
     });
 };

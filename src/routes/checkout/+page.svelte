@@ -4,7 +4,8 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
-	import { fetchWooCommerceData } from '$lib/api';
+	export let data;
+	const {products} = data
 
 	let stripe, elements, cardElement, paymentRequest, prButton;
 	let amount = 1000; // Example amount in cents
@@ -37,7 +38,6 @@
 			style: {
 				base: {
 					color: 'var(--text-color)',
-					fontFamily: 'var(--font-primary)',
 					fontSize: '16px',
 					'::placeholder': { color: 'var(--secondary-color)' }
 				}
@@ -135,143 +135,108 @@
 		}
 	}
 
-	async function createWooCommerceOrder() {
-		try {
-			const user = get(userInfo);
-			const cartData = get(cart).map((item) => ({
-				product_id: item.id,
-				quantity: item.quantity
-			}));
-
-			const orderData = {
-				payment_method: 'stripe',
-				payment_method_title: 'Stripe',
-				set_paid: true,
-				billing: {
-					first_name: user.firstName,
-					last_name: user.lastName,
-					address_1: user.address,
-					city: user.city,
-					postcode: user.postalCode,
-					country: 'US',
-					email: user.email,
-					phone: user.phone
-				},
-				shipping: {
-					first_name: user.firstName,
-					last_name: user.lastName,
-					address_1: user.address,
-					city: user.city,
-					postcode: user.postalCode,
-					country: 'US'
-				},
-				line_items: cartData,
-				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }]
-			};
-
-			const result = await fetchWooCommerceData('orders', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(orderData)
-			});
-
-			if (!result.id) throw new Error('Order creation failed in WooCommerce');
-			console.log('Order created in WooCommerce:', result);
-			return result.id; // Return orderId for confirmation page
-		} catch (error) {
-			console.error('WooCommerce Order Creation Error:', error);
-			paymentError = 'Failed to create order in WooCommerce. Please contact support.';
-			return null;
-		}
-	}
 </script>
 
 <div class="checkout-wrapper">
 	<!-- Left Column: User Information Form -->
 	<div class="user-info-container">
 		<form class="user-info-form">
-			<label for="firstName">First Name</label>
-			<input
-				id="firstName"
-				type="text"
-				bind:value={$userInfo.firstName}
-				placeholder="Your First Name"
-				class="input-field"
-			/>
-			{#if validationErrors.firstName}
-				<p class="error">{validationErrors.firstName}</p>
-			{/if}
+			<div class="form-group">
+				<label for="firstName">First Name</label>
+				<input
+					id="firstName"
+					type="text"
+					bind:value={$userInfo.firstName}
+					placeholder="Your First Name"
+					class="input-field"
+				/>
+				{#if validationErrors.firstName}
+					<p class="error">{validationErrors.firstName}</p>
+				{/if}
+			</div>
 
-			<label for="lastName">Last Name</label>
-			<input
-				id="lastName"
-				type="text"
-				bind:value={$userInfo.lastName}
-				placeholder="Your Last Name"
-				class="input-field"
-			/>
-			{#if validationErrors.lastName}
-				<p class="error">{validationErrors.lastName}</p>
-			{/if}
+			<div class="form-group">
+				<label for="lastName">Last Name</label>
+				<input
+					id="lastName"
+					type="text"
+					bind:value={$userInfo.lastName}
+					placeholder="Your Last Name"
+					class="input-field"
+				/>
+				{#if validationErrors.lastName}
+					<p class="error">{validationErrors.lastName}</p>
+				{/if}
+			</div>
 
-			<label for="email">Email</label>
-			<input
-				id="email"
-				type="email"
-				bind:value={$userInfo.email}
-				placeholder="Your Email"
-				class="input-field"
-			/>
-			{#if validationErrors.email}
-				<p class="error">{validationErrors.email}</p>
-			{/if}
+			<div class="form-group">
+				<label for="email">Email</label>
+				<input
+					id="email"
+					type="email"
+					bind:value={$userInfo.email}
+					placeholder="Your Email"
+					class="input-field"
+				/>
+				{#if validationErrors.email}
+					<p class="error">{validationErrors.email}</p>
+				{/if}
+			</div>
 
-			<label for="address">Address</label>
-			<textarea
-				id="address"
-				bind:value={$userInfo.address}
-				placeholder="Your Address"
-				class="input-field"
-			></textarea>
-			{#if validationErrors.address}
-				<p class="error">{validationErrors.address}</p>
-			{/if}
+			<div class="form-group">
+				<label for="address">Address</label>
+				<textarea
+					id="address"
+					bind:value={$userInfo.address}
+					placeholder="Your Address"
+					class="input-field"
+				></textarea>
+				{#if validationErrors.address}
+					<p class="error">{validationErrors.address}</p>
+				{/if}
+			</div>
 
-			<label for="city">City</label>
-			<input
-				id="city"
-				type="text"
-				bind:value={$userInfo.city}
-				placeholder="Your City"
-				class="input-field"
-			/>
-			{#if validationErrors.city}
-				<p class="error">{validationErrors.city}</p>
-			{/if}
+			<div class="form-group">
+				<label for="city">City</label>
+				<input
+					id="city"
+					type="text"
+					bind:value={$userInfo.city}
+					placeholder="Your City"
+					class="input-field"
+				/>
+				{#if validationErrors.city}
+					<p class="error">{validationErrors.city}</p>
+				{/if}
+			</div>
 
-			<label for="postalCode">Postal Code</label>
-			<input
-				id="postalCode"
-				type="text"
-				bind:value={$userInfo.postalCode}
-				placeholder="Your Postal Code"
-				class="input-field"
-			/>
-			{#if validationErrors.postalCode}
-				<p class="error">{validationErrors.postalCode}</p>
-			{/if}
+			<div class="form-group">
+				<label for="postalCode">Postal Code</label>
+				<input
+					id="postalCode"
+					type="text"
+					bind:value={$userInfo.postalCode}
+					placeholder="Your Postal Code"
+					class="input-field"
+				/>
+				{#if validationErrors.postalCode}
+					<p class="error">{validationErrors.postalCode}</p>
+				{/if}
+			</div>
 
-			<label for="phone">Phone</label>
-			<input
-				id="phone"
-				type="text"
-				bind:value={$userInfo.phone}
-				placeholder="Your Phone"
-				class="input-field"
-			/>
-			{#if validationErrors.phone}
-				<p class="error">{validationErrors.phone}</p>
-			{/if}
+			<div class="form-group">
+				<label for="phone">Phone</label>
+				<input
+					id="phone"
+					type="text"
+					bind:value={$userInfo.phone}
+					placeholder="Your Phone"
+					class="input-field"
+				/>
+				{#if validationErrors.phone}
+					<p class="error">{validationErrors.phone}</p>
+				{/if}
+			</div>
 		</form>
 	</div>
 
