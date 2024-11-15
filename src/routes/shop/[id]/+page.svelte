@@ -92,16 +92,18 @@
 		{/if}
 
 		{#if product.categories.length > 0}
-			<p class="product-info text-small">
-				<strong>Categories:</strong>
-				{#each product.categories as category}{category.name}{#if category !== product.categories[product.categories.length - 1]},{/if}{/each}
-			</p>
+			<div class="product-info">
+				{#each product.categories as category}
+					<span class="pill pill-secondary pill-sm">{category.name}</span>
+				{/each}
+			</div>
 		{/if}
 		{#if product.tags.length > 0}
-			<p class="product-info text-small">
-				<strong>Tags:</strong>
-				{#each product.tags as tag}{tag.name}{#if tag !== product.tags[product.tags.length - 1]},{/if}{/each}
-			</p>
+			<div class="product-info">
+				{#each product.tags as tag}
+					<span class="pill pill-accent pill-sm">{tag.name}</span>
+				{/each}
+			</div>
 		{/if}
 
 		<button on:click={addToCart} class="button-primary mt-4 px-4 py-2">Add to Cart</button>

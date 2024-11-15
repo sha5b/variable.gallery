@@ -1,11 +1,10 @@
 <script>
     import { handleMouseMove, handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
-    import {  isCartSliderOpen } from '$lib/stores/cartStore';
+    import { isCartSliderOpen } from '$lib/stores/cartStore';
     import { goto } from '$app/navigation';
 
     export let products;
 
-    // Limit to 20 newest products
     let limitedProducts = products
         .slice()
         .sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
@@ -17,7 +16,6 @@
         isAnimating: false
     };
 
-    // Subscribe to the cart slider state
     let isCartOpen = false;
     $: isCartSliderOpen.subscribe((value) => {
         isCartOpen = value;
@@ -36,17 +34,15 @@
     }
 </script>
 
-<div class="featured-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
-    <div class="featured-slider flex gap-md">
+<div class="featured-slider-container bg-background" bind:this={slider} on:mousemove={onHandleMouseMove}>
+    <div class="featured-slider gap-md">
         {#each limitedProducts as product}
-            <div class="featured-card" on:click={() => onProductClick(product.id)}>
-                <!-- Display Product Tags Above the Image -->
-                <div class="tag-container">
+            <div class="featured-card transition-default" on:click={() => onProductClick(product.id)}>
+                <div class="tag-container gap-xs">
                     {#each product.tags as tag}
-                        <span class="tag">{tag.name}</span>
+                        <span class="pill pill-primary pill-sm">{tag.name}</span>
                     {/each}
                 </div>
-                <!-- Product Image -->
                 <img src={getImageSrc(product.images[0]?.src)} alt={product.name} class="product-image" />
             </div>
         {/each}
@@ -54,12 +50,40 @@
 </div>
 
 <style>
+    /* Base Slider Layout */
     .featured-slider-container {
         width: 100%;
         overflow: hidden;
-        transition: all 0.3s ease;
     }
 
+    .featured-slider {
+        display: flex;
+    }
+
+    /* Card Styling */
+    .featured-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Tag Container */
+    .tag-container {
+        position: absolute;
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
+        display: flex;
+        flex-wrap: wrap;
+        z-index: 10;
+    }
+
+    /* Product Image */
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Mobile Styles */
     @media (max-width: 767px) {
         .featured-slider-container {
             overflow-x: auto;
@@ -67,83 +91,22 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .featured-slider {
-            display: flex;
-            gap: 1rem;
-        }
-
         .featured-card {
             flex: 0 0 50%;
             scroll-snap-align: start;
-            position: relative;
         }
     }
 
+    /* Desktop Styles */
     @media (min-width: 768px) {
-        .featured-slider {
-            display: flex;
-            gap: 1rem;
-        }
-
         .featured-card {
             flex: 0 0 300px;
             height: 50vh;
-            position: relative;
-            overflow: hidden;
-            transition: flex 0.9s ease;
             cursor: pointer;
         }
 
         .featured-card:hover {
             flex: 0 0 600px;
-        }
-    }
-
-    .product-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .tag-container {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        display: flex;
-        gap: 0.25rem;
-        flex-wrap: wrap;
-        z-index: 10;
-    }
-
-    .tag {
-        background-color: var(--primary-color);
-        color: var(--background-color);
-        padding: 0.25rem 0.5rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .exhibition-card {
-        @apply bg-white p-4 rounded-lg border border-gray-200;
-        transition: transform 0.2s ease;
-    }
-
-    .exhibition-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .virtual-badge {
-        @apply inline-block mt-3 px-2 py-1 text-xs font-medium rounded-full;
-        background-color: var(--primary-color);
-        color: var(--background-color);
-    }
-
-    /* Make the artist info sticky on desktop */
-    @media (min-width: 1024px) {
-        .artist-info {
-            position: sticky;
-            top: 2rem;
         }
     }
 </style>

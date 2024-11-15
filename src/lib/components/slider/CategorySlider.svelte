@@ -43,7 +43,7 @@
                 <div class="category-card" on:click={() => onProductClick(product)}>
                     <div class="product-tag-container">
                         {#each product.tags as tag}
-                            <span class="tag">{tag.name}</span>
+                            <span class="pill pill-primary pill-sm">{tag.name}</span>
                         {/each}
                     </div>
                     <img src={getImageSrc(product.images[0]?.src)} alt={product.name} class="product-image" />
@@ -79,8 +79,8 @@
     }
 
     .category-card {
-        flex: 0 0 300px;
-        height: 750px;
+        flex: 0 0 250px;
+        height: 600px;
         position: relative;
         overflow: hidden;
         transition: flex 0.9s ease;
@@ -88,7 +88,7 @@
     }
 
     .category-card:hover {
-        flex: 0 0 600px;
+        flex: 0 0 500px;
     }
 
     .product-image {
@@ -99,21 +99,13 @@
 
     .product-tag-container {
         position: absolute;
-        top: var(--spacing-xs);
-        left: var(--spacing-xs);
+        top: var(--spacing-sm);
+        left: var(--spacing-sm);
         display: flex;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
         flex-wrap: wrap;
         z-index: 10;
-    }
-
-    .tag {
-        background-color: var(--primary-color);
-        color: var(--background-color);
-        padding: var(--spacing-xs) var(--spacing-sm);
-        border-radius: 9999px;
-        font-size: var(--font-size-small);
-        font-weight: 600;
+        padding: var(--spacing-xs);
     }
 
     /* Responsive styles */

@@ -63,8 +63,8 @@
 </script>
 
 <div class="product-container gap-md flex w-full flex-col items-stretch md:flex-row">
-	<!-- Product Details Section with 1/3 width -->
-	<div class="product-details space-y-md bg-background p-lg flex-col md:w-1/3">
+	<!-- Product Details Section -->
+	<div class="product-details space-y-md bg-background flex-col md:w-1/3">
 		<h1 class="product-title text-xlarge text-primary font-bold">{latestProduct.name}</h1>
 		<p class="text-primary text-base">
 			{@html latestProduct.short_description || latestProduct.description}
@@ -129,8 +129,7 @@
 			<p class="product-info text-small">
 				<strong>Categories:</strong>
 				{#each latestProduct.categories as category}
-					{category.name}{#if category !== latestProduct.categories[latestProduct.categories.length - 1]},
-					{/if}
+					<span class="pill pill-primary pill-sm">{category.name}</span>
 				{/each}
 			</p>
 		{/if}
@@ -138,8 +137,7 @@
 			<p class="product-info text-small">
 				<strong>Tags:</strong>
 				{#each latestProduct.tags as tag}
-					{tag.name}{#if tag !== latestProduct.tags[latestProduct.tags.length - 1]},
-					{/if}
+					<span class="pill pill-secondary pill-sm">{tag.name}</span>
 				{/each}
 			</p>
 		{/if}
@@ -147,18 +145,19 @@
 		<button on:click={addToCart} class="button-primary mt-4 px-4 py-2">Add to Cart</button>
 	</div>
 
-	<!-- Gallery Component with 2/3 width -->
-	<div class="image-gallery md:w-2/3">
+	<!-- Gallery Component -->
+	<div class="image-gallery md:w-2/3 relative">
 		<Gallery images={gallery} />
+		<button on:click={addToCart} class="button-primary absolute bottom-4 right-4">Add to Cart</button>
 	</div>
 </div>
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background mt-8 flex flex-col pt-12 md:flex-row">
+	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
 		<div class="flex flex-col items-start md:w-1/2">
 			<div class="artist-details space-y-md mt-4 md:mt-0">
-				<h3 class="text-large text-primary font-bold">about the artist</h3>
+				<h3 class="text-4xl text-primary font-bold">about the artist</h3>
 				<p class="text-primary text-base">
 					<strong>name:</strong>
 					{artistInfo.title.rendered}
@@ -169,7 +168,7 @@
 				</p>
 				<p class="text-primary text-base">
 					<strong>location:</strong>
-					{artistInfo.acf?.location || 'Unknown'}
+					<span class="pill pill-accent pill-sm">{artistInfo.acf?.location || 'Unknown'}</span>
 				</p>
 				<a href={`/artist/${artistInfo.slug}`} class="artist-link text-accent">view profile</a>
 			</div>
@@ -186,37 +185,38 @@
 <style>
 	.product-container {
 		display: flex;
-		margin-top: 7.5rem;
-
+		flex-direction: column;
+		gap: var(--spacing-md);
+		margin-top: 0;
 		width: 100%;
 		overflow: hidden;
-		padding-top: var(--spacing-lg);
+	}
+
+	@media (min-width: 768px) {
+		.product-container {
+			flex-direction: row;
+		}
 	}
 
 	.product-details {
-		background-color: var(--background-color);
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
 		padding-right: var(--spacing-md);
-		align-self: flex-end;
+		align-self: flex-start;
 		word-break: break-word;
 		flex: 1 1 33%;
+		background-color: var(--background-color);
 	}
 
 	.image-gallery {
 		width: 100%;
 		flex: 1 1 67%;
+		position: relative;
 	}
 
 	.artist-container {
-		display: flex;
-		flex-direction: row;
 		background-color: var(--background-color);
-		margin-top: var(--spacing-md);
-		gap: var(--spacing-md);
-	}
-
-	.artist-thumbnail {
-		width: 100%;
-		max-width: 200px;
 	}
 
 	.artist-details {
@@ -224,23 +224,11 @@
 		flex: 1;
 	}
 
-	.product-title,
-	.product-info,
-	.price {
-		word-break: break-word;
-	}
-
-	.button-primary {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		border-radius: var(--rounded-md);
-		transition: background-color 0.3s;
-		text-align: center;
-		font-weight: 600;
-	}
-
-	.button-primary:hover {
-		background-color: var(--secondary-color);
+	.product-info {
+		display: flex;
+		gap: var(--spacing-xs);
+		flex-wrap: wrap;
+		align-items: center;
 	}
 
 	.sale-price {
@@ -249,19 +237,19 @@
 		margin-right: 0.5em;
 	}
 
-	@media (min-width: 768px) and (max-width: 1024px) {
-		.product-container {
-			flex-direction: row;
-			gap: var(--spacing-md);
-		}
+	.button-primary {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: var(--spacing-sm) var(--spacing-md);
+		border-radius: var(--spacing-xs);
+		transition: background-color 0.3s ease;
+		position: absolute;
+		bottom: var(--spacing-sm);
+		right: var(--spacing-sm);
+	}
 
-		.product-details {
-			flex: 0 0 35%;
-		}
-
-		.image-gallery {
-			flex: 0 0 65%;
-		}
+	.button-primary:hover {
+		background-color: var(--secondary-color);
 	}
 
 	@media (max-width: 767px) {
@@ -276,17 +264,7 @@
 			margin-bottom: var(--spacing-md);
 		}
 
-		.button-primary {
-			margin-bottom: var(--spacing-md);
-		}
-
 		.artist-container {
-			flex-direction: column;
-		}
-
-		.artist-thumbnail {
-			width: 100%;
-			margin-bottom: var(--spacing-md);
 		}
 	}
 </style>
