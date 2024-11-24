@@ -2,29 +2,31 @@
 	import { onMount } from 'svelte';
 	import { loadStripe } from '@stripe/stripe-js';
 	import { userInfo } from '$lib/stores/userInfoStore';
-	import { cart } from '$lib/stores/cartStore';
+	import { cart, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
 	import { fetchWooCommerceData } from '$lib/api';
+	import { goto } from '$app/navigation';
 	export let data;
 	const {products} = data
 
 	let stripe, elements, cardElement, paymentRequest, prButton;
-	let amount = 1000; // Example amount in cents
-	let currency = 'usd';
 	let paymentSuccess = false;
 	let paymentError = '';
-	let cartItems = [];
+	$: cartItems = $cart;
 	let validationErrors = {};
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 		elements = stripe.elements();
-		cartItems = get(cart);
 
+		// Create payment request button
 		paymentRequest = stripe.paymentRequest({
 			country: 'US',
-			currency: currency,
-			total: { label: 'Total', amount: amount },
+			currency: 'eur',
+			total: {
+				label: 'Total',
+				amount: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 100 + 1500
+			},
 			requestPayerName: true,
 			requestPayerEmail: true
 		});
@@ -46,24 +48,6 @@
 			}
 		});
 		cardElement.mount('#card-element');
-
-		paymentRequest.on('paymentmethod', async (event) => {
-			const response = await fetch('/checkout', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ amount, currency })
-			});
-			const { clientSecret } = await response.json();
-			if (!clientSecret) return event.complete('fail');
-			const { error } = await stripe.confirmCardPayment(
-				clientSecret,
-				{ payment_method: event.paymentMethod.id },
-				{ handleActions: false }
-			);
-			if (error) return event.complete('fail');
-			paymentSuccess = true;
-			event.complete('success');
-		});
 	});
 
 	function validateForm() {
@@ -85,6 +69,15 @@
 		return Object.keys(validationErrors).length === 0;
 	}
 
+	// Calculate totals
+	$: subtotal = cartItems.reduce((sum, item) => {
+		const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+		return sum + (itemPrice * item.quantity);
+	}, 0);
+
+	$: shippingCost = 15.00;
+	$: total = subtotal + shippingCost;
+
 	async function handlePayment() {
 		paymentError = '';
 		if (!validateForm()) {
@@ -97,8 +90,12 @@
 			const response = await fetch('/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ amount, currency })
+				body: JSON.stringify({ 
+					amount: Math.round(total * 100), // Convert to cents
+					currency: 'eur'
+				})
 			});
+
 			const result = await response.json();
 			if (!result.success) throw new Error(result.error || 'PaymentIntent creation failed');
 
@@ -109,7 +106,10 @@
 			const confirmation = await stripe.confirmCardPayment(clientSecret, {
 				payment_method: {
 					card: cardElement,
-					billing_details: { name: `${user.firstName} ${user.lastName}`, email: user.email }
+					billing_details: { 
+						name: `${user.firstName} ${user.lastName}`, 
+						email: user.email 
+					}
 				}
 			});
 
@@ -194,222 +194,280 @@
 		}
 	}
 
+	// Helper function to parse and format price
+	function formatPrice(price) {
+		const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+		return `€${numPrice.toFixed(2)}`;
+	}
+
+	// Modified remove function to handle reactive updates
+	async function handleRemoveItem(itemId) {
+		removeItem(itemId);
+		// Force reactive update of totals
+		subtotal = cartItems.reduce((sum, item) => {
+			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+			return sum + (itemPrice * item.quantity);
+		}, 0);
+	}
+
 </script>
 
-<div class="checkout-wrapper">
-	<!-- Left Column: User Information Form -->
-	<div class="user-info-container bg-background rounded-lg p-lg">
-		<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Shipping Information</h2>
-		<form class="user-info-form">
-			<div class="form-group">
-				<label for="firstName">First Name</label>
-				<input
-					id="firstName"
-					type="text"
-					bind:value={$userInfo.firstName}
-					placeholder="Your First Name"
-					class="input-field"
-				/>
-				{#if validationErrors.firstName}
-					<p class="error">{validationErrors.firstName}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="lastName">Last Name</label>
-				<input
-					id="lastName"
-					type="text"
-					bind:value={$userInfo.lastName}
-					placeholder="Your Last Name"
-					class="input-field"
-				/>
-				{#if validationErrors.lastName}
-					<p class="error">{validationErrors.lastName}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="email">Email</label>
-				<input
-					id="email"
-					type="email"
-					bind:value={$userInfo.email}
-					placeholder="Your Email"
-					class="input-field"
-				/>
-				{#if validationErrors.email}
-					<p class="error">{validationErrors.email}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="address">Address</label>
-				<textarea
-					id="address"
-					bind:value={$userInfo.address}
-					placeholder="Your Address"
-					class="input-field"
-				></textarea>
-				{#if validationErrors.address}
-					<p class="error">{validationErrors.address}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="city">City</label>
-				<input
-					id="city"
-					type="text"
-					bind:value={$userInfo.city}
-					placeholder="Your City"
-					class="input-field"
-				/>
-				{#if validationErrors.city}
-					<p class="error">{validationErrors.city}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="postalCode">Postal Code</label>
-				<input
-					id="postalCode"
-					type="text"
-					bind:value={$userInfo.postalCode}
-					placeholder="Your Postal Code"
-					class="input-field"
-				/>
-				{#if validationErrors.postalCode}
-					<p class="error">{validationErrors.postalCode}</p>
-				{/if}
-			</div>
-
-			<div class="form-group">
-				<label for="phone">Phone</label>
-				<input
-					id="phone"
-					type="text"
-					bind:value={$userInfo.phone}
-					placeholder="Your Phone"
-					class="input-field"
-				/>
-				{#if validationErrors.phone}
-					<p class="error">{validationErrors.phone}</p>
-				{/if}
-			</div>
-		</form>
-	</div>
-
-	<!-- Right Column: Cart Summary and Payment -->
-	<div class="order-summary-container">
-		<!-- Cart Summary -->
-		<div class="cart-summary bg-background rounded-lg p-lg mb-lg">
-			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Cart Summary</h2>
-			{#each cartItems as item}
-				<div class="cart-item gap-sm flex items-center">
-					<a href={`/shop/${item.id}`} class="product-image-link">
-						<img
-							src={item.images[0]?.src || '/placeholder.jpg'}
-							alt={item.name}
-							class="product-image-large"
-						/>
-					</a>
-					<div class="item-details">
-						<p class="font-heading text-lg">{item.name}</p>
-						<p class="text-secondary-color text-sm">Quantity: {item.quantity}</p>
-						<p class="text-primary-color text-sm">Price: ${(item.price / 1).toFixed(2)}</p>
-					</div>
+<div class="px-page pb-12">
+	<div class="checkout-container gap-md flex w-full flex-col md:flex-row">
+		<!-- Left Column: Shipping Information -->
+		<div class="shipping-info bg-background rounded-lg md:w-1/2">
+			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Shipping Information</h2>
+			<form class="shipping-form space-y-md">
+				<div class="form-group">
+					<label for="firstName" class="text-sm text-secondary">First Name</label>
+					<input
+						type="text"
+						id="firstName"
+						bind:value={$userInfo.firstName}
+						placeholder="Your First Name"
+						class="input-field"
+					/>
+					{#if validationErrors.firstName}
+						<p class="error">{validationErrors.firstName}</p>
+					{/if}
 				</div>
-			{/each}
 
-			<!-- Price Breakdown -->
-			<div class="price-breakdown mt-4 pt-4  space-y-2">
-				<div class="flex justify-between text-base">
-					<span class="text-secondary-color">Subtotal</span>
-					<span>€{cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}</span>
+				<div class="form-group">
+					<label for="lastName">Last Name</label>
+					<input
+						id="lastName"
+						type="text"
+						bind:value={$userInfo.lastName}
+						placeholder="Your Last Name"
+						class="input-field"
+					/>
+					{#if validationErrors.lastName}
+						<p class="error">{validationErrors.lastName}</p>
+					{/if}
 				</div>
-				<div class="flex justify-between text-base">
-					<span class="text-secondary-color">Shipping</span>
-					<span>€15.00</span>
+
+				<div class="form-group">
+					<label for="email">Email</label>
+					<input
+						id="email"
+						type="email"
+						bind:value={$userInfo.email}
+						placeholder="Your Email"
+						class="input-field"
+					/>
+					{#if validationErrors.email}
+						<p class="error">{validationErrors.email}</p>
+					{/if}
 				</div>
-				<div class="flex justify-between text-large font-bold mt-4 pt-4 ">
-					<span>Total</span>
-					<span>€{(cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) + 15).toFixed(2)}</span>
+
+				<div class="form-group">
+					<label for="address">Address</label>
+					<textarea
+						id="address"
+						bind:value={$userInfo.address}
+						placeholder="Your Address"
+						class="input-field"
+					></textarea>
+					{#if validationErrors.address}
+						<p class="error">{validationErrors.address}</p>
+					{/if}
 				</div>
-			</div>
+
+				<div class="form-group">
+					<label for="city">City</label>
+					<input
+						id="city"
+						type="text"
+						bind:value={$userInfo.city}
+						placeholder="Your City"
+						class="input-field"
+					/>
+					{#if validationErrors.city}
+						<p class="error">{validationErrors.city}</p>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label for="postalCode">Postal Code</label>
+					<input
+						id="postalCode"
+						type="text"
+						bind:value={$userInfo.postalCode}
+						placeholder="Your Postal Code"
+						class="input-field"
+					/>
+					{#if validationErrors.postalCode}
+						<p class="error">{validationErrors.postalCode}</p>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label for="phone">Phone</label>
+					<input
+						id="phone"
+						type="text"
+						bind:value={$userInfo.phone}
+						placeholder="Your Phone"
+						class="input-field"
+					/>
+					{#if validationErrors.phone}
+						<p class="error">{validationErrors.phone}</p>
+					{/if}
+				</div>
+			</form>
 		</div>
 
-		<!-- Payment Section -->
-		<div class="payment-section bg-background rounded-lg p-lg">
-			<h2 class="text-xlarge font-heading text-primary mb-lg  pb-md">Payment Details</h2>
-			{#if paymentSuccess}
-				<p class="text-accent-color font-heading text-lg">
-					Payment successful! Thank you for your purchase.
-				</p>
-			{:else}
-				<div id="payment-request-button" class="payment-request-button mb-8"></div>
-				<form on:submit|preventDefault={handlePayment} class="payment-form">
-					<label for="card-element" class="font-heading text-secondary-color block text-base"
-						>Credit or Debit Card</label
+		<!-- Right Column: Cart Summary and Payment -->
+		<div class="order-summary bg-background rounded-lg md:w-1/2">
+			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Cart Summary</h2>
+			
+			<!-- Cart Items -->
+			{#if cartItems.length === 0}
+				<div class="flex flex-col items-center justify-center py-12 text-secondary">
+					<p>Your cart is empty</p>
+					<button 
+						class="mt-4 text-primary hover:text-secondary underline"
+						on:click={() => goto('/shop')}
 					>
-					<div id="card-element" class="card-element padding-sm"></div>
-					{#if paymentError}
-						<p class="error text-error-color text-sm">{paymentError}</p>
-					{/if}
-					<button type="submit" class="button-primary w-full">Pay Now</button>
-				</form>
+						Continue Shopping
+					</button>
+				</div>
+			{:else}
+				{#each cartItems as item}
+					<div class="cart-item flex gap-md mb-md">
+						<div class="flex gap-md flex-1">
+							<!-- Clickable image -->
+							<img 
+								src={item.images[0]?.src || '/placeholder.jpg'} 
+								alt={item.name}
+								class="w-20 h-20 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+								on:click={() => goto(`/shop/${item.id}`)}
+								on:keydown={(e) => e.key === 'Enter' && goto(`/shop/${item.id}`)}
+								role="button"
+								tabindex="0"
+							/>
+							<div class="flex flex-col gap-xs">
+								<h3 class="text-lg font-heading">{item.name}</h3>
+								<p class="text-sm text-secondary">Quantity: {item.quantity}</p>
+								<p class="text-base">€{item.price}</p>
+								<button 
+									class="remove-btn" 
+									on:click={() => handleRemoveItem(item.id)}
+									>
+									REMOVE
+								</button>
+							</div>
+						</div>
+					</div>
+				{/each}
+
+				<!-- Price Summary -->
+				<div class="price-summary space-y-2 mt-lg pt-md border-t border-secondary">
+					<div class="flex justify-between">
+						<span class="text-secondary">Subtotal</span>
+						<span>{formatPrice(subtotal)}</span>
+					</div>
+					<div class="flex justify-between">
+						<span class="text-secondary">Shipping</span>
+						<span>{formatPrice(shippingCost)}</span>
+					</div>
+					<div class="flex justify-between text-lg font-bold mt-md pt-md border-t border-secondary">
+						<span>Total</span>
+						<span>{formatPrice(total)}</span>
+					</div>
+				</div>
+
+				<!-- Payment Section -->
+				<div class="payment-section mt-lg pt-md border-t border-secondary">
+					<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Payment Details</h2>
+					
+					<div id="payment-request-button" class="mb-lg"></div>
+					
+					<div class="card-payment">
+						<label class="text-base text-secondary mb-sm block">Credit or Debit Card</label>
+						<div id="card-element" class="card-element mb-md"></div>
+						{#if paymentError}
+							<p class="error mb-sm">{paymentError}</p>
+						{/if}
+						<button class="button-primary w-full" on:click={handlePayment}>
+							Pay Now
+						</button>
+					</div>
+				</div>
 			{/if}
 		</div>
 	</div>
 </div>
 
 <style>
-	.checkout-wrapper {
-		display: flex;
-		gap: var(--spacing-lg);
-		max-width: 1200px;
-		margin: auto;
-		padding: var(--page-padding-md);
+	.checkout-container {
+		max-width: var(--max-width-lg);
+		margin: 0 auto;
 	}
-	.user-info-container,
-	.order-summary-container {
-		flex: 1;
-	}
-	.user-info-form,
-	.cart-summary,
-	.payment-form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-sm);
-	}
-	.input-field,
-	.card-element,
-	.button-primary {
+
+	.input-field {
 		width: 100%;
-		padding: var(--spacing-sm);
-		border: 1px solid #ddd;
-		border-radius: 4px;
+		padding: var(--spacing-xs) 0;
+		border: none;
+		border-bottom: 1px solid var(--border-color);
+		background: transparent;
+		color: var(--text-color);
 		font-size: var(--font-size-base);
+		transition: border-color 0.2s ease;
 	}
-	.product-image-large {
-		width: 80px;
-		height: 80px;
-		object-fit: cover;
-		border-radius: 4px;
-		margin-right: var(--spacing-sm);
+
+	.input-field:focus {
+		outline: none;
+		border-bottom-color: var(--primary-color);
 	}
+
+	.input-field::placeholder {
+		color: var(--secondary-color);
+	}
+
+	/* Make textarea match the input styling */
+	textarea.input-field {
+		resize: vertical;
+		min-height: 2.5rem;
+	}
+
+	.card-element {
+		padding: var(--spacing-sm);
+		border: 1px solid var(--border-color);
+		background: var(--background-color);
+	}
+
+	.error {
+		color: var(--error-color);
+		font-size: var(--font-size-sm);
+	}
+
 	.button-primary {
 		background-color: var(--primary-color);
-		color: #fff;
+		color: var(--background-color);
+		padding: var(--spacing-sm) var(--spacing-md);
 		border: none;
 		cursor: pointer;
-		padding: var(--spacing-sm) var(--spacing-md);
-		transition: background-color 0.3s ease;
+		transition: all 0.2s ease-in-out;
 	}
+
 	.button-primary:hover {
 		background-color: var(--secondary-color);
 	}
-	.error {
-		color: var(--error-color);
+
+	.remove-btn {
+		background: #E76F51;  /* coral/red background */
+		color: white;
+		border: none;
+		padding: var(--spacing-xs) var(--spacing-sm);
+		cursor: pointer;
+		font-size: var(--font-size-sm);
+		text-transform: uppercase;
+		width: fit-content;
+		transition: opacity 0.2s ease;
+	}
+
+	.remove-btn:hover {
+		opacity: 0.9;
 	}
 </style>
