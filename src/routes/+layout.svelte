@@ -1,9 +1,12 @@
 <script>
 	import '../app.css';
+	import { navigating } from '$app/stores';
+	import { fade } from 'svelte/transition';
 
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Navbar from '$lib/components/navigation/Navbar.svelte';
 	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
+	import Loading from '$lib/components/Loading.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
 
 	export let data;
@@ -14,8 +17,9 @@
 	function closeCart() {
 		closeCartSlider(); // Close the cart when clicking on the overlay
 	}
-	console
 </script>
+
+<Loading isLoading={$navigating} />
 
 <div class="relative min-h-screen flex flex-col">
 	<!-- Navbar and Cart Overlay -->
