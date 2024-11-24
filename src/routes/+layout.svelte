@@ -17,6 +17,11 @@
 	function closeCart() {
 		closeCartSlider(); // Close the cart when clicking on the overlay
 	}
+
+	// Subscribe to navigation changes
+	$: if ($navigating) {
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
 </script>
 
 <Loading isLoading={$navigating} />

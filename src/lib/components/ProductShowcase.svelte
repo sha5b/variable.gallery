@@ -4,6 +4,7 @@
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import { addItem, toggleCartSlider } from '$lib/stores/cartStore';
 	import { slide } from 'svelte/transition';
+	import { goto } from '$app/navigation';
 
 	export let products;
 	export let artists;
