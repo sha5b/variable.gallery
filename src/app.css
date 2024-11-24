@@ -47,6 +47,7 @@ a {
   /* Font Families */
   --font-primary: 'Work Sans', sans-serif;
   --font-heading: 'Montserrat', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
 
   /* Updated Spacing Variables */
   --spacing-xs: 0.5rem;    /* 8px */
@@ -483,4 +484,15 @@ a:not(.no-underline):hover::after {
   .product-details {
     padding: var(--spacing-sm);
   }
+}
+
+/* Then update your Loading.svelte component to use it */
+.terminal-content {
+  font-family: var(--font-code);
+  /* ... other styles ... */
+}
+
+.package-name, .package-size {
+  font-family: var(--font-code);
+  /* ... other styles ... */
 }
