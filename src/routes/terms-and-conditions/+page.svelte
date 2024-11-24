@@ -1,115 +1,91 @@
 <!-- TermsAndConditions.svelte -->
 <script>
-    // No additional script needed unless you have interactive elements
-  </script>
-  
-  <div class="terms-page px-page text-text-color">
-    <h1 class="text-xlarge font-heading margin-md text-primary-color text-left">
-      Terms and Conditions
-    </h1>
-  
-    <div class="terms-content">
-      <div class="terms-section">
-        <h2 class="text-large font-heading text-primary-color margin-md">
-          Use of Website
-        </h2>
-        <p class="text-base margin-sm">
-          All content on our website, including images and text, is owned by us or our artists. You may not use our content without permission.
-        </p>
-      </div>
-  
-      <div class="terms-section">
-        <h2 class="text-large font-heading text-primary-color margin-md">
-          Sales Policy
-        </h2>
-        <p class="text-base margin-sm">
-          All sales are final. Due to the digital and custom nature of our products, we do not offer refunds or returns. If you have any issues with your purchase, please contact our support team.
-        </p>
-      </div>
-  
-      <div class="terms-section">
-        <h2 class="text-large font-heading text-primary-color margin-md">
-          Changes to Terms
-        </h2>
-        <p class="text-base margin-sm">
-          We may update these terms from time to time. Any changes will be posted on this page. Please check back periodically for updates.
-        </p>
-      </div>
-  
-      <div class="terms-section">
-        <h2 class="text-large font-heading text-primary-color margin-md">
-          Contact
-        </h2>
-        <p class="text-base margin-sm">
-          If you have questions about these terms, reach out to us at <a href="mailto:support@yourgallery.com">support@yourgallery.com</a>.
-        </p>
-      </div>
+    let companyInfo = {
+        name: "variable.gallerie",
+        email: "support@variable.gallery",
+        location: "Lunar Orbit Station V.G-23"
+    };
+</script>
+
+<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
+    <div class="flex flex-col md:flex-row gap-lg items-start">
+        <!-- Left Column -->
+        <div class="w-full md:w-1/2 space-y-md">
+            <section class="space-y-sm">
+                <h1 class="text-xlarge font-bold text-[var(--text-color)]">Terms and Conditions</h1>
+                <p class="text-base text-[var(--text-color)]">
+                    Operating from lunar orbit requires unique terms that account for both terrestrial and extra-terrestrial considerations.
+                </p>
+            </section>
+
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Orbital Platform Usage</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    All content transmitted through our quantum networks is protected by space-time copyright laws. Users agree to:
+                </p>
+                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                    <li>Respect relativistic transmission protocols</li>
+                    <li>Maintain quantum encryption standards</li>
+                    <li>Acknowledge lunar phase scheduling</li>
+                    <li>Accept space-time dilation effects</li>
+                </ul>
+            </section>
+
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Transaction Policies</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    Our quantum-secured marketplace operates under:
+                </p>
+                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                    <li>Lunar blockchain verification</li>
+                    <li>Time-dilated payment processing</li>
+                    <li>Multi-planetary escrow systems</li>
+                    <li>Space-synchronized delivery protocols</li>
+                </ul>
+            </section>
+        </div>
+
+        <!-- Right Column -->
+        <div class="w-full md:w-1/2 space-y-md">
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Liability Limitations</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    We account for various space-time anomalies:
+                </p>
+                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                    <li>Solar radiation interference</li>
+                    <li>Gravitational time dilation</li>
+                    <li>Quantum entanglement disruptions</li>
+                    <li>Lunar orbit perturbations</li>
+                </ul>
+            </section>
+
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Terms Updates</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    Terms are updated according to lunar cycles. Changes are transmitted via quantum channels and archived in our lunar blockchain.
+                </p>
+            </section>
+
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Contact</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    For inquiries about our terms:
+                </p>
+                <p class="text-base text-[var(--text-color)]">
+                    <a href={`mailto:${companyInfo.email}`} class="text-accent hover:underline">{companyInfo.email}</a><br>
+                    {companyInfo.location}
+                </p>
+            </section>
+        </div>
     </div>
-  </div>
-  
-  <style>
-    /* Use your existing global CSS styles from app.css */
-  
-    /* Terms and Conditions Page Styles */
-    .terms-page {
-      max-width: 100%;
-      margin: 0 auto;
-      padding-top: var(--spacing-lg);
-      padding-bottom: var(--spacing-lg);
+</div>
+
+<style>
+    .about-container {
+        padding-top: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+        line-height: 1.75;
     }
-  
-    .terms-page h1 {
-      margin-bottom: var(--spacing-lg);
-    }
-  
-    .terms-content {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-lg);
-    }
-  
-    .terms-section {
-      flex: 1 1 calc(50% - var(--spacing-lg));
-      box-sizing: border-box;
-    }
-  
-    /* Adjust margin for odd items to align properly */
-    .terms-section:nth-child(odd) {
-      margin-right: var(--spacing-lg);
-    }
-  
-    /* Remove margin-right for even items */
-    .terms-section:nth-child(even) {
-      margin-right: 0;
-    }
-  
-    /* Responsive Adjustments */
-    @media (max-width: 767px) {
-      .terms-content {
-        flex-direction: column;
-      }
-      .terms-section {
-        flex: 1 1 100%;
-        margin-right: 0;
-      }
-    }
-  
-    .terms-section h2 {
-      margin-top: 0;
-    }
-  
-    .terms-section p {
-      margin-top: var(--spacing-sm);
-    }
-  
-    /* Link styling */
-    .terms-page a {
-      color: var(--accent-color);
-      text-decoration: none;
-    }
-  
-    .terms-page a:hover {
-      text-decoration: underline;
-    }
-  </style>
+</style>
   

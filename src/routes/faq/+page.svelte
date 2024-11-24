@@ -1,192 +1,109 @@
 <!-- FAQPage.svelte -->
 <script>
-    import { slide } from 'svelte/transition';
+    import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
   
     let faqs = [
-      {
-        question: "What types of artworks can I buy?",
-        answer:
-          "You can buy original artworks, editions, and download digital goods.",
-        isOpen: false,
-      },
-      {
-        question: "Is shipping included for original works?",
-        answer:
-          "Shipping is excluded for original works; this will be arranged with the artist after the purchase is conducted.",
-        isOpen: false,
-      },
-      {
-        question: "What is this gallery about?",
-        answer:
-          "It is a solely digital gallery for exploring and distributing new concepts of exhibiting in the digital world, connecting artists together, and also providing the backend structure for sales.",
-        isOpen: false,
-      },
-      {
-        question: "Who is behind this gallery?",
-        answer:
-          "A community of young artists and creatives is behind this, founded by Shahab Nedaei.",
-        isOpen: false,
-      },
-      // Add more FAQs as needed
+        {
+            question: "What types of artworks can I purchase?",
+            answer: "Our lunar gallery offers a diverse range of digital and physical art forms: digital originals, limited editions, AI-generated works, quantum-encrypted NFTs, holographic installations, 3D-printed sculptures, time-dilated exhibitions, and space-synchronized installations. All pieces are transmitted directly from our lunar orbital station.",
+            isOpen: false
+        },
+        {
+            question: "How does the artist revenue sharing work?",
+            answer: "Our innovative revenue model allocates funds as follows: 75% goes directly to the artist, 10% enters our Universal Artist Pool (distributed monthly among all participating artists based on engagement metrics), and 15% supports our lunar infrastructure maintenance, quantum transmission networks, and platform development.",
+            isOpen: false
+        },
+        {
+            question: "How are artists selected for the gallery?",
+            answer: "Artists are selected through a combination of our AI curator algorithm and human panel review. We look for creators who push the boundaries of digital-physical art fusion and space-time manipulation. Applications are reviewed quarterly during the lunar perigee.",
+            isOpen: false
+        },
+        {
+            question: "How does shipping work for physical pieces?",
+            answer: "Physical artworks (prints, 3D sculptures) are manufactured at our Earth-based facilities using quantum-transmitted specifications. Shipping costs vary by location and are calculated at checkout. Original works are arranged directly with the artist after purchase confirmation.",
+            isOpen: false
+        },
+        {
+            question: "What about digital delivery?",
+            answer: "Digital works are transmitted instantly through our quantum-encrypted channels. NFTs are minted on our lunar blockchain, and holographic installations require our proprietary viewer (provided free with purchase).",
+            isOpen: false
+        }
     ];
-  
-    function toggleFAQ(index) {
-      faqs = faqs.map((faq, i) => ({
-        ...faq,
-        isOpen: i === index ? !faq.isOpen : faq.isOpen,
-      }));
-    }
-  </script>
-  
-  <div class="faq-page px-page text-text-color">
-    <h1 class="text-xlarge font-heading margin-md text-primary-color">
-      Frequently Asked Questions
-    </h1>
-    <div class="faq-container">
-      <!-- Left Column -->
-      <div class="faq-list">
-        {#each faqs as { question, answer, isOpen }, index}
-          <div class="faq-item bg-secondary-bg rounded padding-md">
-            <button
-              class="faq-question flex-between align-center text-left"
-              on:click={() => toggleFAQ(index)}
-              aria-expanded={isOpen}
-              aria-controls={`faq-answer-${index}`}
-              id={`faq-question-${index}`}
-            >
-              <h2 class="text-large font-heading margin-none">{question}</h2>
-              <span class="text-large">{isOpen ? '−' : '+'}</span>
-            </button>
-            {#if isOpen}
-              <p
-                class="text-base margin-sm"
-                id={`faq-answer-${index}`}
-                aria-labelledby={`faq-question-${index}`}
-                transition:slide
-              >
-                {answer}
-              </p>
-            {/if}
-          </div>
-        {/each}
-      </div>
-      <!-- Right Column (Placeholder) -->
-      <div class="faq-placeholder">
-        <!-- Placeholder content -->
-        <p>This is a placeholder for additional content.</p>
-      </div>
+
+    let technicalFaqs = [
+        {
+            question: "Do you offer authenticity certificates?",
+            answer: "All works come with a quantum-encrypted certificate of authenticity, timestamped using lunar orbital parameters. NFTs are verified through our proprietary space-time blockchain.",
+            isOpen: false
+        },
+        {
+            question: "What happens if there's a transmission error?",
+            answer: "Our quantum entanglement network ensures 99.99% transmission accuracy. In rare cases of solar interference, our backup systems will automatically retransmit within one lunar cycle.",
+            isOpen: false
+        },
+        {
+            question: "Can I resell my purchased artworks?",
+            answer: "Yes, our lunar marketplace supports secondary sales. Digital works include smart contracts that ensure artist royalties (5%) on all future transactions. Physical pieces can be resold with original quantum certificates.",
+            isOpen: false
+        },
+        {
+            question: "How do you handle returns?",
+            answer: "Digital works are non-refundable once transmitted. Physical pieces can be returned within one lunar cycle (27.3 Earth days) if they don't match their quantum signature specifications.",
+            isOpen: false
+        },
+        {
+            question: "Do you offer payment plans?",
+            answer: "Yes, we offer lunar-cycle payment plans (27.3 days) for purchases over 1,000€. We accept major Earth currencies, cryptocurrencies, and space mining credits.",
+            isOpen: false
+        }
+    ];
+</script>
+
+<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
+    <div class="flex flex-col md:flex-row gap-lg items-start">
+        <!-- Left Column -->
+        <div class="w-full md:w-1/2 space-y-md">
+            <section class="space-y-sm">
+                <h1 class="text-xlarge font-bold text-[var(--text-color)]">Frequently Asked Questions</h1>
+                <p class="text-base text-[var(--text-color)]">
+                    Find answers to common questions about our lunar art gallery, digital exhibitions, and space-time curated collections.
+                </p>
+            </section>
+
+            <!-- General Questions -->
+            {#each faqs as faq}
+                <LegalInfoDropdown 
+                    title={faq.question} 
+                    content={`<p class="text-base margin-sm">${faq.answer}</p>`} 
+                />
+            {/each}
+        </div>
+
+        <!-- Right Column -->
+        <div class="w-full md:w-1/2 space-y-md">
+            <section class="space-y-sm">
+                <h2 class="text-large font-semibold text-[var(--text-color)]">Technical & Payment</h2>
+                <p class="text-base text-[var(--text-color)]">
+                    Information about our quantum transmission systems, payment options, and space-time adjusted services.
+                </p>
+            </section>
+
+            <!-- Technical Questions -->
+            {#each technicalFaqs as faq}
+                <LegalInfoDropdown 
+                    title={faq.question} 
+                    content={`<p class="text-base margin-sm">${faq.answer}</p>`} 
+                />
+            {/each}
+        </div>
     </div>
-  </div>
-  
-  <style>
-    /* Use your existing global CSS styles from app.css */
-  
-    /* FAQ Page Styles */
-    .faq-page {
-      max-width: 100%;
-      margin: 0 auto;
-      padding-top: var(--spacing-lg);
-      padding-bottom: var(--spacing-lg);
+</div>
+
+<style>
+    .about-container {
+        padding-top: var(--spacing-xl);
+        padding-bottom: var(--spacing-xl);
+        line-height: 1.75;
     }
-  
-    .faq-container {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-    }
-  
-    @media (min-width: 768px) {
-      .faq-container {
-        flex-direction: row;
-        gap: var(--spacing-lg);
-      }
-      .faq-list,
-      .faq-placeholder {
-        flex: 1;
-      }
-    }
-  
-    .faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-    }
-  
-    .faq-item {
-      width: 100%;
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-  
-    .faq-item:hover {
-      background-color: var(--secondary-color);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-  
-    .faq-item:hover h2,
-    .faq-item:hover p,
-    .faq-item:hover span {
-      color: var(--background-color);
-    }
-  
-    /* Button Styles for FAQ Questions */
-    .faq-question {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-align: left;
-    }
-  
-    .faq-question h2 {
-      flex: 1;
-      margin-right: var(--spacing-sm);
-      text-align: left;
-    }
-  
-    .faq-question span {
-      flex-shrink: 0;
-    }
-  
-    .faq-question:focus {
-      outline: 2px solid var(--accent-color);
-    }
-  
-    .faq-item p {
-      margin-top: var(--spacing-sm);
-    }
-  
-    /* Placeholder Styles */
-    .faq-placeholder {
-      background-color: var(--secondary-bg-color);
-      padding: var(--spacing-md);
-      border-radius: var(--spacing-sm);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      /* Additional styling */
-      text-align: center;
-      color: var(--text-color);
-      font-size: var(--font-size-large);
-    }
-  
-    /* Responsive Adjustments */
-    @media (max-width: 767px) {
-      .faq-container {
-        flex-direction: column;
-      }
-      .faq-placeholder {
-        display: none; /* Hide placeholder on small screens */
-      }
-      .faq-question h2 {
-        font-size: var(--font-size-large);
-      }
-      .faq-question span {
-        font-size: var(--font-size-large);
-      }
-    }
-  </style>
+</style>
   
