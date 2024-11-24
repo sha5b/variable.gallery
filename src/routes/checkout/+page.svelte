@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { loadStripe } from '@stripe/stripe-js';
 	import { userInfo } from '$lib/stores/userInfoStore';
-	import { cart, removeItem } from '$lib/stores/cartStore';
+	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
 	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
@@ -210,6 +210,32 @@
 		}, 0);
 	}
 
+	function increaseQuantity(item) {
+		addItem(item);
+		// Force reactive update of totals
+		subtotal = cartItems.reduce((sum, item) => {
+			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+			return sum + (itemPrice * item.quantity);
+		}, 0);
+	}
+
+	function decreaseQuantity(item) {
+		cart.update((items) => {
+			const existingItem = items.find((i) => i.id === item.id);
+			if (existingItem.quantity > 1) {
+				existingItem.quantity -= 1;
+			} else {
+				return items.filter((i) => i.id !== item.id);
+			}
+			return [...items];
+		});
+		// Force reactive update of totals
+		subtotal = cartItems.reduce((sum, item) => {
+			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+			return sum + (itemPrice * item.quantity);
+		}, 0);
+	}
+
 </script>
 
 <div class="px-page pb-12">
@@ -334,46 +360,59 @@
 				</div>
 			{:else}
 				{#each cartItems as item}
-					<div class="cart-item flex gap-md mb-md">
-						<div class="flex gap-md flex-1">
-							<!-- Clickable image -->
+					<div class="detail-row clean">
+						<div class="flex gap-md">
 							<img 
 								src={item.images[0]?.src || '/placeholder.jpg'} 
 								alt={item.name}
-								class="w-20 h-20 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+								class="h-24 w-24 object-cover cursor-pointer hover:opacity-80 transition-opacity"
 								on:click={() => goto(`/shop/${item.id}`)}
 								on:keydown={(e) => e.key === 'Enter' && goto(`/shop/${item.id}`)}
 								role="button"
 								tabindex="0"
 							/>
-							<div class="flex flex-col gap-xs">
-								<h3 class="text-lg font-heading">{item.name}</h3>
-								<p class="text-sm text-secondary">Quantity: {item.quantity}</p>
-								<p class="text-base">€{item.price}</p>
-								<button 
-									class="remove-btn" 
-									on:click={() => handleRemoveItem(item.id)}
-									>
-									REMOVE
-								</button>
+							<div class="flex flex-col justify-between">
+								<div>
+									<h3 class="text-base font-semibold text-primary">{item.name}</h3>
+									{#if item.variation}
+										<p class="text-sm text-secondary">{item.variation.name}</p>
+									{/if}
+									<p class="text-primary">{formatPrice(item.price)}</p>
+								</div>
+								<div class="flex items-center gap-xs">
+									<button class="quantity-btn" on:click={() => decreaseQuantity(item)}>−</button>
+									<span class="mx-3">{item.quantity}</span>
+									<button class="quantity-btn" on:click={() => increaseQuantity(item)}>+</button>
+								</div>
 							</div>
+						</div>
+						<div class="flex flex-col items-end justify-between">
+							<span class="text-lg font-semibold text-primary">
+								{formatPrice(item.quantity * item.price)}
+							</span>
+							<button 
+								class="remove-btn" 
+								on:click={() => handleRemoveItem(item.id)}
+							>
+								Remove
+							</button>
 						</div>
 					</div>
 				{/each}
 
 				<!-- Price Summary -->
-				<div class="price-summary space-y-2 mt-lg pt-md border-t border-secondary">
-					<div class="flex justify-between">
-						<span class="text-secondary">Subtotal</span>
-						<span>{formatPrice(subtotal)}</span>
+				<div class="space-y-2 mt-lg pt-md border-t border-secondary">
+					<div class="detail-row clean">
+						<span class="detail-label">Subtotal</span>
+						<span class="detail-value">{formatPrice(subtotal)}</span>
 					</div>
-					<div class="flex justify-between">
-						<span class="text-secondary">Shipping</span>
-						<span>{formatPrice(shippingCost)}</span>
+					<div class="detail-row clean">
+						<span class="detail-label">Shipping</span>
+						<span class="detail-value">{formatPrice(shippingCost)}</span>
 					</div>
-					<div class="flex justify-between text-lg font-bold mt-md pt-md border-t border-secondary">
-						<span>Total</span>
-						<span>{formatPrice(total)}</span>
+					<div class="detail-row clean">
+						<span class="detail-label font-bold">Total</span>
+						<span class="detail-value text-lg font-bold">{formatPrice(total)}</span>
 					</div>
 				</div>
 
@@ -469,5 +508,64 @@
 
 	.remove-btn:hover {
 		opacity: 0.9;
+	}
+
+	.detail-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding: var(--spacing-md) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
+	}
+
+	.detail-row:last-child {
+		border-bottom: none;
+	}
+
+	.detail-label {
+		color: var(--secondary-color);
+	}
+
+	.remove-btn {
+		color: var(--error-color);
+		font-size: 0.875rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: var(--spacing-xs);
+	}
+
+	.detail-value {
+		font-weight: 500;
+	}
+
+	@media (max-width: 767px) {
+		.order-summary {
+			width: 100%;
+		}
+	}
+
+	.quantity-btn {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border: 1px solid var(--border-color);
+		background: var(--background-color);
+		color: var(--text-color);
+		min-width: 2rem;
+		text-align: center;
+		cursor: pointer;
+		transition: all 0.2s ease-in-out;
+	}
+
+	.quantity-btn:hover {
+		background: var(--secondary-bg-color);
+	}
+
+	.gap-xs {
+		gap: var(--spacing-xs);
+	}
+
+	.mx-3 {
+		margin-left: 0.75rem;
+		margin-right: 0.75rem;
 	}
 </style>
