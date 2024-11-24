@@ -46,8 +46,8 @@ a {
   --font-size-xlarge: 2rem;
 
   /* Font Families */
-  --font-primary: 'Work Sans', sans-serif;
-  --font-heading: 'Montserrat', sans-serif;
+  --font-primary: 'SUSE', sans-serif;
+  --font-heading: 'SUSE', sans-serif;
   --font-code: 'JetBrains Mono', monospace;
 
   /* Updated Spacing Variables */
@@ -96,7 +96,7 @@ nav {
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 900;
+  font-weight: 700;
   margin-bottom: var(--spacing-md);
 }
 
@@ -126,6 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Page Padding */
 .px-page { 
   padding-top: var(--page-padding);
+  padding-bottom: var(--page-padding);
   padding-left: var(--spacing-md);
   padding-right: var(--spacing-md);
   box-sizing: border-box;
@@ -135,6 +136,7 @@ h1, h2, h3, h4, h5, h6 {
 @media (min-width: 768px) {
   .px-page {
     padding-top: var(--page-padding);
+    padding-bottom: var(--page-padding);
     padding-left: var(--page-padding);
     padding-right: var(--page-padding);
   }
@@ -591,4 +593,69 @@ html, body {
     padding-left: var(--page-padding);
     padding-right: var(--page-padding);
   }
+}
+
+/* Update/Add these button styles */
+.button-primary {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button-primary:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--primary-color);
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.button-secondary:hover {
+  background-color: var(--secondary-bg-color);
+  transform: translateY(-1px);
+}
+
+.quantity-btn {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 2rem;
+  transition: all 0.3s ease;
+}
+
+.quantity-btn:hover {
+  background-color: var(--secondary-bg-color);
+  transform: translateY(-1px);
+}
+
+.remove-btn {
+  color: var(--error-color);
+  background: none;
+  border: none;
+  padding: var(--spacing-xs);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+  color: var(--accent-color);
+  transform: translateY(-1px);
 }

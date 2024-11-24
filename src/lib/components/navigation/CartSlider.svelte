@@ -99,14 +99,14 @@
           <div class="flex-1">
             <h3 class="font-medium text-primary">{item.name}</h3>
             <div class="flex items-center gap-2 mt-2">
-              <div class="flex items-center border rounded-md">
+              <div class="flex items-center">
                 <button 
-                  class="px-3 py-1 hover:bg-gray-100"
+                  class="quantity-btn"
                   on:click={() => decreaseQuantity(item)}
                 >-</button>
-                <span class="px-3 border-x">{item.quantity}</span>
+                <span class="mx-3">{item.quantity}</span>
                 <button 
-                  class="px-3 py-1 hover:bg-gray-100"
+                  class="quantity-btn"
                   on:click={() => increaseQuantity(item)}
                 >+</button>
               </div>
@@ -127,13 +127,13 @@
   </div>
   <div class="space-y-2">
     <button 
-      class="w-full bg-primary text-white py-2 rounded-md hover:bg-secondary transition-colors"
+      class="button-primary w-full"
       on:click={handleCheckout}
     >
       Checkout
     </button>
     <button 
-      class="w-full border border-primary text-primary py-2 rounded-md hover:bg-gray-50 transition-colors"
+      class="button-secondary w-full"
       on:click={viewCart}
     >
       View Cart
@@ -146,6 +146,7 @@
   .cart-slider {
     width: 400px;
     max-width: 100vw;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   }
 
   @media (max-width: 480px) {
