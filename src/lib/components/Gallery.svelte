@@ -71,7 +71,7 @@
 	.image-gallery {
 		display: flex;
 		width: 100%;
-		height: 80vh; /* Adjust container height as needed */
+		height: 80vh; /* Keep the original height */
 		overflow: hidden;
 		gap: var(--spacing-md);
 	}
@@ -86,11 +86,11 @@
 	}
 
 	.gallery-card:hover .gallery-image {
-		transform: scale(1.1); /* Slight zoom on hover */
+		transform: scale(1.1);
 	}
 
 	.gallery-hover {
-		flex: 75%; /* Expand when hovered */
+		flex: 75%;
 	}
 
 	.gallery-image {
@@ -100,21 +100,16 @@
 		transition: transform 0.3s ease;
 	}
 
-	/* Responsive styles for mobile */
+	/* Responsive adjustments */
 	@media (max-width: 767px) {
 		.image-gallery {
-			flex-direction: row;
-			height: auto;
-			overflow-x: auto;
-			scroll-snap-type: x mandatory;
-			-webkit-overflow-scrolling: touch;
-			gap: var(--spacing-xs);
+			height: 50vh; /* Smaller height on mobile */
 		}
+	}
 
-		.gallery-card {
-			flex: 0 0 80%;
-			scroll-snap-align: start;
-			margin-right: var(--spacing-xs);
+	@media (max-width: 480px) {
+		.image-gallery {
+			height: 40vh; /* Even smaller for very small screens */
 		}
 	}
 </style>

@@ -54,8 +54,8 @@ a {
   --spacing-md: 1rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
-  --page-padding: var(--spacing-md);
-  --page-padding-md: var(--spacing-lg);
+  --page-padding: var(--spacing-xl);
+  --page-padding-md: var(--spacing-xl);
 }
 
 /* Responsive Container */

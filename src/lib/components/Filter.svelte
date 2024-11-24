@@ -119,7 +119,7 @@
 
 		<div class="flex flex-col md:flex-row gap-lg">
 			<!-- Sidebar Filters -->
-			<aside class="filter-sidebar w-full md:w-1/4 bg-background p-md">
+			<aside class="filter-sidebar w-full md:w-1/4 bg-background">
 				<!-- Sort and Items Per Page Controls -->
 				<div class="filter-container space-y-xl">
 					<!-- Display Options -->
@@ -473,7 +473,6 @@
 	}
 
 	.filter-container {
-		padding: var(--spacing-xl);
 		background-color: var(--background-color);
 	}
 

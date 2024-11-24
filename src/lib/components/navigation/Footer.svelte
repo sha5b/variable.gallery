@@ -27,7 +27,7 @@
 </script>
 
 <footer class="footer-container bg-primary text-background px-page py-lg border-t border-secondary-bg">
-  <div class="container flex flex-col md:flex-row justify-between items-start gap-md">
+  <div class="flex flex-col md:flex-row justify-between items-start gap-md">
     <div class="footer-links-social flex flex-col md:flex-row gap-lg">
       <!-- Quick Links Section -->
       <div class="footer-links flex-shrink-0 text-left">
@@ -91,7 +91,6 @@
   .footer-container {
     background-color: var(--primary-color);
     color: var(--background-color);
-    padding: var(--page-padding) var(--spacing-lg);
   }
 
   .container {

@@ -62,93 +62,95 @@
 	}
 </script>
 
-<div class="product-container gap-md flex w-full flex-col items-stretch md:flex-row">
-	<!-- Product Details Section -->
-	<div class="product-details space-y-md bg-background flex-col md:w-1/3">
-		<h1 class="product-title text-xlarge text-primary font-bold">{latestProduct.name}</h1>
-		<p class="text-primary text-base">
-			{@html latestProduct.short_description || latestProduct.description}
-		</p>
+<div class="product-layout">
+	<!-- Product Details -->
+	<div class="product-details md:w-1/3">
+		<!-- Title and Description -->
+		<div class="mb-8">
+			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{latestProduct.name}</h1>
+			<p class="text-primary text-base">
+				{@html latestProduct.short_description || latestProduct.description}
+			</p>
+		</div>
 
-		{#if latestProduct.variation}
-			<p class="text-large text-primary">{latestProduct.variation.name}</p>
-		{/if}
-
-		<p class="text-small text-primary">
-			<strong>Editions:</strong>
+		<!-- Technical Details -->
+		<div class="technical-details space-y-2">
 			{#if latestProduct.variation}
-				{latestProduct.variation.stock_quantity || 'N/A'}
-			{:else}
-				{latestProduct.stock_quantity || 'N/A'}
+				<div class="detail-row">
+					<span class="detail-label">Edition</span>
+					<span class="detail-value">{latestProduct.variation.name}</span>
+				</div>
 			{/if}
-		</p>
-		<p class="text-small text-primary">
-			<strong>Stock Status:</strong>
-			{#if latestProduct.variation}
-				{latestProduct.variation.stock_status === 'instock' ? 'In Stock' : 'Out of Stock'}
-			{:else}
-				{latestProduct.stock_status === 'instock' ? 'In Stock' : 'Out of Stock'}
-			{/if}
-		</p>
 
-		<p class="price text-large text-primary font-semibold">
-			{#if latestProduct.variation}
-				{#if latestProduct.variation.sale_price}
-					<span class="sale-price text-secondary line-through">
-						€{latestProduct.variation.regular_price}
-					</span>
-					€{latestProduct.variation.sale_price}
-				{:else}
-					€{latestProduct.variation.regular_price || 'Price not available'}
+			<!-- Print Details -->
+			<div class="detail-row">
+				<span class="detail-label">Print</span>
+				<span class="detail-value">{latestProduct.attributes?.find(attr => attr.name.toLowerCase() === 'print')?.options[0] || 'N/A'}</span>
+			</div>
+
+			<!-- Stock Info -->
+			<div class="detail-row">
+				<span class="detail-label">Editions Available</span>
+				<span class="detail-value">{latestProduct.variation?.stock_quantity || latestProduct.stock_quantity || 'N/A'}</span>
+			</div>
+
+			<!-- Price -->
+			<div class="detail-row price-row">
+				<span class="detail-label">Price</span>
+				<span class="price-value">
+					{#if latestProduct.variation}
+						{#if latestProduct.variation.sale_price}
+							<span class="sale-price">€{latestProduct.variation.regular_price}</span>
+							€{latestProduct.variation.sale_price}
+						{:else}
+							€{latestProduct.variation.regular_price || 'Price not available'}
+						{/if}
+					{:else if latestProduct.sale_price && latestProduct.sale_price !== ''}
+						<span class="sale-price">€{latestProduct.regular_price}</span>
+						€{latestProduct.sale_price}
+					{:else if latestProduct.regular_price}
+						€{latestProduct.regular_price}
+					{:else}
+						Price not available
+					{/if}
+				</span>
+			</div>
+		</div>
+
+		<!-- Additional Info -->
+		{#if latestProduct.dimensions || latestProduct.weight || latestProduct.categories?.length > 0 || latestProduct.tags?.length > 0}
+			<div class="additional-info space-y-2 mt-8">
+				{#if latestProduct.dimensions}
+					<div class="detail-row">
+						<span class="detail-label">Dimensions</span>
+						<span class="detail-value">{latestProduct.dimensions.length || 'N/A'} x {latestProduct.dimensions.width || 'N/A'} x {latestProduct.dimensions.height || 'N/A'} cm</span>
+					</div>
 				{/if}
-			{:else if latestProduct.sale_price && latestProduct.sale_price !== ''}
-				<span class="sale-price text-secondary line-through">€{latestProduct.regular_price}</span>
-				€{latestProduct.sale_price}
-			{:else if latestProduct.regular_price}
-				€{latestProduct.regular_price}
-			{:else}
-				Price not available
-			{/if}
-		</p>
 
-		{#if latestProduct.dimensions}
-			<p class="product-info text-small">
-				<strong>Dimensions:</strong>
-				{latestProduct.dimensions.length || 'N/A'} x {latestProduct.dimensions.width || 'N/A'} x {latestProduct
-					.dimensions.height || 'N/A'} cm
-			</p>
-		{/if}
-		{#if latestProduct.weight}
-			<p class="product-info text-small">
-				<strong>Weight:</strong>
-				{latestProduct.weight || 'N/A'} kg
-			</p>
+				{#if latestProduct.categories?.length > 0}
+					<div class="tags-row">
+						{#each latestProduct.categories as category}
+							<span class="pill pill-primary pill-sm">{category.name}</span>
+						{/each}
+					</div>
+				{/if}
+
+				{#if latestProduct.tags?.length > 0}
+					<div class="tags-row">
+						{#each latestProduct.tags as tag}
+							<span class="pill pill-secondary pill-sm">{tag.name}</span>
+						{/each}
+					</div>
+				{/if}
+			</div>
 		{/if}
 
-		{#if latestProduct.categories?.length > 0}
-			<p class="product-info text-small">
-				<strong>Categories:</strong>
-				{#each latestProduct.categories as category}
-					<span class="pill pill-primary pill-sm">{category.name}</span>
-				{/each}
-			</p>
-		{/if}
-		{#if latestProduct.tags?.length > 0}
-			<p class="product-info text-small">
-				<strong>Tags:</strong>
-				{#each latestProduct.tags as tag}
-					<span class="pill pill-secondary pill-sm">{tag.name}</span>
-				{/each}
-			</p>
-		{/if}
-
-		<button on:click={addToCart} class="button-primary mt-4 px-4 py-2">Add to Cart</button>
+		<button on:click={addToCart} class="button-primary mt-8">Add to Cart</button>
 	</div>
 
 	<!-- Gallery Component -->
-	<div class="image-gallery md:w-2/3 relative">
+	<div class="gallery-container md:w-2/3">
 		<Gallery images={gallery} />
-		<button on:click={addToCart} class="button-primary absolute bottom-4 right-4">Add to Cart</button>
 	</div>
 </div>
 
@@ -183,30 +185,25 @@
 <CategorySlider {products} category={primaryCategory} />
 
 <style>
-	.product-container {
+	.product-layout {
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-md);
-		margin-top: 0;
 		width: 100%;
-		overflow: hidden;
+	}
+
+	.gallery-container {
+		width: 100%;
 	}
 
 	@media (min-width: 768px) {
-		.product-container {
+		.product-layout {
 			flex-direction: row;
+			align-items: flex-start;
 		}
 	}
 
 	.product-details {
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		padding-right: var(--spacing-md);
-		align-self: flex-start;
-		word-break: break-word;
-		flex: 1 1 33%;
-		background-color: var(--background-color);
 	}
 
 	.image-gallery {
@@ -224,17 +221,54 @@
 		flex: 1;
 	}
 
-	.product-info {
+	.detail-row {
 		display: flex;
-		gap: var(--spacing-xs);
-		flex-wrap: wrap;
+		justify-content: space-between;
 		align-items: center;
+		padding: var(--spacing-xs) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
+	}
+
+	.detail-label {
+		color: var(--text-color);
+		font-weight: 500;
+		text-transform: uppercase;
+		font-size: 0.875rem;
+		letter-spacing: 0.05em;
+	}
+
+	.detail-value {
+		color: var(--primary-color);
+		font-weight: 600;
+	}
+
+	.price-row {
+		border-bottom: none;
+		margin-top: var(--spacing-md);
+	}
+
+	.price-value {
+		font-size: 1.25rem;
+		font-weight: 700;
 	}
 
 	.sale-price {
 		color: var(--secondary-color);
 		text-decoration: line-through;
 		margin-right: 0.5em;
+		font-size: 1rem;
+	}
+
+	.tags-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-xs);
+		margin-top: var(--spacing-xs);
+	}
+
+	.additional-info {
+		padding-top: var(--spacing-md);
+		border-top: 1px solid var(--secondary-bg-color);
 	}
 
 	.button-primary {
@@ -253,7 +287,7 @@
 	}
 
 	@media (max-width: 767px) {
-		.product-container {
+		.product-layout {
 			flex-direction: column;
 		}
 
