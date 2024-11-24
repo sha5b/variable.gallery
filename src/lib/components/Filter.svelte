@@ -10,8 +10,11 @@
 	let minPrice = 0;
 	let maxPrice = 1000;
 	let currentPage = 1;
-	let itemsPerPage = 25;
+	let itemsPerPage = 12;
 	let sortBy = 'newest';
+
+	// Add this line - define the options array
+	const itemsPerPageOptions = [12, 24, 48, 96];
 
 	// Initialize price range from products
 	const productPrices = products.map(product => parseFloat(product.price));
@@ -93,24 +96,53 @@
 
 <div class="wrapper space-y-lg py-lg mb-[var(--spacing-xl)]">
 	<div class="flex flex-col gap-lg">
-		<!-- Filter Controls -->
+		<!-- Filter Controls - Simplified -->
 		<div class="filter-controls bg-background p-md rounded-lg">
-			<div class="flex flex-wrap gap-md justify-between items-center mb-md">
+			<div class="flex flex-wrap gap-md justify-between items-center">
+				<!-- Display Options -->
+				<div class="flex gap-md items-center">
+					<select 
+						id="sort-select"
+						bind:value={sortBy}
+						class="filter-select"
+					>
+						<option value="newest">Newest</option>
+						<option value="price-low">Price: Low to High</option>
+						<option value="price-high">Price: High to Low</option>
+					</select>
+
+					<select 
+						id="items-select"
+						bind:value={itemsPerPage}
+						class="filter-select"
+						on:change={() => currentPage = 1}
+					>
+						{#each itemsPerPageOptions as option}
+							<option value={option}>{option} per page</option>
+						{/each}
+					</select>
+				</div>
+
 				<!-- Active Filters -->
 				<div class="filter-tags flex flex-wrap gap-sm">
 					{#if selectedCategory}
-						<span class="active-filter pill pill-primary pill-sm" on:click={() => handleCategoryClick(selectedCategory)}>
-							Category: {selectedCategory} ×
+						<span class="pill pill-primary pill-sm" on:click={() => handleCategoryClick(selectedCategory)}>
+							{selectedCategory} ×
 						</span>
 					{/if}
 					{#if selectedTag}
-						<span class="active-filter pill pill-secondary pill-sm" on:click={() => handleTagClick(selectedTag)}>
-							Tag: {selectedTag} ×
+						<span class="pill pill-secondary pill-sm" on:click={() => handleTagClick(selectedTag)}>
+							{selectedTag} ×
 						</span>
 					{/if}
 					{#if selectedArtist}
-						<span class="active-filter pill pill-accent pill-sm" on:click={() => handleArtistClick(selectedArtist)}>
-							Artist: {selectedArtist} ×
+						<span class="pill pill-accent pill-sm" on:click={() => handleArtistClick(selectedArtist)}>
+							{selectedArtist} ×
+						</span>
+					{/if}
+					{#if priceChanged}
+						<span class="pill pill-neutral pill-sm">
+							€{minPrice} - €{maxPrice}
 						</span>
 					{/if}
 				</div>
@@ -118,47 +150,13 @@
 		</div>
 
 		<div class="flex flex-col md:flex-row gap-lg">
-			<!-- Sidebar Filters -->
-			<aside class="filter-sidebar w-full md:w-1/4 bg-background">
-				<!-- Sort and Items Per Page Controls -->
-				<div class="filter-container space-y-xl">
-					<!-- Display Options -->
-					<div class="filter-section">
-						<h2 class="section-title mb-lg">Display Options</h2>
-						<div class="flex flex-col gap-md">
-							<div class="filter-group">
-								<label for="sort-select" class="label-text">Sort by:</label>
-								<select 
-									id="sort-select"
-									bind:value={sortBy}
-									class="filter-select w-full"
-								>
-									<option value="newest">Newest</option>
-									<option value="price-low">Price: Low to High</option>
-									<option value="price-high">Price: High to Low</option>
-								</select>
-							</div>
-							
-							<div class="filter-group">
-								<label for="items-select" class="label-text">Items per page:</label>
-								<select 
-									id="items-select"
-									bind:value={itemsPerPage}
-									class="filter-select w-full"
-									on:change={() => currentPage = 1}
-								>
-									<option value={25}>25</option>
-									<option value={50}>50</option>
-									<option value={100}>100</option>
-								</select>
-							</div>
-						</div>
-					</div>
-
+			<!-- Sidebar Filters - More Compact -->
+			<aside class="filter-sidebar w-full md:w-1/5 bg-background p-md rounded-lg">
+				<div class="filter-container space-y-md">
 					<!-- Category -->
-					<div class="filter-section">
-						<h2 class="section-title mb-md">Category</h2>
-						<div class="pill-group">
+					<details class="filter-section">
+						<summary class="section-title cursor-pointer">Category</summary>
+						<div class="pill-group mt-sm">
 							{#each uniqueCategories as category}
 								<button 
 									on:click={() => handleCategoryClick(category)}
@@ -168,12 +166,12 @@
 								</button>
 							{/each}
 						</div>
-					</div>
+					</details>
 
 					<!-- Tags -->
-					<div class="filter-section">
-						<h2 class="section-title mb-md">Tags</h2>
-						<div class="pill-group">
+					<details class="filter-section">
+						<summary class="section-title cursor-pointer">Tags</summary>
+						<div class="pill-group mt-sm">
 							{#each uniqueTags as tag}
 								<button 
 									on:click={() => handleTagClick(tag)}
@@ -183,12 +181,12 @@
 								</button>
 							{/each}
 						</div>
-					</div>
+					</details>
 
 					<!-- Artist -->
-					<div class="filter-section">
-						<h2 class="section-title mb-md">Artist</h2>
-						<div class="pill-group">
+					<details class="filter-section">
+						<summary class="section-title cursor-pointer">Artist</summary>
+						<div class="pill-group mt-sm">
 							{#each uniqueArtists as artist}
 								<button 
 									on:click={() => handleArtistClick(artist)}
@@ -198,16 +196,14 @@
 								</button>
 							{/each}
 						</div>
-					</div>
+					</details>
 
 					<!-- Price Range -->
-					<div class="filter-section">
-						<h2 class="section-title mb-lg">Price Range</h2>
-						<div class="slider-container space-y-md">
-							<div class="flex flex-col gap-sm">
-								<label for="min-price" class="label-text">Min Price: €{minPrice}</label>
+					<details class="filter-section">
+						<summary class="section-title cursor-pointer">Price Range</summary>
+						<div class="slider-container mt-sm space-y-sm">
+							<div class="flex flex-col gap-xs">
 								<input
-									id="min-price"
 									type="range"
 									min={initialMinPrice}
 									max={initialMaxPrice}
@@ -215,11 +211,10 @@
 									on:input={(event) => handlePriceChange(event, 'min')}
 									class="w-full"
 								/>
+								<span class="text-sm">Min: €{minPrice}</span>
 							</div>
-							<div class="flex flex-col gap-sm">
-								<label for="max-price" class="label-text">Max Price: €{maxPrice}</label>
+							<div class="flex flex-col gap-xs">
 								<input
-									id="max-price"
 									type="range"
 									min={initialMinPrice}
 									max={initialMaxPrice}
@@ -227,43 +222,11 @@
 									on:input={(event) => handlePriceChange(event, 'max')}
 									class="w-full"
 								/>
-							</div>
-							<div class="price-range-display mt-sm">
-								<span>€{minPrice}</span>
-								<span>€{maxPrice}</span>
+								<span class="text-sm">Max: €{maxPrice}</span>
 							</div>
 						</div>
-					</div>
+					</details>
 				</div>
-
-				<!-- Active Filters Display -->
-				{#if selectedCategory || selectedTag || selectedArtist || priceChanged}
-					<div class="filter-group">
-						{#if selectedCategory}
-							<span class="active-filter" on:click={() => handleCategoryClick(selectedCategory)}>
-								Category: {selectedCategory} ×
-							</span>
-						{/if}
-						{#if selectedTag}
-							<span class="active-filter" on:click={() => handleTagClick(selectedTag)}>
-								Tag: {selectedTag} ×
-							</span>
-						{/if}
-						{#if selectedArtist}
-							<span class="active-filter" on:click={() => handleArtistClick(selectedArtist)}>
-								Artist: {selectedArtist} ×
-							</span>
-						{/if}
-						{#if priceChanged}
-							<span class="active-filter">
-								Price: €{minPrice} - €{maxPrice} ×
-							</span>
-						{/if}
-						<button class="clear-filters" on:click={clearFilters}>
-							Clear All Filters
-						</button>
-					</div>
-				{/if}
 			</aside>
 
 			<!-- Product Grid -->
@@ -477,8 +440,8 @@
 	}
 
 	.filter-section {
-		padding: var(--spacing-lg) 0;
 		border-bottom: 1px solid var(--secondary-bg-color);
+		padding: var(--spacing-sm) 0;
 	}
 
 	.filter-section:last-child {
@@ -486,45 +449,34 @@
 	}
 
 	.section-title {
-		font-size: var(--font-size-large);
+		font-size: var(--font-size-base);
 		color: var(--primary-color);
 		font-weight: 600;
-		letter-spacing: 0.5px;
 	}
 
 	.filter-select {
-		padding: var(--spacing-sm) var(--spacing-md);
+		padding: var(--spacing-xs) var(--spacing-sm);
 		border: 1px solid var(--secondary-bg-color);
-		border-radius: var(--spacing-xs);
+		border-radius: var(--border-radius);
 		background-color: var(--background-color);
-		transition: all 0.3s ease;
-	}
-
-	.filter-select:hover {
-		border-color: var(--primary-color);
-	}
-
-	.slider-container input[type="range"] {
-		margin: var(--spacing-xs) 0;
-	}
-
-	.price-range-display {
-		display: flex;
-		justify-content: space-between;
-		color: var(--text-color);
-		font-size: var(--font-size-small);
-		font-weight: 500;
 	}
 
 	.pill-group {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--spacing-xs);
-		margin: calc(var(--spacing-xs) * -1);
-		padding: var(--spacing-xs);
 	}
 
-	.pill-group .pill {
-		margin: 0;
+	details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	details summary::after {
+		content: '+';
+		float: right;
+	}
+
+	details[open] summary::after {
+		content: '−';
 	}
 </style>
