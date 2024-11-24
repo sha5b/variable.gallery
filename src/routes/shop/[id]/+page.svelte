@@ -1,6 +1,7 @@
 <script>
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import { addItem, toggleCartSlider  } from '$lib/stores/cartStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
