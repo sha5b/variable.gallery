@@ -29,6 +29,8 @@
 	<Footer />
 </div>
 
+<CartSlider />
+
 <style>
 	.site-wrapper {
 		width: 100%;
