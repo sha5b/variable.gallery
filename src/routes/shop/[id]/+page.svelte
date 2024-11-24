@@ -5,18 +5,20 @@
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import Gallery from '$lib/components/Gallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
+	import { onMount } from 'svelte';
 
 	export let data;
-	let { product, variation, products, artists } = data;
-
+	
+	// React to page parameter changes
+	$: ({ product, variation, products, artists } = data);
+	
 	let bioOpen = false;
-
 	let primaryCategory = '';
 	let gallery = [];
 	let artistInfo = null;
 	let artistName = '';
 
-	// No need to find product again since we already have it
+	// Move the reactive statement to watch product changes
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
 		primaryCategory = product.categories?.[0]?.name || '';

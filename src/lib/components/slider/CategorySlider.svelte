@@ -24,7 +24,7 @@
     }
 
     function onProductClick(product) {
-        handleProductClick(product.id, goto);
+        goto(`/shop/${product.id}`, { replaceState: false });
     }
 
     function getImageSrc(src) {

@@ -1,6 +1,7 @@
 <script>
     import { handleMouseMove, handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
     import { goto } from '$app/navigation';
+    import { navigating } from '$app/stores';
 
     export let products = [];
     export let artistName = '';
@@ -21,8 +22,8 @@
         handleMouseMove(event, slider, scrollState);
     }
 
-    function onProductClick(product) {
-        handleProductClick(product.id, goto);
+    async function onProductClick(product) {
+        goto(`/shop/${product.id}`, { replaceState: false });
     }
 
     function getImageSrc(src) {
