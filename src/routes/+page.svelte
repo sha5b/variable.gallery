@@ -70,7 +70,7 @@
 	</div>
 
 	<!-- Product Showcase Component outside the main grid layout -->
-	<ProductShowcase {products} {artists} />
+	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
 	<TagDisplay {products} />
 </div>
 

@@ -1,41 +1,46 @@
-import { fetchArtists, fetchProducts, fetchExhibitions, fetchMedia, fetchWooCommerceData } from '$lib/api';
+import { fetchProductWithVariations, fetchProducts, fetchArtists } from '$lib/api';
 
 export async function load() {
     try {
-        // Fetch all base data concurrently
-        const [baseProducts, artists, exhibitions, media] = await Promise.all([
-            fetchProducts(),
-            fetchArtists(),
-            fetchExhibitions(),
-            fetchMedia(),
-        ]);
-
-        // Batch fetch variations instead of individual requests
-        const productIds = baseProducts.map(product => product.id);
-        const allVariations = await fetchWooCommerceData(`products/variations/batch`, {
-            method: 'POST',
-            body: JSON.stringify({ product_ids: productIds })
+        // Fetch all products with their variations
+        const products = await fetchProducts({ 
+            params: { 
+                status: 'publish'
+            } 
         });
 
-        // Map variations back to products
-        const products = baseProducts.map(product => ({
-            ...product,
-            variation: allVariations[product.id]?.[0] || null
-        }));
+        // Get the latest product
+        const latestProduct = products.length > 0
+            ? products.reduce(
+                (latest, product) =>
+                    new Date(product.date_modified) > new Date(latest.date_modified) ? product : latest,
+                products[0]
+            )
+            : null;
+
+        // Fetch variation for the latest product
+        let variation = null;
+        if (latestProduct && latestProduct.type === 'variable' && latestProduct.variations?.length > 0) {
+            const { variation: latestVariation } = await fetchProductWithVariations(latestProduct.id);
+            variation = latestVariation;
+        }
+
+        // Fetch artists
+        const artists = await fetchArtists();
 
         return {
             products,
             artists,
-            exhibitions,
-            media
+            product: latestProduct,  // Add this to match shop/[id] structure
+            variation               // Add this to match shop/[id] structure
         };
     } catch (error) {
         console.error("Failed to fetch data:", error);
         return {
             products: [],
             artists: [],
-            exhibitions: [],
-            media: []
+            product: null,
+            variation: null
         };
     }
 }

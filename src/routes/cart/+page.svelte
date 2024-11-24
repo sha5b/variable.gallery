@@ -29,104 +29,121 @@
 	}
 </script>
 
-<div class="cart-container mx-auto my-lg p-md max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-lg">
-	<!-- Cart Items Section -->
-	<div class="col-span-2">
-		<h1 class="text-xlarge font-bold mb-lg">Cart</h1>
-		{#if $cart.length === 0}
-			<p>Your cart is empty.</p>
-		{:else}
-			<table class="w-full text-left border-separate space-y-md">
-				<thead>
-					<tr class="border-b text-large">
-						<th class="pb-md">Product</th>
-						<th></th>
-						<th class="pb-md text-right">Total</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each $cart as item}
-						<tr class="border-b">
-							<td class="py-md">
-								<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 object-cover" />
-							</td>
-							<td>
+<div class="px-page">
+	<div class="cart-container gap-md flex w-full flex-col md:flex-row">
+		<!-- Cart Items Section -->
+		<div class="cart-details space-y-md bg-background flex-col md:w-2/3">
+			<h1 class="text-xlarge text-primary font-bold mb-4">Cart</h1>
+			
+			{#if $cart.length === 0}
+				<p class="text-primary">Your cart is empty.</p>
+			{:else}
+				{#each $cart as item}
+					<div class="detail-row clean">
+						<div class="flex gap-md">
+							<img src={item.images[0]?.src} alt={item.name} class="h-24 w-24 object-cover" />
+							<div class="flex flex-col justify-between">
 								<div>
-									<h3 class="text-base font-semibold">{item.name}</h3>
-									<p class="text-gray-600">{formatPrice(item.price)}</p>
-									<div class="flex items-center mt-sm gap-xs">
-										<button class="quantity-btn" on:click={() => decreaseQuantity(item)}>-</button>
-										<span class="mx-3">{item.quantity}</span>
-										<button class="quantity-btn" on:click={() => increaseQuantity(item)}>+</button>
-									</div>
-									<a href="#" class="remove-btn mt-sm inline-block" on:click={() => removeItem(item.id)}>Remove item</a>
+									<h3 class="text-base font-semibold text-primary">{item.name}</h3>
+									{#if item.variation}
+										<p class="text-sm text-secondary">{item.variation.name}</p>
+									{/if}
+									<p class="text-primary">{formatPrice(item.price)}</p>
 								</div>
-							</td>
-							<td class="py-md text-right text-lg font-semibold">{formatPrice(item.quantity * item.price)}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{/if}
-	</div>
+								<div class="flex items-center gap-xs">
+									<button class="quantity-btn" on:click={() => decreaseQuantity(item)}>−</button>
+									<span class="mx-3">{item.quantity}</span>
+									<button class="quantity-btn" on:click={() => increaseQuantity(item)}>+</button>
+								</div>
+							</div>
+						</div>
+						<div class="flex flex-col items-end justify-between">
+							<span class="text-lg font-semibold text-primary">{formatPrice(item.quantity * item.price)}</span>
+							<button class="remove-btn" on:click={() => removeItem(item.id)}>Remove</button>
+						</div>
+					</div>
+				{/each}
+			{/if}
+		</div>
 
-	<!-- Cart Totals Section -->
-	<div class="cart-totals p-lg rounded-lg">
-		<h2 class="text-large font-bold mb-md">Cart Totals</h2>
-		<div class="mb-md">
-			<label class="block font-semibold mb-xs">Add a coupon</label>
-			<input type="text" placeholder="Coupon code" class="w-full border border-gray-300 p-sm" />
+		<!-- Cart Summary Section -->
+		<div class="cart-summary space-y-md bg-background flex-col md:w-1/3">
+			<h2 class="text-large text-primary font-bold mb-4">Summary</h2>
+			
+			<div class="detail-row clean">
+				<span class="detail-label">Subtotal</span>
+				<span class="detail-value">{formatPrice(total)}</span>
+			</div>
+
+			<div class="detail-row clean">
+				<span class="detail-label">Total</span>
+				<span class="detail-value text-lg font-bold">{formatPrice(total)}</span>
+			</div>
+
+			<button 
+				class="button-primary w-full mt-8" 
+				on:click={proceedToCheckout}
+				disabled={$cart.length === 0}
+			>
+				Proceed to Checkout
+			</button>
 		</div>
-		<div class="flex justify-between text-base font-semibold">
-			<span>Subtotal</span>
-			<span>{formatPrice(total)}</span>
-		</div>
-		<hr class="my-md" />
-		<div class="flex justify-between text-large font-bold">
-			<span>Total</span>
-			<span>{formatPrice(total)} EUR</span>
-		</div>
-		<button on:click={proceedToCheckout} class="button-primary w-full mt-md py-md">
-			Proceed to Checkout
-		</button>
 	</div>
 </div>
 
 <style>
 	.cart-container {
-		max-width: 1200px;
+		max-width: var(--max-width-lg);
+		margin: 0 auto;
 	}
 
-	/* Cart Totals Styling */
-	.cart-totals {
-		padding: var(--spacing-lg);
+	.detail-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		padding: var(--spacing-md) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
 	}
 
 	.quantity-btn {
 		padding: var(--spacing-xs) var(--spacing-sm);
 		border: 1px solid var(--border-color);
-		border-radius: var(--rounded-sm);
-	}
-
-	/* Remove button styling */
-	.remove-btn {
-		margin-top: var(--spacing-sm);
-		color: #ffffff; /* Ensures text is visible on red background */
-		background-color: var(--error-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		border-radius: var(--rounded-sm);
-		display: inline-block;
+		background: var(--background-color);
+		color: var(--text-color);
+		min-width: 2rem;
 		text-align: center;
-		font-weight: bold;
 	}
 
-	/* Responsive adjustments */
+	.remove-btn {
+		color: var(--error-color);
+		font-size: 0.875rem;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: var(--spacing-xs);
+	}
+
+	.button-primary {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		transition: all 0.2s ease-in-out;
+	}
+
+	.button-primary:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
 	@media (max-width: 767px) {
 		.cart-container {
-			padding: var(--spacing-md) var(--spacing-sm);
+			flex-direction: column;
 		}
 
-		.cart-totals {
+		.cart-details, .cart-summary {
 			width: 100%;
 		}
 	}

@@ -7,59 +7,67 @@
 
 	export let products;
 	export let artists;
+	export let product = null;
+	export let variation = null;
 
-	let latestProduct = null;
 	let gallery = [];
 	let artistInfo = null;
 	let artistName = '';
 	let primaryCategory = '';
 	let bioOpen = false;
 
-	$: {
-		// Get the latest product
-		latestProduct =
-			products.length > 0
-				? products.reduce(
-						(latest, product) =>
-							new Date(product.date_modified) > new Date(latest.date_modified) ? product : latest,
-						products[0]
-					)
-				: null;
-
-		if (latestProduct) {
-			gallery = latestProduct.images?.map((img) => img.src) || [];
-			primaryCategory =
-				latestProduct.categories && latestProduct.categories.length > 0
-					? latestProduct.categories[0].name
-					: '';
-
-			// Retrieve artist information
-			const artistAttr = latestProduct.attributes?.find(
-				(attr) => attr.name.toLowerCase() === 'artist'
-			)?.options[0];
-
-			artistInfo = artists.find(
-				(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
-			);
-			artistName = artistInfo ? artistInfo.title.rendered : '';
-		}
+	$: if (product) {
+		gallery = product.images?.map((img) => img.src) || [];
+		primaryCategory = product.categories?.[0]?.name || '';
+		
+		const artistAttr = product.attributes?.find(
+			(attr) => attr.name.toLowerCase() === 'artist'
+		)?.options[0];
+		
+		artistInfo = artists.find(
+			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
+		);
+		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
 	function addToCart() {
-		if (latestProduct) {
+		if (product) {
 			const cartItem = {
-				...latestProduct,
-				price: latestProduct.variation?.regular_price || latestProduct.regular_price,
-				variation: latestProduct.variation ? {
-					id: latestProduct.variation.id,
-					name: latestProduct.variation.name,
-					price: latestProduct.variation.regular_price,
-					stock_quantity: latestProduct.variation.stock_quantity,
-					stock_status: latestProduct.variation.stock_status
+				...product,
+				price: variation?.regular_price || product.regular_price,
+				variation: variation ? {
+					id: variation.id,
+					name: variation.name,
+					
+					price: variation.regular_price,
+					stock_quantity: variation.stock_quantity,
+					stock_status: variation.stock_status
 				} : null
 			};
 			addItem(cartItem);
 			toggleCartSlider();
+		}
+	}
+
+	// Helper function to get price display
+	function getPriceDisplay(product, variation) {
+		if (product.type === 'variable') {
+			return variation?.regular_price 
+				? `€${variation.regular_price}` 
+				: 'Price not available';
+		} else {
+			return product.regular_price 
+				? `€${product.regular_price}` 
+				: 'Price not available';
+		}
+	}
+
+	// Helper function to get stock status
+	function getStockStatus(product, variation) {
+		if (product.type === 'variable') {
+			return variation?.stock_status === 'instock' ? 'In Stock' : 'Out of Stock';
+		} else {
+			return product.stock_status === 'instock' ? 'In Stock' : 'Out of Stock';
 		}
 	}
 </script>
@@ -69,77 +77,79 @@
 	<div class="product-details md:w-1/3">
 		<!-- Title and Description -->
 		<div class="mb-8">
-			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{latestProduct.name}</h1>
+			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
 			<p class="text-primary text-base">
-				{@html latestProduct.short_description || latestProduct.description}
+				{@html product.short_description || product.description}
 			</p>
 		</div>
 
 		<!-- Technical Details -->
 		<div class="technical-details space-y-2">
-			{#if latestProduct.variation}
+			{#if variation}
 				<div class="detail-row">
 					<span class="detail-label">Edition</span>
-					<span class="detail-value">{latestProduct.variation.name}</span>
+					<span class="detail-value">{variation.name}</span>
 				</div>
 			{/if}
 
 			<!-- Print Details -->
 			<div class="detail-row">
 				<span class="detail-label">Print</span>
-				<span class="detail-value">{latestProduct.attributes?.find(attr => attr.name.toLowerCase() === 'print')?.options[0] || 'N/A'}</span>
+				<span class="detail-value">{product.attributes?.find(attr => attr.name.toLowerCase() === 'print')?.options[0] || 'N/A'}</span>
 			</div>
 
 			<!-- Stock Info -->
 			<div class="detail-row">
 				<span class="detail-label">Editions Available</span>
-				<span class="detail-value">{latestProduct.variation?.stock_quantity || latestProduct.stock_quantity || 'N/A'}</span>
+				<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
 			</div>
 
 			<!-- Price -->
-			<div class="detail-row price-row">
+			<div class="detail-row clean price-row">
 				<span class="detail-label">Price</span>
 				<span class="price-value">
-					{#if latestProduct.variation}
-						{#if latestProduct.variation.sale_price}
-							<span class="sale-price">€{latestProduct.variation.regular_price}</span>
-							€{latestProduct.variation.sale_price}
-						{:else}
-							€{latestProduct.variation.regular_price || 'Price not available'}
-						{/if}
-					{:else if latestProduct.sale_price && latestProduct.sale_price !== ''}
-						<span class="sale-price">€{latestProduct.regular_price}</span>
-						€{latestProduct.sale_price}
-					{:else if latestProduct.regular_price}
-						€{latestProduct.regular_price}
+					{#if product}
+						{getPriceDisplay(product, variation)}
 					{:else}
 						Price not available
+					{/if}
+				</span>
+			</div>
+
+			<!-- Stock Status -->
+			<div class="detail-row clean">
+				<span class="detail-label">Stock Status</span>
+				<span class="detail-value">
+					{#if product}
+						{getStockStatus(product, variation)}
+					{:else}
+						Out of Stock
 					{/if}
 				</span>
 			</div>
 		</div>
 
 		<!-- Additional Info -->
-		{#if latestProduct.dimensions || latestProduct.weight || latestProduct.categories?.length > 0 || latestProduct.tags?.length > 0}
+		{#if product.dimensions || product.weight || product.categories?.length > 0 || product.tags?.length > 0}
 			<div class="additional-info space-y-2 mt-8">
-				{#if latestProduct.dimensions}
+				{#if product.dimensions}
 					<div class="detail-row">
 						<span class="detail-label">Dimensions</span>
-						<span class="detail-value">{latestProduct.dimensions.length || 'N/A'} x {latestProduct.dimensions.width || 'N/A'} x {latestProduct.dimensions.height || 'N/A'} cm</span>
+						<span class="detail-value">{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm</span>
 					</div>
 				{/if}
 
-				{#if latestProduct.categories?.length > 0}
+				{#if product.categories?.length > 0}
 					<div class="tags-row">
-						{#each latestProduct.categories as category}
+						{#each product.categories as category}
 							<span class="pill pill-primary pill-sm">{category.name}</span>
 						{/each}
 					</div>
 				{/if}
 
-				{#if latestProduct.tags?.length > 0}
+				{#if product.tags?.length > 0}
 					<div class="tags-row">
-						{#each latestProduct.tags as tag}
+						{#each product.tags as tag}
 							<span class="pill pill-secondary pill-sm">{tag.name}</span>
 						{/each}
 					</div>

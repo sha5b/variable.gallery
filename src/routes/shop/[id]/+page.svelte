@@ -16,14 +16,18 @@
 	let artistInfo = null;
 	let artistName = '';
 
-	// Assign the product and prepare the gallery images
-	$: product = products ? products.find((p) => p.id === Number($page.params.id)) : null;
+	// No need to find product again since we already have it
 	$: if (product) {
 		gallery = product.images?.map((img) => img.src) || [];
-		primaryCategory = product.categories && product.categories.length > 0 ? product.categories[0].name : '';
-		// Retrieve artist information
-		const artistAttr = product.attributes.find((attr) => attr.name.toLowerCase() === 'artist')?.options[0];
-		artistInfo = artists.find((artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase());
+		primaryCategory = product.categories?.[0]?.name || '';
+		
+		const artistAttr = product.attributes?.find(
+			(attr) => attr.name.toLowerCase() === 'artist'
+		)?.options[0];
+		
+		artistInfo = artists.find(
+			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
+		);
 		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
@@ -47,152 +51,157 @@
 </script>
 
 <div class='px-page'>
-<div
-	class="product-container gap-md flex w-full flex-col md:flex-row"
->
-	<!-- Product Details Section with 1/3 width -->
-	<div class="product-details space-y-md bg-background flex-col md:w-1/3">
-		<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
-		<p class="text-primary text-base">{@html product.short_description || product.description}</p>
+{#if product}
+	<div class="product-container gap-md flex w-full flex-col md:flex-row">
+		<!-- Product Details Section with 1/3 width -->
+		<div class="product-details space-y-md bg-background flex-col md:w-1/3">
+			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
+			<p class="text-primary text-base">
+				{@html product.short_description || product.description || 'No description available'}
+			</p>
 
-		<!-- Technical Details -->
-		<div class="technical-details space-y-4">
-			<div class="detail-row clean">
-				<span class="detail-label">Edition</span>
-				<span class="detail-value">{variation ? variation.name : product.name}</span>
-			</div>
-
-			<div class="detail-row clean">
-				<span class="detail-label">Editions Available</span>
-				<span class="detail-value">
-					{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
-				</span>
-			</div>
-
-			<div class="detail-row clean">
-				<span class="detail-label">Stock Status</span>
-				<span class="detail-value">
-					{variation
-						? variation.stock_status === 'instock'
-							? 'In Stock'
-							: 'Out of Stock'
-						: product.stock_status === 'instock'
-							? 'In Stock'
-							: 'Out of Stock'}
-				</span>
-			</div>
-
-			<!-- Price Row -->
-			<div class="detail-row clean price-row">
-				<span class="detail-label">Price</span>
-				<span class="price-value">
-					{#if product.sale_price && product.sale_price !== ''}
-						<span class="sale-price">€{product.regular_price}</span>
-						€{product.sale_price}
-					{:else if variation?.regular_price}
-						€{variation.regular_price}
-					{:else if product.regular_price}
-						€{product.regular_price}
-					{:else}
-						Price not available
-					{/if}
-				</span>
-			</div>
-
-			{#if product.dimensions}
+			<!-- Technical Details -->
+			<div class="technical-details space-y-4">
 				<div class="detail-row clean">
-					<span class="detail-label">Dimensions</span>
+					<span class="detail-label">Edition</span>
+					<span class="detail-value">{variation ? variation.name : product.name}</span>
+				</div>
+
+				<div class="detail-row clean">
+					<span class="detail-label">Editions Available</span>
 					<span class="detail-value">
-						{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+						{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
 					</span>
 				</div>
-			{/if}
 
-			{#if product.weight}
 				<div class="detail-row clean">
-					<span class="detail-label">Weight</span>
-					<span class="detail-value">{product.weight || 'N/A'} kg</span>
+					<span class="detail-label">Stock Status</span>
+					<span class="detail-value">
+						{variation
+							? variation.stock_status === 'instock'
+								? 'In Stock'
+								: 'Out of Stock'
+							: product.stock_status === 'instock'
+								? 'In Stock'
+								: 'Out of Stock'}
+					</span>
+				</div>
+
+				<!-- Price Row -->
+				<div class="detail-row clean price-row">
+					<span class="detail-label">Price</span>
+					<span class="price-value">
+						{#if product.sale_price && product.sale_price !== ''}
+							<span class="sale-price">€{product.regular_price}</span>
+							€{product.sale_price}
+						{:else if variation?.regular_price}
+							€{variation.regular_price}
+						{:else if product.regular_price}
+							€{product.regular_price}
+						{:else}
+							Price not available
+						{/if}
+					</span>
+				</div>
+
+				{#if product.dimensions}
+					<div class="detail-row clean">
+						<span class="detail-label">Dimensions</span>
+						<span class="detail-value">
+							{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+						</span>
+					</div>
+				{/if}
+
+				{#if product.weight}
+					<div class="detail-row clean">
+						<span class="detail-label">Weight</span>
+						<span class="detail-value">{product.weight || 'N/A'} kg</span>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Categories and Tags -->
+			{#if product.categories.length > 0 || product.tags.length > 0}
+				<div class="tags-row">
+					{#each product.categories as category}
+						<span class="pill pill-secondary pill-sm">{category.name}</span>
+					{/each}
+					{#each product.tags as tag}
+						<span class="pill pill-accent pill-sm">{tag.name}</span>
+					{/each}
 				</div>
 			{/if}
+
+			<!-- Add to Cart Button -->
+			<button 
+				on:click={addToCart} 
+				class="button-primary w-full mt-8"
+			>
+				Add to Cart
+			</button>
 		</div>
 
-		<!-- Categories and Tags -->
-		{#if product.categories.length > 0 || product.tags.length > 0}
-			<div class="tags-row">
-				{#each product.categories as category}
-					<span class="pill pill-secondary pill-sm">{category.name}</span>
-				{/each}
-				{#each product.tags as tag}
-					<span class="pill pill-accent pill-sm">{tag.name}</span>
-				{/each}
-			</div>
-		{/if}
-
-		<!-- Add to Cart Button -->
-		<button 
-			on:click={addToCart} 
-			class="button-primary w-full mt-8"
-		>
-			Add to Cart
-		</button>
+		<!-- Gallery Component with 2/3 width -->
+		<div class="gallery-container md:w-2/3 relative">
+			<Gallery images={gallery} />
+		</div>
 	</div>
 
-	<!-- Gallery Component with 2/3 width -->
-	<div class="gallery-container md:w-2/3 relative">
-		<Gallery images={gallery} />
-	</div>
-</div>
-
-<!-- Artist Details Section -->
-{#if artistInfo}
-	<div class="artist-container gap-md bg-background flex flex-col md:flex-row pt-12">
-		<div class="flex flex-col items-start md:w-1/2">
-			<div class="artist-details space-y-md">
-				<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
-				
-				<!-- Artist Info -->
-				<div class="technical-details space-y-4">
-					<div class="detail-row clean">
-						<span class="detail-label">Name</span>
-						<span class="detail-value">{artistInfo.title.rendered}</span>
-					</div>
-
-					<div class="detail-row clean">
-						<span class="detail-label">Location</span>
-						<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
-					</div>
-
-					<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
-						<span class="detail-label">Bio</span>
-						<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
-					</div>
-
-					{#if bioOpen}
-						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-							<p class="text-primary text-base">
-								{artistInfo.acf?.description || 'No description available.'}
-							</p>
+	<!-- Artist Details Section -->
+	{#if artistInfo}
+		<div class="artist-container gap-md bg-background flex flex-col md:flex-row pt-12">
+			<div class="flex flex-col items-start md:w-1/2">
+				<div class="artist-details space-y-md">
+					<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
+					
+					<!-- Artist Info -->
+					<div class="technical-details space-y-4">
+						<div class="detail-row clean">
+							<span class="detail-label">Name</span>
+							<span class="detail-value">{artistInfo.title.rendered}</span>
 						</div>
-					{/if}
-				</div>
 
-				<button 
-					class="button-primary mt-8 w-full"
-					on:click={() => goto(`/artist/${artistInfo.slug}`)}
-				>
-					View Profile
-				</button>
+						<div class="detail-row clean">
+							<span class="detail-label">Location</span>
+							<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+						</div>
+
+						<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
+							<span class="detail-label">Bio</span>
+							<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+						</div>
+
+						{#if bioOpen}
+							<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+								<p class="text-primary text-base">
+									{artistInfo.acf?.description || 'No description available.'}
+								</p>
+							</div>
+						{/if}
+					</div>
+
+					<button 
+						class="button-primary mt-8 w-full"
+						on:click={() => goto(`/artist/${artistInfo.slug}`)}
+					>
+						View Profile
+					</button>
+				</div>
+			</div>
+
+			<div class="placeholder-column flex-1">
+				<ArtistSlider {products} artistName={artistInfo.title.rendered} />
 			</div>
 		</div>
+	{/if}
 
-		<div class="placeholder-column flex-1">
-			<ArtistSlider {products} artistName={artistInfo.title.rendered} />
-		</div>
+	<CategorySlider {products} category={primaryCategory} />
+{:else}
+	<div class="flex items-center justify-center h-[50vh]">
+		<p class="text-lg">Product not found</p>
 	</div>
 {/if}
-
-<CategorySlider {products} category={primaryCategory} />
-
 </div>
 
 <style>
