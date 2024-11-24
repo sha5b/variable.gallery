@@ -1,22 +1,25 @@
 <script>
 	import { page } from '$app/stores';
+	import { slide } from 'svelte/transition';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
+	import { goto } from '$app/navigation';
 
 	export let data;
 	let { products, artists, exhibitions } = data;
+	let bioOpen = false;
+	console.log(exhibitions);
 
 	let filteredArtist = null;
 	let artistProducts = [];
 	let artistExhibitions = [];
 
-	function normalizeTitle(title) {
-		return title.toLowerCase().replace(/-/g, ' ').trim();
-	}
+	let currentPage = 1;
+	const exhibitionsPerPage = 6;
 
 	$: {
-		const artistTitle = normalizeTitle($page.params.title || '');
+		const artistTitle = $page.params.title.toLowerCase().replace(/-/g, ' ').trim();
 		filteredArtist = artists.find(
-			(artist) => normalizeTitle(artist.title.rendered) === artistTitle
+			(artist) => artist.title.rendered.toLowerCase() === artistTitle
 		);
 
 		if (filteredArtist) {
@@ -28,129 +31,174 @@
 				)
 			);
 
-			artistExhibitions = exhibitions.filter((exhibition) =>
-				exhibition.acf?.artist?.includes(filteredArtist.id)
-			);
+			artistExhibitions = exhibitions
+				.filter((exhibition) => exhibition.acf?.artist?.includes(filteredArtist.id))
+				.sort((a, b) => {
+					const dateA = new Date(a.acf?.date?.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+					const dateB = new Date(b.acf?.date?.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+					return dateB - dateA;
+				});
+		}
+	}
+
+	function formatDate(dateString) {
+		if (!dateString) return 'No date';
+		const date = new Date(dateString.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		});
+	}
+
+	$: totalPages = Math.ceil(artistExhibitions.length / exhibitionsPerPage);
+	$: paginatedExhibitions = artistExhibitions.slice(
+		(currentPage - 1) * exhibitionsPerPage,
+		currentPage * exhibitionsPerPage
+	);
+
+	function changePage(page) {
+		if (page >= 1 && page <= totalPages) {
+			currentPage = page;
+		}
+	}
+
+	function handleExhibitionClick(exhibition) {
+		if (exhibition.acf?.link?.url) {
+			window.open(exhibition.acf.link.url, '_blank');
 		}
 	}
 </script>
 
 <div class="artist-container px-page py-lg">
 	{#if filteredArtist}
-		<!-- Main Grid Layout -->
-		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-			<!-- Left Column: Artist Info -->
-			<div class="lg:col-span-1">
-				<div class="artist-info space-y-8 sticky top-20">
-					{#if filteredArtist.acf?.image}
-						<div class="artist-thumbnail w-full">
-							<img
-								src={`/wp-content/uploads/${filteredArtist.acf.image}`}
-								alt={filteredArtist.title.rendered}
-								class="w-full h-auto object-cover rounded-lg shadow-md"
-							/>
-						</div>
-					{/if}
+		<div class="product-layout">
+			<!-- Left Column: Artist Details Section -->
+			<div class="product-details md:w-1/3">
+				<h1 class="text-xlarge text-primary font-bold mb-8">{filteredArtist.title.rendered}</h1>
 
-					<div class="artist-details space-y-6">
-						<div class="text-secondary">
-							<h2 class="text-xl font-semibold mb-2">Bio</h2>
-							<p class="text-base leading-relaxed">
+				<!-- Artist Info -->
+				<div class="technical-details space-y-4">
+					<div class="detail-row clean">
+						<span class="detail-label">Location</span>
+						<span class="detail-value">{filteredArtist.acf?.location || 'Unknown location'}</span>
+					</div>
+
+					<div class="detail-row clean">
+						<span class="detail-label">Years Active</span>
+						<span class="detail-value">{filteredArtist.acf?.yearsActive || 'Unknown'}</span>
+					</div>
+
+					<div class="detail-row clean">
+						<span class="detail-label">Specialties</span>
+						<span class="detail-value">{filteredArtist.acf?.specialties || 'Various'}</span>
+					</div>
+
+					<div class="detail-row clean">
+						<span class="detail-label">Exhibitions</span>
+						<span class="detail-value">{artistExhibitions.length}</span>
+					</div>
+
+					<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
+						<span class="detail-label">Bio</span>
+						<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+					</div>
+
+					{#if bioOpen}
+						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+							<p class="text-primary text-base">
 								{filteredArtist.acf?.description || 'No description available.'}
 							</p>
 						</div>
-						
-						<div class="text-secondary">
-							<h2 class="text-xl font-semibold mb-2">Location</h2>
-							<p class="text-base">
-								{filteredArtist.acf?.location || 'Unknown location'}
-							</p>
-						</div>
-
-						<!-- Quick Stats -->
-						<div class="quick-stats">
-							<h2 class="text-xl font-semibold mb-2">Artist Stats</h2>
-							<ul class="list-disc list-inside">
-								<li>Exhibitions: {artistExhibitions.length}</li>
-								<li>Years Active: {filteredArtist.acf?.yearsActive || 'Unknown'}</li>
-								<li>Specialties: {filteredArtist.acf?.specialties || 'Various'}</li>
-							</ul>
-						</div>
-
-						<!-- Social Media Links -->
-						{#if filteredArtist.acf?.socialMedia}
-							<div class="social-media">
-								<h2 class="text-xl font-semibold mb-2">Connect</h2>
-								<div class="flex space-x-4">
-									{#each filteredArtist.acf.socialMedia as social}
-										<a href={social.url} target="_blank" rel="noopener noreferrer" class="text-primary hover:text-secondary">
-											<!-- Add appropriate icon based on social media type -->
-											{social.platform}
-										</a>
-									{/each}
-								</div>
-							</div>
-						{/if}
-
-						<!-- Featured Artwork -->
-						{#if filteredArtist.acf?.featuredArtwork}
-							<div class="featured-artwork">
-								<h2 class="text-xl font-semibold mb-2">Featured Work</h2>
-								<img 
-									src={filteredArtist.acf.featuredArtwork.url} 
-									alt={filteredArtist.acf.featuredArtwork.title}
-									class="w-full h-auto object-cover rounded-lg shadow-md"
-								/>
-								<p class="text-sm mt-2 text-secondary">{filteredArtist.acf.featuredArtwork.title}</p>
-							</div>
-						{/if}
-					</div>
+					{/if}
 				</div>
+
+				<!-- Social Media Links -->
+				{#if filteredArtist.acf?.socialMedia}
+					<div class="social-media mt-8">
+						<h3 class="text-lg font-semibold mb-4">Connect</h3>
+						<div class="tags-row">
+							{#each filteredArtist.acf.socialMedia as social}
+								<a href={social.url} target="_blank" rel="noopener noreferrer" class="pill pill-secondary pill-sm">
+									{social.platform}
+								</a>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			</div>
 
-			<!-- Right Column: Exhibitions -->
-			<div class="lg:col-span-2">
-				<div class="space-y-6">
-					<h2 class="text-xl font-bold text-primary">Exhibitions</h2>
-					
-					{#if artistExhibitions?.length > 0}
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{#each artistExhibitions as exhibition}
-								<div class="exhibition-card">
-									<h3 class="text-lg font-semibold mb-2">
-										{exhibition.title.rendered}
-									</h3>
-									<div class="text-sm space-y-1 text-secondary">
-										<p>
-											<span class="font-medium">Date:</span> 
-											{new Date(exhibition.date).toLocaleDateString()}
-										</p>
-										<p>
-											<span class="font-medium">Location:</span> 
-											{exhibition.acf?.location || 'Unknown location'}
-										</p>
+			<!-- Right Column: Exhibitions Section -->
+			<div class="md:w-2/3">
+				{#if artistExhibitions?.length > 0}
+					<div class="exhibitions-section">
+						<h2 class="text-xlarge text-primary font-bold mb-8">exhibitions</h2>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+							{#each paginatedExhibitions as exhibition}
+								<div 
+									class="exhibition-card {exhibition.acf?.link?.url ? 'cursor-pointer' : ''}" 
+									on:click={() => handleExhibitionClick(exhibition)}
+								>
+									<div class="detail-row clean">
+										<span class="detail-label">Exhibition</span>
+										<span class="detail-value font-bold">{exhibition.title.rendered}</span>
+									</div>
+									<div class="detail-row clean">
+										<span class="detail-label">Date</span>
+										<span class="detail-value text-sm">{formatDate(exhibition.acf?.date)}</span>
+									</div>
+									<div class="detail-row clean">
+										<span class="detail-label">Location</span>
+										<span class="detail-value text-sm">{exhibition.acf?.location || 'Unknown location'}</span>
 									</div>
 									{#if exhibition.acf?.virtual}
-										<span class="virtual-badge">
-											Virtual Exhibition
-										</span>
+										<div class="mt-6">
+											<span class="pill pill-primary pill-sm">Virtual Exhibition</span>
+										</div>
 									{/if}
 								</div>
 							{/each}
 						</div>
-					{:else}
-						<p class="text-secondary">No exhibitions found for this artist.</p>
-					{/if}
-				</div>
+
+						{#if totalPages > 1}
+							<div class="pagination">
+								<button 
+									class="pagination-button" 
+									disabled={currentPage === 1}
+									on:click={() => changePage(currentPage - 1)}
+								>
+									Previous
+								</button>
+								
+								{#each Array(totalPages) as _, i}
+									<button 
+										class="pagination-button {currentPage === i + 1 ? 'active' : ''}"
+										on:click={() => changePage(i + 1)}
+									>
+										{i + 1}
+									</button>
+								{/each}
+								
+								<button 
+									class="pagination-button"
+									disabled={currentPage === totalPages}
+									on:click={() => changePage(currentPage + 1)}
+								>
+									Next
+								</button>
+							</div>
+						{/if}
+					</div>
+				{/if}
 			</div>
 		</div>
 
-		<!-- Artist Products Section -->
+		<!-- Artist's Works Section -->
 		{#if artistProducts?.length > 0}
-			<section class="artist-products mt-12">
-				<h2 class="text-xl font-bold text-primary mb-6">Artist's Works</h2>
+			<div class="mt-12">
+				<h2 class="text-xlarge text-primary font-bold mb-8">artist's works</h2>
 				<ArtistSlider products={artistProducts} artistName={filteredArtist.title.rendered} />
-			</section>
+			</div>
 		{/if}
 	{:else}
 		<p class="text-secondary text-center">Artist information not found.</p>
@@ -158,26 +206,79 @@
 </div>
 
 <style>
+	.product-layout {
+		display: flex;
+		gap: var(--spacing-md);
+		width: 100%;
+		margin-bottom: var(--spacing-xl);
+	}
+
 	.exhibition-card {
-		@apply bg-white p-4 rounded-lg border border-gray-200;
+		background-color: var(--background-color);
+		padding: var(--spacing-md);
 		transition: transform 0.2s ease;
 	}
 
-	.exhibition-card:hover {
+	.exhibition-card.cursor-pointer:hover {
 		transform: translateY(-2px);
 	}
 
-	.virtual-badge {
-		@apply inline-block mt-3 px-2 py-1 text-xs font-medium rounded-full;
+	.detail-row.clean {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-xs) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
+	}
+
+	.detail-label {
+		color: var(--text-color);
+		font-size: 0.875rem;
+	}
+
+	.detail-value {
+		color: var(--text-color);
+		text-align: right;
+	}
+
+	.bio-drawer {
+		padding: var(--spacing-sm) 0;
+	}
+
+	@media (max-width: 767px) {
+		.product-layout {
+			flex-direction: column;
+		}
+	}
+
+	.pagination {
+		display: flex;
+		justify-content: center;
+		gap: var(--spacing-xs);
+		margin-top: var(--spacing-lg);
+		padding: var(--spacing-md);
+	}
+
+	.pagination-button {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		background-color: var(--background-color);
+		color: var(--primary-color);
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	.pagination-button:hover:not(:disabled) {
 		background-color: var(--primary-color);
 		color: var(--background-color);
 	}
 
-	/* Make the artist info sticky on desktop */
-	@media (min-width: 1024px) {
-		.artist-info {
-			position: sticky;
-			top: 2rem;
-		}
+	.pagination-button.active {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+	}
+
+	.pagination-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>

@@ -3,6 +3,7 @@
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import { addItem, toggleCartSlider } from '$lib/stores/cartStore';
+	import { slide } from 'svelte/transition';
 
 	export let products;
 	export let artists;
@@ -12,6 +13,7 @@
 	let artistInfo = null;
 	let artistName = '';
 	let primaryCategory = '';
+	let bioOpen = false;
 
 	$: {
 		// Get the latest product
@@ -145,12 +147,13 @@
 			</div>
 		{/if}
 
-		<button on:click={addToCart} class="button-primary mt-8">Add to Cart</button>
 	</div>
 
 	<!-- Gallery Component -->
 	<div class="gallery-container md:w-2/3">
 		<Gallery images={gallery} />
+		
+		<button on:click={addToCart} class="button-primary mt-8">Add to Cart</button>
 	</div>
 </div>
 
@@ -158,25 +161,45 @@
 {#if artistInfo}
 	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
 		<div class="flex flex-col items-start md:w-1/2">
-			<div class="artist-details space-y-md mt-4 md:mt-0">
-				<h3 class="text-4xl text-primary font-bold">about the artist</h3>
-				<p class="text-primary text-base">
-					<strong>name:</strong>
-					{artistInfo.title.rendered}
-				</p>
-				<p class="text-primary text-base">
-					<strong>bio:</strong>
-					{artistInfo.acf?.description || 'No description available.'}
-				</p>
-				<p class="text-primary text-base">
-					<strong>location:</strong>
-					<span class="pill pill-accent pill-sm">{artistInfo.acf?.location || 'Unknown'}</span>
-				</p>
-				<a href={`/artist/${artistInfo.slug}`} class="artist-link text-accent">view profile</a>
+			<div class="artist-details space-y-md">
+				<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
+				
+				<!-- Artist Info -->
+				<div class="technical-details space-y-4">
+					<div class="detail-row clean">
+						<span class="detail-label">Name</span>
+						<span class="detail-value">{artistInfo.title.rendered}</span>
+					</div>
+
+					<div class="detail-row clean">
+						<span class="detail-label">Location</span>
+						<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+					</div>
+
+					<div class="detail-row clean cursor-pointer" on:click={() => bioOpen = !bioOpen}>
+						<span class="detail-label">Bio</span>
+						<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+					</div>
+
+					{#if bioOpen}
+						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+							<p class="text-primary text-base">
+								{artistInfo.acf?.description || 'No description available.'}
+							</p>
+						</div>
+					{/if}
+				</div>
+
+				<button 
+					class="button-primary mt-8 w-full"
+					on:click={() => goto(`/artist/${artistInfo.slug}`)}
+				>
+					View Profile
+				</button>
 			</div>
 		</div>
 
-		<div class="placeholder-column flex-1 rounded-md">
+		<div class="placeholder-column flex-1">
 			<ArtistSlider {products} artistName={artistInfo.title.rendered} />
 		</div>
 	</div>
@@ -214,11 +237,11 @@
 
 	.artist-container {
 		background-color: var(--background-color);
+		padding: var(--spacing-xl) 0;
 	}
 
 	.artist-details {
 		width: 100%;
-		flex: 1;
 	}
 
 	.detail-row {
@@ -231,15 +254,12 @@
 
 	.detail-label {
 		color: var(--text-color);
-		font-weight: 500;
-		text-transform: uppercase;
 		font-size: 0.875rem;
-		letter-spacing: 0.05em;
 	}
 
 	.detail-value {
-		color: var(--primary-color);
-		font-weight: 600;
+		color: var(--text-color);
+		text-align: right;
 	}
 
 	.price-row {
@@ -274,12 +294,10 @@
 	.button-primary {
 		background-color: var(--primary-color);
 		color: var(--background-color);
-		padding: var(--spacing-sm) var(--spacing-md);
-		border-radius: var(--spacing-xs);
-		transition: background-color 0.3s ease;
-		position: absolute;
-		bottom: var(--spacing-sm);
-		right: var(--spacing-sm);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: 0;
+		text-align: center;
+		font-size: 0.875rem;
 	}
 
 	.button-primary:hover {
@@ -300,5 +318,34 @@
 
 		.artist-container {
 		}
+	}
+
+	.bio-drawer {
+		padding: var(--spacing-sm) 0;
+	}
+
+	.artist-link {
+		display: inline-block;
+		margin-top: var(--spacing-md);
+		font-weight: 500;
+	}
+
+	.gallery-container {
+		position: relative;
+	}
+
+	.gallery-container .button-primary {
+		position: absolute;
+		bottom: var(--spacing-sm);
+		right: var(--spacing-sm);
+		padding: var(--spacing-sm) var(--spacing-md);
+	}
+
+	.detail-row.clean {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-xs) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
 	}
 </style>

@@ -6,7 +6,7 @@
 <style>
 	/* Base container styling */
 	.header-container {
-		height: 30vh;
+		height: 40vh;
 	}
 
 	/* Typography */
@@ -35,13 +35,13 @@
 			font-size: 10rem;
 		}
 		.header-container {
-			height: 40vh;
+			height: 50vh;
 		}
 	}
 
 	@media (min-width: 1280px) {
 		.headline {
-			font-size: 14rem;
+			font-size: 16rem;
 		}
 	}
 </style>

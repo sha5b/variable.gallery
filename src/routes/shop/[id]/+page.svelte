@@ -1,4 +1,5 @@
 <script>
+	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { addItem, toggleCartSlider  } from '$lib/stores/cartStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
@@ -7,6 +8,8 @@
 
 	export let data;
 	let { product, variation, products, artists } = data;
+
+	let bioOpen = false;
 
 	let primaryCategory = '';
 	let gallery = [];
@@ -43,115 +46,160 @@
 	}
 </script>
 
+<div class='px-page'>
 <div
-	class="product-container px-page gap-md flex w-full flex-col items-stretch md:flex-row"
+	class="product-container gap-md flex w-full flex-col md:flex-row"
 >
 	<!-- Product Details Section with 1/3 width -->
-	<div class="product-details space-y-md bg-background p-lg flex-col md:w-1/3">
-		<h1 class="product-title text-xlarge text-primary font-bold">{product.name}</h1>
+	<div class="product-details space-y-md bg-background flex-col md:w-1/3">
+		<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
 		<p class="text-primary text-base">{@html product.short_description || product.description}</p>
-		<p class="text-large text-primary">{variation ? variation.name : product.name}</p>
 
-		<p class="text-small text-primary">
-			<strong>Editions:</strong>
-			{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
-		</p>
-		<p class="text-small text-primary">
-			<strong>Stock Status:</strong>
-			{variation
-				? variation.stock_status === 'instock'
-					? 'In Stock'
-					: 'Out of Stock'
-				: product.stock_status === 'instock'
-					? 'In Stock'
-					: 'Out of Stock'}
-		</p>
+		<!-- Technical Details -->
+		<div class="technical-details space-y-4">
+			<div class="detail-row clean">
+				<span class="detail-label">Edition</span>
+				<span class="detail-value">{variation ? variation.name : product.name}</span>
+			</div>
 
-		<p class="price text-large text-primary font-semibold">
-			{#if product.sale_price && product.sale_price !== ''}
-				<span class="sale-price text-secondary line-through">€{product.regular_price}</span>
-				€{product.sale_price}
-			{:else if variation?.regular_price}
-				€{variation.regular_price}
-			{:else if product.regular_price}
-				€{product.regular_price}
-			{:else}
-				Price not available
+			<div class="detail-row clean">
+				<span class="detail-label">Editions Available</span>
+				<span class="detail-value">
+					{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
+				</span>
+			</div>
+
+			<div class="detail-row clean">
+				<span class="detail-label">Stock Status</span>
+				<span class="detail-value">
+					{variation
+						? variation.stock_status === 'instock'
+							? 'In Stock'
+							: 'Out of Stock'
+						: product.stock_status === 'instock'
+							? 'In Stock'
+							: 'Out of Stock'}
+				</span>
+			</div>
+
+			<!-- Price Row -->
+			<div class="detail-row clean price-row">
+				<span class="detail-label">Price</span>
+				<span class="price-value">
+					{#if product.sale_price && product.sale_price !== ''}
+						<span class="sale-price">€{product.regular_price}</span>
+						€{product.sale_price}
+					{:else if variation?.regular_price}
+						€{variation.regular_price}
+					{:else if product.regular_price}
+						€{product.regular_price}
+					{:else}
+						Price not available
+					{/if}
+				</span>
+			</div>
+
+			{#if product.dimensions}
+				<div class="detail-row clean">
+					<span class="detail-label">Dimensions</span>
+					<span class="detail-value">
+						{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
+					</span>
+				</div>
 			{/if}
-		</p>
 
-		{#if product.dimensions}
-			<p class="product-info text-small">
-				<strong>Dimensions:</strong>
-				{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product
-					.dimensions.height || 'N/A'} cm
-			</p>
-		{/if}
-		{#if product.weight}
-			<p class="product-info text-small"><strong>Weight:</strong> {product.weight || 'N/A'} kg</p>
-		{/if}
+			{#if product.weight}
+				<div class="detail-row clean">
+					<span class="detail-label">Weight</span>
+					<span class="detail-value">{product.weight || 'N/A'} kg</span>
+				</div>
+			{/if}
+		</div>
 
-		{#if product.categories.length > 0}
-			<div class="product-info">
+		<!-- Categories and Tags -->
+		{#if product.categories.length > 0 || product.tags.length > 0}
+			<div class="tags-row">
 				{#each product.categories as category}
 					<span class="pill pill-secondary pill-sm">{category.name}</span>
 				{/each}
-			</div>
-		{/if}
-		{#if product.tags.length > 0}
-			<div class="product-info">
 				{#each product.tags as tag}
 					<span class="pill pill-accent pill-sm">{tag.name}</span>
 				{/each}
 			</div>
 		{/if}
 
-		<button on:click={addToCart} class="button-primary mt-4 px-4 py-2">Add to Cart</button>
+		<!-- Add to Cart Button -->
+		<button 
+			on:click={addToCart} 
+			class="button-primary w-full mt-8"
+		>
+			Add to Cart
+		</button>
 	</div>
 
 	<!-- Gallery Component with 2/3 width -->
-	<div class="image-gallery md:w-2/3">
+	<div class="gallery-container md:w-2/3 relative">
 		<Gallery images={gallery} />
 	</div>
 </div>
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background mt-8 flex flex-col md:flex-row  px-page pt-12">
-		<!-- First Column: Artist Image and Details -->
+	<div class="artist-container gap-md bg-background flex flex-col md:flex-row pt-12">
 		<div class="flex flex-col items-start md:w-1/2">
-			<!-- Artist Details -->
-			<div class="artist-details space-y-md mt-4 md:mt-0">
-				<h3 class="text-large text-primary font-bold">about the artist</h3>
-				<p class="text-primary text-base">
-					<strong>name:</strong>
-					{artistInfo.title.rendered}
-				</p>
-				<p class="text-primary text-base">
-					<strong>bio:</strong>
-					{artistInfo.acf.description || 'No description available.'}
-				</p>
-				<p class="text-primary text-base">
-					<strong>location:</strong>
-					{artistInfo.acf.location || 'Unknown'}
-				</p>
-				<a href={artistInfo.link} target="_blank" class="artist-link text-accent">view profile</a>
+			<div class="artist-details space-y-md">
+				<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
+				
+				<!-- Artist Info -->
+				<div class="technical-details space-y-4">
+					<div class="detail-row clean">
+						<span class="detail-label">Name</span>
+						<span class="detail-value">{artistInfo.title.rendered}</span>
+					</div>
+
+					<div class="detail-row clean">
+						<span class="detail-label">Location</span>
+						<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+					</div>
+
+					<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
+						<span class="detail-label">Bio</span>
+						<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+					</div>
+
+					{#if bioOpen}
+						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+							<p class="text-primary text-base">
+								{artistInfo.acf?.description || 'No description available.'}
+							</p>
+						</div>
+					{/if}
+				</div>
+
+				<button 
+					class="button-primary mt-8 w-full"
+					on:click={() => goto(`/artist/${artistInfo.slug}`)}
+				>
+					View Profile
+				</button>
 			</div>
 		</div>
 
-		<!-- Second Column: Placeholder -->
-		<div class="placeholder-column flex-1 rounded-md ">
-			<ArtistSlider {products} artistName={artistInfo.title.rendered}/>
+		<div class="placeholder-column flex-1">
+			<ArtistSlider {products} artistName={artistInfo.title.rendered} />
 		</div>
 	</div>
-{:else}{/if}
+{/if}
 
 <CategorySlider {products} category={primaryCategory} />
+
+</div>
 
 <style>
 	.product-container {
 		display: flex;
 		width: 100%;
+		
 		overflow: hidden;
 		padding-top: var(--spacing-lg);
 	}
@@ -159,72 +207,74 @@
 	.product-details {
 		background-color: var(--background-color);
 		padding-right: var(--spacing-md);
-		align-self: flex-end;
 		word-break: break-word;
-		flex: 1 1 33%; /* Ensures the product details take up 1/3 */
 	}
 
-	.image-gallery {
-		width: 100%;
-		flex: 1 1 67%; /* Ensures the gallery takes up 2/3 */
-	}
-
-	.artist-container {
+	.detail-row.clean {
 		display: flex;
-		flex-direction: row;
-		background-color: var(--background-color);
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-xs) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
+	}
+
+	.detail-label {
+		color: var(--text-color);
+		font-size: 0.875rem;
+	}
+
+	.detail-value {
+		color: var(--text-color);
+		text-align: right;
+		font-size: 0.875rem;
+	}
+
+	.price-row {
 		margin-top: var(--spacing-md);
-		gap: var(--spacing-md);
 	}
 
-	.artist-thumbnail {
-		width: 100%;
-		max-width: 200px;
+	.price-value {
+		font-size: 1.25rem;
+		font-weight: 700;
 	}
 
-	.artist-details {
-		width: 100%;
-		flex: 1;
+	.tags-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-xs);
+		margin-top: var(--spacing-xs);
 	}
 
-	.product-title,
-	.product-info,
-	.price {
-		word-break: break-word;
+	.gallery-container {
+		position: relative;
+	}
+
+	.gallery-container .button-primary {
+		position: absolute;
+		bottom: var(--spacing-sm);
+		right: var(--spacing-sm);
+		padding: var(--spacing-sm) var(--spacing-md);
 	}
 
 	.button-primary {
 		background-color: var(--primary-color);
 		color: var(--background-color);
-		border-radius: var(--rounded-md);
-		transition: background-color 0.3s;
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: none;
+		cursor: pointer;
+		font-weight: 500;
+		transition: all 0.2s ease-in-out;
+		width: 100%;
 		text-align: center;
-		font-weight: 600;
 	}
 
 	.button-primary:hover {
 		background-color: var(--secondary-color);
+		transform: translateY(-1px);
 	}
 
-	.sale-price {
-		color: var(--secondary-color);
-		text-decoration: line-through;
-		margin-right: 0.5em;
-	}
-
-	@media (min-width: 768px) and (max-width: 1024px) {
-		.product-container {
-			flex-direction: row;
-			gap: var(--spacing-md);
-		}
-
-		.product-details {
-			flex: 0 0 35%;
-		}
-
-		.image-gallery {
-			flex: 0 0 65%;
-		}
+	.button-primary:active {
+		transform: translateY(0);
 	}
 
 	@media (max-width: 767px) {
@@ -233,23 +283,53 @@
 		}
 
 		.product-details {
-			flex: 0 0 100%;
-			width: 100%;
-			padding: var(--spacing-sm);
-			margin-bottom: var(--spacing-md);
-		}
-
-		.button-primary {
-			margin-bottom: var(--spacing-md);
-		}
-
-		.artist-container {
-			flex-direction: column;
-		}
-
-		.artist-thumbnail {
 			width: 100%;
 			margin-bottom: var(--spacing-md);
 		}
+	}
+
+	.artist-details {
+		width: 100%;
+	}
+
+	.detail-row.clean {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-xs) 0;
+		border-bottom: 1px solid var(--secondary-bg-color);
+	}
+
+	.detail-label {
+		color: var(--text-color);
+		font-size: 0.875rem;
+	}
+
+	.detail-value {
+		color: var(--text-color);
+		text-align: right;
+		font-size: 0.875rem;
+	}
+
+	.bio-drawer {
+		padding: var(--spacing-sm) 0;
+	}
+
+	.button-primary {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: var(--spacing-xs) var(--spacing-sm);
+		border-radius: 0;
+		text-align: center;
+		font-size: 0.875rem;
+	}
+
+	.button-primary:hover {
+		background-color: var(--secondary-color);
+	}
+
+	.artist-container {
+		background-color: var(--background-color);
+		padding: var(--spacing-xl) 0;
 	}
 </style>
