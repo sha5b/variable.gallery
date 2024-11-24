@@ -70,7 +70,7 @@
 	}
 </script>
 
-<div class="artist-container px-page py-lg">
+<div class="artist-page-container">
 	{#if filteredArtist}
 		<div class="product-layout">
 			<!-- Left Column: Artist Details Section -->
@@ -206,6 +206,20 @@
 </div>
 
 <style>
+	.artist-page-container {
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
+		padding: var(--spacing-md);
+		box-sizing: border-box;
+	}
+
+	@media (min-width: 768px) {
+		.artist-page-container {
+			padding: var(--page-padding);
+		}
+	}
+
 	.product-layout {
 		display: flex;
 		gap: var(--spacing-md);

@@ -47,43 +47,19 @@
 	getRandomTypeAndThumbnail();
 </script>
 
-<div class="shop-container px-page bg-background">
-	<div class="content w-full max-w-full">
-		<!-- Top Featured Slider -->
-		<div class="row-start-1 w-full">
-			<FeaturedSlider {products} />
-		</div>
-
-		<!-- Bottom Row with Product Banner and Category Grid -->
-		<div class="gap-md row-start-2 flex w-full flex-col md:flex-row">
-			<!-- Product Banner with Random Tag and Thumbnail -->
-			<div class="bg-alt w-full flex-1 md:w-auto">
-				<Header />
-			</div>
-
-			<!-- Category Display and Contact -->
-			<div class="gap-md flex w-full flex-1 flex-col md:w-auto">
-				<div class="bg-alt padding-lg"></div>
-				<Contact />
-			</div>
-		</div>
-	</div>
-
-	<!-- Product Showcase Component outside the main grid layout -->
+<div class="landing-container px-page">
+	<FeaturedSlider {products} />
+	<Header />
 	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
 	<TagDisplay {products} />
 </div>
 
 <style>
 	.landing-container {
-		width: 100vw; /* Ensures it fits the viewport width */
-		max-width: 100vw;
-		overflow-x: hidden; /* Prevents horizontal overflow */
-	}
-
-	.content {
-		max-width: 100%; /* Prevents child elements from expanding beyond container */
-		width: 100%; /* Full width to prevent overflow */
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
 		box-sizing: border-box;
+		position: relative;
 	}
 </style>

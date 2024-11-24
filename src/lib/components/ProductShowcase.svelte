@@ -322,7 +322,6 @@
 		.product-details {
 			flex: 0 0 100%;
 			width: 100%;
-			padding: var(--spacing-sm);
 			margin-bottom: var(--spacing-md);
 		}
 

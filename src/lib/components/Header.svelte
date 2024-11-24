@@ -1,47 +1,45 @@
-<div class="header-container bg-background flex h-full w-full flex-col items-start justify-end">
-	<h2 class="subheadline text-large md:text-xlarge m-0">gallerie fuer provisorische kunst und diverse austellungen.</h2>
-	<h1 class="headline m-0">variable.</h1>
+<div class="header-container bg-background flex w-full flex-col justify-end pt-32 md:pt-40 lg:pt-48">
+	<div class="flex flex-col-reverse sm:flex-row gap-8 w-full">
+		<div class="w-full sm:w-2/3 flex flex-col justify-end">
+			<h2 class="subheadline m-0 max-w-[90%] md:max-w-[80%] mb-8">
+				gallerie fuer provisorische kunst und diverse austellungen.
+			</h2>
+			<h1 class="headline m-0">variable.</h1>
+		</div>
+	</div>
 </div>
 
 <style>
-	/* Base container styling */
 	.header-container {
-		height: 40vh;
 	}
 
-	/* Typography */
 	.subheadline {
 		font-family: var(--font-primary);
 		color: var(--text-color);
+		font-size: 2rem;
+		line-height: 2.25rem;
 	}
 
 	.headline {
 		font-family: var(--font-heading);
 		font-weight: 900;
 		color: var(--primary-color);
-		font-size: 6rem;
-		line-height: 1;
+		line-height: 0.85;
+		width: 100%;
+		font-size: clamp(4.5rem, 15vw, 20rem);
 	}
 
-	/* Responsive adjustments */
+	@media (min-width: 640px) {
+		.subheadline {
+			font-size: 2.5rem;
+			line-height: 2.75rem;
+		}
+	}
+
 	@media (min-width: 768px) {
-		.headline {
-			font-size: 8rem;
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.headline {
-			font-size: 10rem;
-		}
-		.header-container {
-			height: 50vh;
-		}
-	}
-
-	@media (min-width: 1280px) {
-		.headline {
-			font-size: 16rem;
+		.subheadline {
+			font-size: 3rem;
+			line-height: 3.5rem;
 		}
 	}
 </style>

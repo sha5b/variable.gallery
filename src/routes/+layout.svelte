@@ -21,36 +21,25 @@
 
 <Loading isLoading={$navigating} />
 
-<div class="relative min-h-screen flex flex-col">
-	<!-- Navbar and Cart Overlay -->
-	<Navbar  {artists}/>
-	<div class="nav-filler"/>
-	<div
-		class={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 ease-in-out ${isOpen ? 'visible z-50 opacity-100' : 'invisible opacity-0'}`}
-		on:click={closeCart}
-	></div>
-
-	<!-- Main Content Area -->
-	<div class="flex-grow flex ">
-		<div class={`flex-grow transition-all duration-300 ${isOpen ? 'mr-[300px]' : 'mr-0'}`}>
-			<slot /> <!-- Page-specific content goes here -->
-		</div>
-
-		<!-- Cart Slider -->
-		<CartSlider bind:isOpen />
-	</div>
-
-	<!-- Footer that appears after the main content -->
+<div class="site-wrapper">
+	<Navbar {artists} />
+	<main>
+		<slot />
+	</main>
 	<Footer />
 </div>
 
-
 <style>
-	/* Optional: Add styling for a smoother layout */
-	.flex-grow {
-		min-height: 100%;
+	.site-wrapper {
+		width: 100%;
+		max-width: 100vw;
+		overflow-x: hidden;
+		position: relative;
 	}
-	.nav-filler {
-		height: 60px;
+
+	main {
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
 	}
 </style>
