@@ -96,6 +96,7 @@
             class="w-20 h-20 object-cover rounded-md cursor-pointer"
             on:click={() => onImageClick(item.id)}
           />
+          
           <div class="flex-1">
             <h3 class="font-medium text-primary">{item.name}</h3>
             <div class="flex items-center gap-2 mt-2">
