@@ -216,7 +216,7 @@
 	</div>
 {/if}
 
-<CategorySlider {products} category={primaryCategory} />
+<!-- <CategorySlider {products} category={primaryCategory} /> -->
 
 <style>
 	.product-layout {

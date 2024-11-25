@@ -7,19 +7,19 @@
 	console.log('Products:', {
 		count: products.length,
 		sample: products[0],
-		types: [...new Set(products.map(p => p.type))]
+		types: [...new Set(products.map((p) => p.type))]
 	});
 
 	console.log('Artists:', {
 		count: artists.length,
-		names: artists.map(a => a.name)
+		names: artists.map((a) => a.name)
 	});
 
 	console.log('Exhibitions:', exhibitions);
 
 	console.log('Media:', {
 		count: media.length,
-		types: [...new Set(media.map(m => m.media_type))]
+		types: [...new Set(media.map((m) => m.media_type))]
 	});
 
 	// Import components
@@ -45,11 +45,37 @@
 
 	// Call the function to initialize randomType and thumbnail
 	getRandomTypeAndThumbnail();
+
+	let productsByCategory = {};
+
+	// Organize products by category
+	if (products) {
+		products.forEach((product) => {
+			product.categories.forEach((category) => {
+				if (!productsByCategory[category.name]) {
+					productsByCategory[category.name] = [];
+				}
+				productsByCategory[category.name].push(product);
+			});
+		});
+	}
 </script>
 
 <div class="landing-container px-page">
 	<FeaturedSlider {products} />
 	<Header />
+	<div class="mb-12 grid grid-cols-1 gap-md md:grid-cols-2 mt-12">
+		{#each Object.keys(productsByCategory) as categoryName}
+			<div class="category-container transition-default w-full">
+				<h2 class="my-sm text-6xl font-semibold text-primary">
+					{categoryName}
+				</h2>
+
+				<!-- Use FeaturedSlider for each category's products -->
+				<FeaturedSlider products={productsByCategory[categoryName]} />
+			</div>
+		{/each}
+	</div>
 	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
 	<TagDisplay {products} />
 </div>
