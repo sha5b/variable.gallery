@@ -7,8 +7,7 @@
 
     let limitedProducts = products
         .slice()
-        .sort((a, b) => new Date(b.date_modified) - new Date(a.date_modified))
-        .slice(0, 20);
+        .sort(() => Math.random() - 0.5);
 
     let slider;
     let scrollState = {
