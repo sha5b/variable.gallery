@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://variable.gallery/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 10
+
+# Disallow paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /*?*
+
+# Allow important paths
+Allow: /artist/
+Allow: /shop/
+Allow: /about
+Allow: /exhibitions/ 
