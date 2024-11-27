@@ -4,7 +4,7 @@
 
     let companyInfo = {
         name: "variable.gallerie",
-        email: "support@variable.gallery",
+        email: "space@variable.gallery",
         location: "Lunar Orbit Station V.G-23",
         established: "2024",
         founder: "Shahab Nedaei"
@@ -87,8 +87,8 @@
                 </p>
                 <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
                     <li>General Inquiries: <a href="mailto:{companyInfo.email}" class="text-accent hover:underline">{companyInfo.email}</a></li>
-                    <li>Artist Relations: <a href="mailto:artists@variable.gallery" class="text-accent hover:underline">artists@variable.gallery</a></li>
-                    <li>Technical Support: <a href="mailto:support@variable.gallery" class="text-accent hover:underline">support@variable.gallery</a></li>
+                    <li>Artist Relations: <a href="mailto:space@variable.gallery" class="text-accent hover:underline">artists@variable.gallery</a></li>
+                    <li>Technical Support: <a href="mailto:space@variable.gallery" class="text-accent hover:underline">space@variable.gallery</a></li>
                 </ul>
             </section>
 

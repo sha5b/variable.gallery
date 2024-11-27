@@ -5,7 +5,7 @@
   
 	let companyInfo = {
 		name: "variable.gallerie",
-		email: "support@variable.gallery",
+		email: "space@variable.gallery",
 		location: "Lunar Orbit Station V.G-23",
 		established: "2024"
 	};
