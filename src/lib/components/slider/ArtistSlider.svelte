@@ -1,5 +1,5 @@
 <script>
-    import { handleMouseMove, handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
+    import { handleMouseMove, handleProductClick } from '$lib/utils/sliderHelper';
     import { goto } from '$app/navigation';
     import { navigating } from '$app/stores';
 
@@ -9,9 +9,7 @@
     $: filteredProducts = products.filter(product =>
         product.attributes.some(attr => attr.name.toLowerCase() === 'artist' && attr.options.includes(artistName))
     );
-    console.log('Filtered Products:', filteredProducts);
-    console.log('Artist Name:', artistName);
-    console.log('Products:', products);
+
     let slider;
     let scrollState = {
         scrollTarget: 0,
@@ -26,12 +24,25 @@
         goto(`/shop/${product.id}`, { replaceState: false });
     }
 
-    function getImageSrc(src) {
-        return preloadImage(src, 'static/placeholder.jpg');
+    async function loadImage(src) {
+        if (!src) return '/placeholder.jpg';
+        
+        try {
+            await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = src;
+            });
+            return src;
+        } catch (error) {
+            console.error('Error loading image:', error);
+            return '/placeholder.jpg';
+        }
     }
 </script>
 
-<section class='artist-slider-section '>
+<section class='artist-slider-section'>
     <div class="artist-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
         <div class="artist-slider gap-lg flex">
             {#each filteredProducts as product}
@@ -41,7 +52,11 @@
                             <span class="pill pill-primary pill-sm">{tag.name}</span>
                         {/each}
                     </div>
-                    <img src={getImageSrc(product.images[0]?.src)} alt={product.name} class="product-image" />
+                    {#await loadImage(product.images[0]?.src)}
+                        <img src="/placeholder.jpg" alt="Loading..." class="product-image" />
+                    {:then src}
+                        <img {src} alt={product.name} class="product-image" />
+                    {/await}
                 </div>
             {/each}
         </div>

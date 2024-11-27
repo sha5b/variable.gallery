@@ -7,7 +7,8 @@
 
     let limitedProducts = products
         .slice()
-        .sort(() => Math.random() - 0.5);
+        .sort(() => Math.random() - 0.5)
+        
 
     let slider;
     let scrollState = {
@@ -28,9 +29,29 @@
         handleProductClick(productId, goto);
     }
 
-    function getImageSrc(src) {
-        return preloadImage(src, '/placeholder.jpg');
+    async function getImageSrc(src) {
+        if (!src) return '/placeholder.jpg';
+        
+        try {
+            // Create a promise to load the image
+            await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = src;
+            });
+            return src;
+        } catch (error) {
+            console.error('Error loading image:', error);
+            return '/placeholder.jpg';
+        }
     }
+
+    // Add this to handle reactive loading of images
+    $: imagePromises = limitedProducts.map(product => ({
+        ...product,
+        loadedSrc: getImageSrc(product.images[0]?.src)
+    }));
 </script>
 
 <div class="featured-slider-container bg-background" bind:this={slider} on:mousemove={onHandleMouseMove}>
@@ -42,7 +63,11 @@
                         <span class="pill pill-primary pill-sm">{tag.name}</span>
                     {/each}
                 </div>
-                <img src={getImageSrc(product.images[0]?.src)} alt={product.name} class="product-image" />
+                {#await getImageSrc(product.images[0]?.src)}
+                    <img src="/placeholder.jpg" alt="Loading..." class="product-image" />
+                {:then src}
+                    <img {src} alt={product.name} class="product-image" />
+                {/await}
             </div>
         {/each}
     </div>
