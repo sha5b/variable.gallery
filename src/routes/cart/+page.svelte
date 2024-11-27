@@ -1,8 +1,32 @@
 <script>
 	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { goto } from '$app/navigation';
+	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
 	let total = $cart.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+	// Create cart-specific SEO
+	const pageSEO = {
+		...defaultSEO,
+		title: 'Cart | variable.gallery',
+		description: 'Review the items in your cart before proceeding to checkout. Ensure you have all the digital artworks and NFTs you wish to purchase.',
+		keywords: [
+			...defaultSEO.keywords,
+			'cart',
+			'shopping cart',
+			'digital art cart',
+			'NFT cart',
+			'review purchase'
+		],
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: 'Cart | variable.gallery',
+			description: 'Review the items in your cart before proceeding to checkout. Ensure you have all the digital artworks and NFTs you wish to purchase.',
+			url: 'https://variable.gallery/cart'
+		}
+	};
+
+	$: metaTags = generateMetaTags(pageSEO);
 
 	function increaseQuantity(item) {
 		addItem(item);
@@ -28,6 +52,17 @@
 		return `€${(price / 1).toFixed(2)}`;
 	}
 </script>
+
+<svelte:head>
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+</svelte:head>
 
 <div class="px-page">
 	<div class="cart-container gap-md flex w-full flex-col md:flex-row">

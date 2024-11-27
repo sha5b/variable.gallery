@@ -1,11 +1,47 @@
 <!-- PrivacyPolicy.svelte -->
 <script>
+    import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+
     let companyInfo = {
         name: "variable.gallerie",
         email: "support@variable.gallery",
         location: "Lunar Orbit Station V.G-23"
     };
+
+    // Create privacy policy-specific SEO
+    const pageSEO = {
+        ...defaultSEO,
+        title: 'Privacy Policy | variable.gallery',
+        description: 'Learn about how variable.gallery handles and protects your personal data. Our privacy policy outlines our data collection, usage, and protection practices.',
+        keywords: [
+            ...defaultSEO.keywords,
+            'privacy policy',
+            'data protection',
+            'user privacy',
+            'GDPR compliance',
+            'data security'
+        ],
+        openGraph: {
+            ...defaultSEO.openGraph,
+            title: 'Privacy Policy | variable.gallery',
+            description: 'Learn about how variable.gallery handles and protects your personal data. Our privacy policy outlines our data collection, usage, and protection practices.',
+            url: 'https://variable.gallery/privacy-policy'
+        }
+    };
+
+    $: metaTags = generateMetaTags(pageSEO);
 </script>
+
+<svelte:head>
+    <title>{pageSEO.title}</title>
+    {#each metaTags as tag}
+        {#if tag.name}
+            <meta name={tag.name} content={tag.content}>
+        {:else if tag.property}
+            <meta property={tag.property} content={tag.content}>
+        {/if}
+    {/each}
+</svelte:head>
 
 <div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
     <div class="flex flex-col md:flex-row gap-lg items-start">

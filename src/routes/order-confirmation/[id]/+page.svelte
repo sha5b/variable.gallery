@@ -3,9 +3,32 @@
 	import { fetchWooCommerceData } from '$lib/api';
 	import { userInfo } from '$lib/stores/userInfoStore';
     import { get } from 'svelte/store'; // Import get to access store value
+    import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
 	let orderData = null;
 	let paymentStatusMessage = 'Checking payment status...';
+
+	// Create order confirmation-specific SEO
+	const pageSEO = {
+		...defaultSEO,
+		title: 'Order Confirmation | variable.gallery',
+		description: 'Thank you for your purchase! View your order details and payment status on this page.',
+		keywords: [
+			...defaultSEO.keywords,
+			'order confirmation',
+			'purchase details',
+			'payment status',
+			'digital art order'
+		],
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: 'Order Confirmation | variable.gallery',
+			description: 'Thank you for your purchase! View your order details and payment status on this page.',
+			url: 'https://variable.gallery/order-confirmation'
+		}
+	};
+
+	$: metaTags = generateMetaTags(pageSEO);
 
 	function formatPrice(price) {
 		return `€${(price / 1).toFixed(2)}`;
@@ -34,6 +57,17 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+</svelte:head>
 
 <div class="px-page">
 	{#if orderData}

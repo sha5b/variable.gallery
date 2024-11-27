@@ -1,10 +1,35 @@
 <script>
+  import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
   import { goto } from '$app/navigation';
   import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
   import TagDisplay from '$lib/components/Filter.svelte';
 
   export let data;
   const { products, error } = data;
+
+  // Create page-specific SEO by extending defaultSEO
+  const pageSEO = {
+    ...defaultSEO,
+    title: 'Shop Digital Art | variable.gallery',
+    description: 'Browse and collect unique digital artworks, NFTs, and experimental media. Discover limited editions and original pieces from emerging and established artists.',
+    keywords: [
+      ...defaultSEO.keywords,
+      'buy digital art',
+      'collect NFTs',
+      'digital art marketplace',
+      'limited editions',
+      'original artwork',
+      'art collection'
+    ],
+    openGraph: {
+      ...defaultSEO.openGraph,
+      title: 'Shop Digital Art | variable.gallery',
+      description: 'Browse and collect unique digital artworks, NFTs, and experimental media. Discover limited editions and original pieces from emerging and established artists.',
+      url: 'https://variable.gallery/shop'
+    }
+  };
+
+  $: metaTags = generateMetaTags(pageSEO);
 
   let productsByCategory = {};
 
@@ -24,6 +49,38 @@
     goto(`/shop/${productId}`);
   }
 </script>
+
+<svelte:head>
+  <title>{pageSEO.title}</title>
+  {#each metaTags as tag}
+    {#if tag.name}
+      <meta name={tag.name} content={tag.content}>
+    {:else if tag.property}
+      <meta property={tag.property} content={tag.content}>
+    {/if}
+  {/each}
+  <!-- Add structured data for product listing -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Digital Art Shop | variable.gallery",
+      "description": "{pageSEO.description}",
+      "url": "https://variable.gallery/shop",
+      "numberOfItems": "{products?.length || 0}",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "EUR",
+        "availability": "https://schema.org/InStock"
+      },
+      "provider": {
+        "@type": "ArtGallery",
+        "name": "variable.gallery",
+        "url": "https://variable.gallery"
+      }
+    }
+  </script>
+</svelte:head>
 
 <div class="shop-container px-page bg-background">
   {#if error}
@@ -60,5 +117,4 @@
   .text-error {
     color: var(--error-color);
   }
-
 </style>

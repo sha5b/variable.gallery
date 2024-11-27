@@ -1,4 +1,5 @@
 <script>
+	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -10,9 +11,30 @@
 
 	export let data;
 	
-	// React to page parameter changes
-	$: ({ product, variation, products, artists } = data);
-	
+	const { product, variation, products, artists } = data;
+
+	// Create product-specific SEO
+	const pageSEO = {
+		...defaultSEO,
+		title: `${product.name} | variable.gallery`,
+		description: product.short_description || product.description || 'Explore this unique digital artwork.',
+		keywords: [
+			...defaultSEO.keywords,
+			product.name,
+			product.categories.map(c => c.name).join(', '),
+			product.tags.map(t => t.name).join(', ')
+		],
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: `${product.name} | variable.gallery`,
+			description: product.short_description || product.description || 'Explore this unique digital artwork.',
+			url: `https://variable.gallery/shop/${product.id}`,
+			image: product.images?.[0]?.src || defaultSEO.openGraph.image
+		}
+	};
+
+	$: metaTags = generateMetaTags(pageSEO);
+
 	let bioOpen = false;
 	let primaryCategory = '';
 	let gallery = [];
@@ -52,6 +74,38 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+	<!-- Add structured data for the product -->
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Product",
+			"name": "{product.name}",
+			"description": "{pageSEO.description}",
+			"image": "{pageSEO.openGraph.image}",
+			"brand": {
+				"@type": "Brand",
+				"name": "variable.gallery"
+			},
+			"offers": {
+				"@type": "Offer",
+				"url": "https://variable.gallery/shop/{product.id}",
+				"priceCurrency": "EUR",
+				"price": "{variation?.regular_price || product.regular_price}",
+				"availability": "{variation?.stock_status || product.stock_status}"
+			}
+		}
+	</script>
+</svelte:head>
 
 <div class='px-page'>
 {#if product}

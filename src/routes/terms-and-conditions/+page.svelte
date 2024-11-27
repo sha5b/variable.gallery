@@ -1,11 +1,47 @@
 <!-- TermsAndConditions.svelte -->
 <script>
+    import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+
     let companyInfo = {
         name: "variable.gallerie",
         email: "support@variable.gallery",
         location: "Lunar Orbit Station V.G-23"
     };
+
+    // Create page-specific SEO by extending defaultSEO
+    const pageSEO = {
+        ...defaultSEO,
+        title: 'Terms and Conditions | variable.gallery',
+        description: 'Terms and conditions for variable.gallery digital art platform. Learn about our policies, user agreements, and operational guidelines.',
+        keywords: [
+            ...defaultSEO.keywords,
+            'terms of service',
+            'user agreement',
+            'legal terms',
+            'digital art terms',
+            'gallery policies'
+        ],
+        openGraph: {
+            ...defaultSEO.openGraph,
+            title: 'Terms and Conditions | variable.gallery',
+            description: 'Terms and conditions for variable.gallery digital art platform. Learn about our policies, user agreements, and operational guidelines.',
+            url: 'https://variable.gallery/terms-and-conditions'
+        }
+    };
+
+    $: metaTags = generateMetaTags(pageSEO);
 </script>
+
+<svelte:head>
+    <title>{pageSEO.title}</title>
+    {#each metaTags as tag}
+        {#if tag.name}
+            <meta name={tag.name} content={tag.content}>
+        {:else if tag.property}
+            <meta property={tag.property} content={tag.content}>
+        {/if}
+    {/each}
+</svelte:head>
 
 <div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
     <div class="flex flex-col md:flex-row gap-lg items-start">

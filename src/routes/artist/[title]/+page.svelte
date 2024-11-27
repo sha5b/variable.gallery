@@ -3,6 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { goto } from '$app/navigation';
+	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
 	export let data;
 	let { products, artists, exhibitions } = data;
@@ -68,7 +69,43 @@
 			window.open(exhibition.acf.link.url, '_blank');
 		}
 	}
+
+	// Create artist-specific SEO
+	$: pageSEO = filteredArtist ? {
+		...defaultSEO,
+		title: `${filteredArtist.title.rendered} | variable.gallery`,
+		description: filteredArtist.acf?.description || `Explore the digital artworks and exhibitions of ${filteredArtist.title.rendered} at variable.gallery.`,
+		keywords: [
+			...defaultSEO.keywords,
+			filteredArtist.title.rendered,
+			'digital artist',
+			'NFT artist',
+			'virtual exhibitions',
+			filteredArtist.acf?.specialties || '',
+			filteredArtist.acf?.location || ''
+		].filter(Boolean),
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: `${filteredArtist.title.rendered} | variable.gallery`,
+			description: filteredArtist.acf?.description || `Explore the digital artworks and exhibitions of ${filteredArtist.title.rendered} at variable.gallery.`,
+			url: `https://variable.gallery/artist/${$page.params.title}`,
+			image: filteredArtist.acf?.profileImage || defaultSEO.openGraph.image
+		}
+	} : defaultSEO;
+
+	$: metaTags = generateMetaTags(pageSEO);
 </script>
+
+<svelte:head>
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+</svelte:head>
 
 <div class="artist-page-container">
 	{#if filteredArtist}
@@ -132,7 +169,7 @@
 			<div class="md:w-2/3">
 				{#if artistExhibitions?.length > 0}
 					<div class="exhibitions-section">
-						<h2 class="text-xlarge text-primary font-bold mb-8">exhibitions</h2>
+						<h2 class="text-xlarge text-primary font-bold mb-8">Exhibitions</h2>
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 							{#each paginatedExhibitions as exhibition}
 								<div 
@@ -196,7 +233,7 @@
 		<!-- Artist's Works Section -->
 		{#if artistProducts?.length > 0}
 			<div class="mt-12">
-				<h2 class="text-xlarge text-primary font-bold mb-8">artist's works</h2>
+				<h2 class="text-xlarge text-primary font-bold mb-8">Artist's Works</h2>
 				<ArtistSlider products={artistProducts} artistName={filteredArtist.title.rendered} />
 			</div>
 		{/if}

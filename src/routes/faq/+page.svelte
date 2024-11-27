@@ -1,7 +1,33 @@
 <!-- FAQPage.svelte -->
 <script>
+    import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
     import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
   
+    // Create FAQ-specific SEO
+    const pageSEO = {
+        ...defaultSEO,
+        title: 'FAQ | variable.gallery',
+        description: 'Find answers to common questions about our digital art gallery, NFTs, shipping, authenticity certificates, and payment options.',
+        keywords: [
+            ...defaultSEO.keywords,
+            'FAQ',
+            'frequently asked questions',
+            'digital art help',
+            'NFT questions',
+            'art shipping',
+            'payment options',
+            'authenticity certificates'
+        ],
+        openGraph: {
+            ...defaultSEO.openGraph,
+            title: 'FAQ | variable.gallery',
+            description: 'Find answers to common questions about our digital art gallery, NFTs, shipping, authenticity certificates, and payment options.',
+            url: 'https://variable.gallery/faq'
+        }
+    };
+
+    $: metaTags = generateMetaTags(pageSEO);
+
     let faqs = [
         {
             question: "What types of artworks can I purchase?",
@@ -58,6 +84,35 @@
         }
     ];
 </script>
+
+<svelte:head>
+    <title>{pageSEO.title}</title>
+    {#each metaTags as tag}
+        {#if tag.name}
+            <meta name={tag.name} content={tag.content}>
+        {:else if tag.property}
+            <meta property={tag.property} content={tag.content}>
+        {/if}
+    {/each}
+    <!-- Add FAQ structured data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                ...faqs,
+                ...technicalFaqs
+            ].map(faq => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": faq.answer
+                }
+            }))
+        }
+    </script>
+</svelte:head>
 
 <div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
     <div class="flex flex-col md:flex-row gap-lg items-start">

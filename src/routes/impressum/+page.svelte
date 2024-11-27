@@ -1,5 +1,7 @@
 <!-- Impressum.svelte -->
 <script>
+    import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+
     let companyInfo = {
         name: "variable.gallerie",
         email: "support@variable.gallery",
@@ -7,7 +9,41 @@
         established: "2024",
         founder: "Shahab Nedaei"
     };
+
+    // Create impressum-specific SEO
+    const pageSEO = {
+        ...defaultSEO,
+        title: 'Impressum | variable.gallery',
+        description: 'Legal information and company details for variable.gallery, a digital art platform specializing in NFTs and experimental media.',
+        keywords: [
+            ...defaultSEO.keywords,
+            'impressum',
+            'legal information',
+            'company details',
+            'digital art legal',
+            'NFT legal'
+        ],
+        openGraph: {
+            ...defaultSEO.openGraph,
+            title: 'Impressum | variable.gallery',
+            description: 'Legal information and company details for variable.gallery, a digital art platform specializing in NFTs and experimental media.',
+            url: 'https://variable.gallery/impressum'
+        }
+    };
+
+    $: metaTags = generateMetaTags(pageSEO);
 </script>
+
+<svelte:head>
+    <title>{pageSEO.title}</title>
+    {#each metaTags as tag}
+        {#if tag.name}
+            <meta name={tag.name} content={tag.content}>
+        {:else if tag.property}
+            <meta property={tag.property} content={tag.content}>
+        {/if}
+    {/each}
+</svelte:head>
 
 <div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
     <div class="flex flex-col md:flex-row gap-lg items-start">

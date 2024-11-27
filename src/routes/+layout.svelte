@@ -1,6 +1,7 @@
 <script>
 	import '../app.css';
 	import { navigating } from '$app/stores';
+	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
 
 	import Footer from '$lib/components/navigation/Footer.svelte';
@@ -8,16 +9,63 @@
 	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
 	import Loading from '$lib/components/Loading.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
+	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
 	export let data;
 	const { artists } = data;
 	
 	$: isOpen = $isCartSliderOpen;
+	$: currentPath = $page.url.pathname;
+	
+	// Create layout-specific SEO that will serve as fallback
+	$: pageSEO = {
+		...defaultSEO,
+		openGraph: {
+			...defaultSEO.openGraph,
+			url: `https://variable.gallery${currentPath}`
+		}
+	};
+	
+	$: metaTags = generateMetaTags(pageSEO);
 
 	function closeCart() {
-		closeCartSlider(); // Close the cart when clicking on the overlay
+		closeCartSlider();
 	}
 </script>
+
+<svelte:head>
+	<!-- Default SEO tags that can be overridden by individual pages -->
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+	<link rel="canonical" href={pageSEO.openGraph.url}>
+	
+	<!-- Global site metadata -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="/favicon.png">
+	
+	<!-- Structured data for organization -->
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "Organization",
+			"name": "variable.gallery",
+			"url": "https://variable.gallery",
+			"logo": "https://variable.gallery/logo.png",
+			"sameAs": [
+				"https://twitter.com/variablegallery",
+				"https://instagram.com/variable.gallery"
+			]
+		}
+	</script>
+</svelte:head>
 
 <Loading isLoading={$navigating} />
 

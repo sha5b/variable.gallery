@@ -6,14 +6,39 @@
 	import { get } from 'svelte/store';
 	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
+	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+
 	export let data;
-	const {products} = data
+	const { products } = data;
 
 	let stripe, elements, cardElement, paymentRequest, prButton;
 	let paymentSuccess = false;
 	let paymentError = '';
 	$: cartItems = $cart;
 	let validationErrors = {};
+
+	// Create checkout-specific SEO
+	const pageSEO = {
+		...defaultSEO,
+		title: 'Checkout | variable.gallery',
+		description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
+		keywords: [
+			...defaultSEO.keywords,
+			'checkout',
+			'secure payment',
+			'digital art purchase',
+			'NFT checkout',
+			'shipping details'
+		],
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: 'Checkout | variable.gallery',
+			description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
+			url: 'https://variable.gallery/checkout'
+		}
+	};
+
+	$: metaTags = generateMetaTags(pageSEO);
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -235,8 +260,18 @@
 			return sum + (itemPrice * item.quantity);
 		}, 0);
 	}
-
 </script>
+
+<svelte:head>
+	<title>{pageSEO.title}</title>
+	{#each metaTags as tag}
+		{#if tag.name}
+			<meta name={tag.name} content={tag.content}>
+		{:else if tag.property}
+			<meta property={tag.property} content={tag.content}>
+		{/if}
+	{/each}
+</svelte:head>
 
 <div class="px-page pb-12">
 	<div class="checkout-container gap-md flex w-full flex-col md:flex-row">
