@@ -3,6 +3,7 @@
 	import { navigating } from '$app/stores';
 	import { page } from '$app/stores';
 	import { fade } from 'svelte/transition';
+	import { onMount } from 'svelte';
 
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Navbar from '$lib/components/navigation/Navbar.svelte';
@@ -15,7 +16,7 @@
 	const { artists } = data;
 	
 	$: isOpen = $isCartSliderOpen;
-	$: currentPath = $page.url.pathname;
+	$: currentPath = $page?.url?.pathname;
 	
 	// Create layout-specific SEO that will serve as fallback
 	$: pageSEO = {
@@ -30,6 +31,13 @@
 
 	function closeCart() {
 		closeCartSlider();
+	}
+
+	let currentPath;
+	
+	// Use $: to reactively update currentPath when $page changes
+	$: if ($page?.url) {
+		currentPath = $page.url.pathname;
 	}
 </script>
 
@@ -72,7 +80,9 @@
 <div class="site-wrapper">
 	<Navbar {artists} />
 	<main>
-		<slot />
+		{#if currentPath !== undefined}
+			<slot />
+		{/if}
 	</main>
 	<Footer />
 </div>
