@@ -88,20 +88,26 @@
 		<div class="technical-details space-y-2">
 			{#if variation}
 				<div class="detail-row">
-					<span class="detail-label">details</span>
+					<span class="detail-label">Edition</span>
 					<span class="detail-value">{variation.name}</span>
 				</div>
 			{/if}
 
+			<!-- Print Details -->
+			<div class="detail-row">
+				<span class="detail-label">Print</span>
+				<span class="detail-value">{product.attributes?.find(attr => attr.name.toLowerCase() === 'print')?.options[0] || 'N/A'}</span>
+			</div>
+
 			<!-- Stock Info -->
 			<div class="detail-row">
-				<span class="detail-label">editions</span>
+				<span class="detail-label">Editions Available</span>
 				<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
 			</div>
 
 			<!-- Price -->
 			<div class="detail-row clean price-row">
-				<span class="detail-label">price</span>
+				<span class="detail-label">Price</span>
 				<span class="price-value">
 					{#if product}
 						{getPriceDisplay(product, variation)}
@@ -113,7 +119,7 @@
 
 			<!-- Stock Status -->
 			<div class="detail-row clean">
-				<span class="detail-label">stock</span>
+				<span class="detail-label">Stock Status</span>
 				<span class="detail-value">
 					{#if product}
 						{getStockStatus(product, variation)}
@@ -129,8 +135,8 @@
 			<div class="additional-info space-y-2 mt-8">
 				{#if product.dimensions}
 					<div class="detail-row">
-						<span class="detail-label">dimensions</span>
-						<span class="detail-value">{product.dimensions.length || '0'} x {product.dimensions.width || '0'} x {product.dimensions.height || '0'} cm</span>
+						<span class="detail-label">Dimensions</span>
+						<span class="detail-value">{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm</span>
 					</div>
 				{/if}
 
@@ -152,24 +158,13 @@
 			</div>
 		{/if}
 
-		<!-- View Details Button -->
-		<button 
-			on:click={() => window.location.href = `/shop/${product.id}`} 
-			class="button-primary w-full mt-8"
-		>
-			View Details
-		</button>
 	</div>
 
 	<!-- Gallery Component -->
 	<div class="gallery-container md:w-2/3">
 		<Gallery images={gallery} />
-		<button 
-			on:click={addToCart} 
-			class="button-primary absolute bottom-4 right-4"
-		>
-			Add to Cart
-		</button>
+		
+		<button on:click={addToCart} class="button-primary mt-8">Add to Cart</button>
 	</div>
 </div>
 
@@ -233,7 +228,6 @@
 
 	.gallery-container {
 		width: 100%;
-		position: relative;
 	}
 
 	@media (min-width: 768px) {
@@ -363,51 +357,5 @@
 		align-items: center;
 		padding: var(--spacing-xs) 0;
 		border-bottom: 1px solid var(--secondary-bg-color);
-	}
-
-	.button-container {
-		display: flex;
-		gap: var(--spacing-sm);
-		margin-top: var(--spacing-md);
-	}
-
-	.button-secondary {
-		flex: 1;
-		background-color: var(--background-color);
-		color: var(--primary-color);
-		border: 1px solid var(--primary-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		text-align: center;
-		font-size: 0.875rem;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.button-secondary:hover {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-	}
-
-	.button-primary {
-		flex: 1;
-	}
-
-	.button-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-sm);
-	}
-
-	.button-primary {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.button-primary:hover {
-		background-color: var(--secondary-color);
 	}
 </style>

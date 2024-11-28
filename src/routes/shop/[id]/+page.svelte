@@ -120,19 +120,19 @@
 			<!-- Technical Details -->
 			<div class="technical-details space-y-4">
 				<div class="detail-row clean">
-					<span class="detail-label">details</span>
+					<span class="detail-label">Edition</span>
 					<span class="detail-value">{variation ? variation.name : product.name}</span>
 				</div>
 
 				<div class="detail-row clean">
-					<span class="detail-label">editions</span>
+					<span class="detail-label">Editions Available</span>
 					<span class="detail-value">
 						{variation ? variation.stock_quantity || 'N/A' : product.stock_quantity || 'N/A'}
 					</span>
 				</div>
 
 				<div class="detail-row clean">
-					<span class="detail-label">stock</span>
+					<span class="detail-label">Stock Status</span>
 					<span class="detail-value">
 						{variation
 							? variation.stock_status === 'instock'
@@ -146,7 +146,7 @@
 
 				<!-- Price Row -->
 				<div class="detail-row clean price-row">
-					<span class="detail-label">price</span>
+					<span class="detail-label">Price</span>
 					<span class="price-value">
 						{#if product.sale_price && product.sale_price !== ''}
 							<span class="sale-price">€{product.regular_price}</span>
@@ -163,16 +163,16 @@
 
 				{#if product.dimensions}
 					<div class="detail-row clean">
-						<span class="detail-label">dimensions</span>
+						<span class="detail-label">Dimensions</span>
 						<span class="detail-value">
-							{product.dimensions.length || '0'} x {product.dimensions.width || '0'} x {product.dimensions.height || '0'} cm
+							{product.dimensions.length || 'N/A'} x {product.dimensions.width || 'N/A'} x {product.dimensions.height || 'N/A'} cm
 						</span>
 					</div>
 				{/if}
 
 				{#if product.weight}
 					<div class="detail-row clean">
-						<span class="detail-label">weight</span>
+						<span class="detail-label">Weight</span>
 						<span class="detail-value">{product.weight || 'N/A'} kg</span>
 					</div>
 				{/if}
@@ -195,7 +195,7 @@
 				on:click={addToCart} 
 				class="button-primary w-full mt-8"
 			>
-				add to cart
+				Add to Cart
 			</button>
 		</div>
 
