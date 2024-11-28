@@ -48,7 +48,7 @@
 
   // Redirect to product page on image click
   function onImageClick(productId) {
-      handleProductClick(productId, goto);
+      window.location.href = `/shop/${productId}`;
   }
 
   // Preload images with fallback

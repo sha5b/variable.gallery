@@ -24,7 +24,7 @@
     }
 
     function onProductClick(product) {
-        goto(`/shop/${product.id}`, { replaceState: false });
+        window.location.href = `/shop/${product.id}`;
     }
 
     function getImageSrc(src) {
