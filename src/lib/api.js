@@ -188,3 +188,45 @@ export async function fetchArtistPreview(artistId) {
         })
     );
 }
+
+// Add this with your other API functions
+export async function notifyCreativeHubOrder(orderData) {
+    try {
+        const response = await fetch('https://api.creativehub.io/api/v1/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${import.meta.env.VITE_CREATIVEHUB_API_KEY}`,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                orderId: orderData.id,
+                customerEmail: orderData.billing.email,
+                customerName: `${orderData.billing.first_name} ${orderData.billing.last_name}`,
+                shippingAddress: {
+                    address1: orderData.shipping.address_1,
+                    address2: orderData.shipping.address_2 || '',
+                    city: orderData.shipping.city,
+                    country: orderData.shipping.country,
+                    postalCode: orderData.shipping.postcode,
+                    phone: orderData.billing.phone
+                },
+                items: orderData.line_items.map(item => ({
+                    productId: item.product_id,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`CreativeHub API error: ${response.status} - ${errorText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('CreativeHub notification error:', error);
+        throw error;
+    }
+}

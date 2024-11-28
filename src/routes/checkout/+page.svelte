@@ -4,7 +4,7 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
-	import { fetchWooCommerceData } from '$lib/api';
+	import { fetchWooCommerceData, notifyCreativeHubOrder } from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { countries } from '$lib/data/countries';
@@ -45,35 +45,48 @@
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 		elements = stripe.elements();
 
-		// Create payment request button
-		paymentRequest = stripe.paymentRequest({
-			country: 'US',
-			currency: 'eur',
-			total: {
-				label: 'Total',
-				amount: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 100 + 1500
-			},
-			requestPayerName: true,
-			requestPayerEmail: true
-		});
+		// Create payment request button with proper error handling
+		try {
+			paymentRequest = stripe.paymentRequest({
+				country: $userInfo.country || 'AT',
+				currency: 'eur',
+				total: {
+					label: 'Total',
+					amount: Math.round((subtotal + shippingCost) * 100) // Include shipping cost
+				},
+				requestPayerName: true,
+				requestPayerEmail: true
+			});
 
-		const canMakePayment = await paymentRequest.canMakePayment();
-		if (canMakePayment) {
-			prButton = elements.create('paymentRequestButton', { paymentRequest });
-			prButton.mount('#payment-request-button');
+			const canMakePayment = await paymentRequest.canMakePayment();
+			if (canMakePayment) {
+				prButton = elements.create('paymentRequestButton', { paymentRequest });
+				prButton.mount('#payment-request-button');
+			} else {
+				document.getElementById('payment-request-button').style.display = 'none';
+			}
+		} catch (error) {
+			console.error('Payment Request Button Error:', error);
+			document.getElementById('payment-request-button').style.display = 'none';
 		}
 
-		cardElement = elements.create('card', {
-			style: {
-				base: {
-					color: 'var(--text-color)',
-					fontFamily: 'var(--font-primary)',
-					fontSize: '16px',
-					'::placeholder': { color: 'var(--secondary-color)' }
+		// Card Element setup with error handling
+		try {
+			cardElement = elements.create('card', {
+				style: {
+					base: {
+						color: 'var(--text-color)',
+						fontFamily: 'var(--font-primary)',
+						fontSize: '16px',
+						'::placeholder': { color: 'var(--secondary-color)' }
+					}
 				}
-			}
-		});
-		cardElement.mount('#card-element');
+			});
+			cardElement.mount('#card-element');
+		} catch (error) {
+			console.error('Card Element Error:', error);
+			paymentError = 'Failed to load payment form. Please refresh the page.';
+		}
 	});
 
 	function validateForm() {
@@ -112,37 +125,49 @@
 		}
 
 		try {
+			// Create PaymentIntent
 			console.log('Creating PaymentIntent...');
 			const response = await fetch('/checkout', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ 
-					amount: Math.round(total * 100), // Convert to cents
+					amount: Math.round((subtotal + shippingCost) * 100), // Include shipping cost
 					currency: 'eur'
 				})
 			});
 
 			const result = await response.json();
-			if (!result.success) throw new Error(result.error || 'PaymentIntent creation failed');
+			if (!result.success || !result.clientSecret) {
+				throw new Error(result.error || 'PaymentIntent creation failed');
+			}
 
 			const clientSecret = result.clientSecret;
 			const user = get(userInfo);
 
+			// Confirm card payment
 			console.log('Confirming payment with Stripe...');
 			const confirmation = await stripe.confirmCardPayment(clientSecret, {
 				payment_method: {
 					card: cardElement,
 					billing_details: { 
-						name: `${user.firstName} ${user.lastName}`, 
-						email: user.email 
+						name: `${user.firstName} ${user.lastName}`,
+						email: user.email,
+						address: {
+							city: user.city,
+							country: user.country,
+							line1: user.address,
+							postal_code: user.postalCode
+						}
 					}
 				}
 			});
 
 			if (confirmation.error) {
-				paymentError = confirmation.error.message;
-			} else if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
-				// Payment successful, now create WooCommerce order
+				throw new Error(confirmation.error.message);
+			}
+
+			if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
+				// Create WooCommerce order
 				console.log('Payment successful, creating WooCommerce order...');
 				const orderId = await createWooCommerceOrder();
 				
@@ -150,18 +175,26 @@
 					throw new Error('Failed to create WooCommerce order.');
 				}
 
-				// Store orderId in userInfo and sessionStorage
+				try {
+					// Notify CreativeHub
+					console.log('Notifying CreativeHub...');
+					await notifyCreativeHubOrder(orderId);
+					console.log('CreativeHub notification successful');
+				} catch (creativeHubError) {
+					console.error('Failed to notify CreativeHub:', creativeHubError);
+					// Continue with checkout even if CreativeHub notification fails
+				}
+
+				// Update user info and session
 				userInfo.update((info) => {
 					const updatedInfo = { ...info, orderId };
 					sessionStorage.setItem('orderId', orderId);
 					return updatedInfo;
 				});
 
-				// Set payment success and clear cart
+				// Clear cart and redirect
 				paymentSuccess = true;
-				cart.set([]); // Clear the cart after successful order
-
-				// Redirect to order confirmation page
+				cart.set([]);
 				window.location.href = `/order-confirmation/${orderId}`;
 			}
 		} catch (error) {
@@ -188,7 +221,7 @@
 					address_1: user.address,
 					city: user.city,
 					postcode: user.postalCode,
-					country: 'US',
+					country: user.country,
 					email: user.email,
 					phone: user.phone
 				},
@@ -198,10 +231,14 @@
 					address_1: user.address,
 					city: user.city,
 					postcode: user.postalCode,
-					country: 'US'
+					country: user.country
 				},
 				line_items: cartData,
-				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }]
+				shipping_lines: [{ 
+					method_id: 'flat_rate', 
+					method_title: 'Flat Rate', 
+					total: shippingCost.toFixed(2) // Use the defined shipping cost
+				}]
 			};
 
 			const result = await fetchWooCommerceData('orders', {
@@ -212,11 +249,10 @@
 
 			if (!result.id) throw new Error('Order creation failed in WooCommerce');
 			console.log('Order created in WooCommerce:', result);
-			return result.id; // Return orderId for confirmation page
+			return result.id;
 		} catch (error) {
 			console.error('WooCommerce Order Creation Error:', error);
-			paymentError = 'Failed to create order in WooCommerce. Please contact support.';
-			return null;
+			throw new Error('Failed to create order in WooCommerce. Please contact support.');
 		}
 	}
 
