@@ -7,6 +7,7 @@
 	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+	import { countries } from '$lib/data/countries';
 
 	export let data;
 	const { products } = data;
@@ -363,14 +364,60 @@
 				</div>
 
 				<div class="form-group">
-					<label for="phone">Phone</label>
-					<input
-						id="phone"
-						type="text"
-						bind:value={$userInfo.phone}
-						placeholder="Your Phone"
+					<label for="country">Country</label>
+					<select
+						id="country"
+						bind:value={$userInfo.country}
 						class="input-field"
-					/>
+					>
+						<option value="">Select a country</option>
+						<optgroup label="European Union">
+							{#each countries.filter(c => c.group === 'EU') as country}
+								<option value={country.code}>{country.flag} {country.name}</option>
+							{/each}
+						</optgroup>
+						<optgroup label="Other European Countries">
+							{#each countries.filter(c => c.group === 'Europe') as country}
+								<option value={country.code}>{country.flag} {country.name}</option>
+							{/each}
+						</optgroup>
+						<optgroup label="Other Developed Countries">
+							{#each countries.filter(c => c.group === 'Developed') as country}
+								<option value={country.code}>{country.flag} {country.name}</option>
+							{/each}
+						</optgroup>
+						<optgroup label="Rest of World">
+							{#each countries.filter(c => c.group === 'Other') as country}
+								<option value={country.code}>{country.flag} {country.name}</option>
+							{/each}
+						</optgroup>
+					</select>
+					{#if validationErrors.country}
+						<p class="error">{validationErrors.country}</p>
+					{/if}
+				</div>
+
+				<div class="form-group">
+					<label for="phone">Phone</label>
+					<div class="phone-input-group">
+						<select 
+							class="country-code input-field" 
+							bind:value={$userInfo.phoneCountryCode}
+						>
+							{#each countries as country}
+								<option value={country.phoneCode}>
+									{country.flag} {country.phoneCode}
+								</option>
+							{/each}
+						</select>
+						<input
+							id="phone"
+							type="tel"
+							bind:value={$userInfo.phone}
+							placeholder="Phone number"
+							class="input-field flex-1"
+						/>
+					</div>
 					{#if validationErrors.phone}
 						<p class="error">{validationErrors.phone}</p>
 					{/if}

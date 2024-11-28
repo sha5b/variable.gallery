@@ -9,6 +9,7 @@ export const userInfo = writable({
 	postalCode: '',
 	city: '',
 	phone: '',
-	country: 'Austria',
-	orderId: null // Add orderId to the store
+	phoneCountryCode: '+43',
+	country: 'AT',
+	orderId: null
 });
