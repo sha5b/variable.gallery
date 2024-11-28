@@ -7,9 +7,6 @@
 	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
-	import Select from 'svelte-select';
-	import { parsePhoneNumberFromString, isValidPhoneNumber } from 'libphonenumber-js';
-	import { countries } from '$lib/data/countries';
 
 	export let data;
 	const { products } = data;
@@ -20,28 +17,25 @@
 	$: cartItems = $cart;
 	let validationErrors = {};
 
-	let selectedCountry = countries.find(c => c.value === 'DE'); // Default to Germany for address
-	let selectedPhoneCountry = countries.find(c => c.value === 'DE'); // Default to Germany for phone
-
 	// Create checkout-specific SEO
 	const pageSEO = {
 		...defaultSEO,
 		title: 'Checkout | variable.gallery',
+		description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
+		keywords: [
+			...defaultSEO.keywords,
+			'checkout',
+			'secure payment',
+			'digital art purchase',
+			'NFT checkout',
+			'shipping details'
+		],
+		openGraph: {
+			...defaultSEO.openGraph,
+			title: 'Checkout | variable.gallery',
 			description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
-			keywords: [
-				...defaultSEO.keywords,
-				'checkout',
-				'secure payment',
-				'digital art purchase',
-				'NFT checkout',
-				'shipping details'
-			],
-			openGraph: {
-				...defaultSEO.openGraph,
-				title: 'Checkout | variable.gallery',
-				description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
-				url: 'https://variable.gallery/checkout'
-			}
+			url: 'https://variable.gallery/checkout'
+		}
 	};
 
 	$: metaTags = generateMetaTags(pageSEO);
@@ -52,8 +46,8 @@
 
 		// Create payment request button
 		paymentRequest = stripe.paymentRequest({
-			country: selectedCountry.value,
-			currency: selectedCountry.currency.toLowerCase(),
+			country: 'US',
+			currency: 'eur',
 			total: {
 				label: 'Total',
 				amount: cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0) * 100 + 1500
@@ -94,10 +88,8 @@
 		if (!user.city) validationErrors.city = 'City is required.';
 		if (!user.postalCode || !/^\d{5}(-\d{4})?$/.test(user.postalCode))
 			validationErrors.postalCode = 'Valid postal code is required.';
-		if (!user.country) validationErrors.country = 'Country is required.';
-		if (!user.phone || !isValidPhoneNumber(user.phone, selectedPhoneCountry.value)) {
+		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
 			validationErrors.phone = 'Valid phone number is required.';
-		}
 
 		return Object.keys(validationErrors).length === 0;
 	}
@@ -125,7 +117,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ 
 					amount: Math.round(total * 100), // Convert to cents
-					currency: selectedCountry.currency.toLowerCase()
+					currency: 'eur'
 				})
 			});
 
@@ -195,7 +187,7 @@
 					address_1: user.address,
 					city: user.city,
 					postcode: user.postalCode,
-					country: user.country,
+					country: 'US',
 					email: user.email,
 					phone: user.phone
 				},
@@ -205,7 +197,7 @@
 					address_1: user.address,
 					city: user.city,
 					postcode: user.postalCode,
-					country: user.country
+					country: 'US'
 				},
 				line_items: cartData,
 				shipping_lines: [{ method_id: 'flat_rate', method_title: 'Flat Rate', total: '10.00' }]
@@ -267,33 +259,6 @@
 			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
 			return sum + (itemPrice * item.quantity);
 		}, 0);
-	}
-
-	// Handle country change for address
-	function handleCountryChange(event) {
-		selectedCountry = event.detail;
-		userInfo.update(info => ({
-			...info,
-			country: event.detail.value,
-			currency: event.detail.currency
-		}));
-	}
-
-	// Handle country change for phone
-	function handlePhoneCountryChange(event) {
-		selectedPhoneCountry = event.detail;
-		handlePhoneInput({ target: { value: $userInfo.phone || '' } });
-	}
-
-	// Format phone number as user types
-	function handlePhoneInput(event) {
-		const phoneNumber = parsePhoneNumberFromString(event.target.value, selectedPhoneCountry.value);
-		if (phoneNumber) {
-			userInfo.update(info => ({
-				...info,
-				phone: phoneNumber.formatInternational()
-			}));
-		}
 	}
 </script>
 
@@ -398,42 +363,14 @@
 				</div>
 
 				<div class="form-group">
-					<label for="country">Country</label>
-					<Select
-						items={countries}
-						value={selectedCountry}
-						on:change={handleCountryChange}
-						containerClasses="country-select"
-					/>
-					{#if validationErrors.country}
-						<p class="error">{validationErrors.country}</p>
-					{/if}
-				</div>
-
-				<div class="form-group">
 					<label for="phone">Phone</label>
-					<div class="phone-input-group">
-						<div class="phone-country-select">
-							<Select
-								items={countries}
-								value={selectedPhoneCountry}
-								on:change={handlePhoneCountryChange}
-								containerClasses="phone-select"
-								placeholder="Select country"
-							/>
-						</div>
-						<div class="phone-input-container">
-							<span class="country-code">{selectedPhoneCountry.phone}</span>
-							<input
-								id="phone"
-								type="tel"
-								bind:value={$userInfo.phone}
-								on:input={handlePhoneInput}
-								placeholder="Phone Number"
-								class="input-field"
-							/>
-						</div>
-					</div>
+					<input
+						id="phone"
+						type="text"
+						bind:value={$userInfo.phone}
+						placeholder="Your Phone"
+						class="input-field"
+					/>
 					{#if validationErrors.phone}
 						<p class="error">{validationErrors.phone}</p>
 					{/if}
@@ -665,46 +602,5 @@
 	.mx-3 {
 		margin-left: 0.75rem;
 		margin-right: 0.75rem;
-	}
-
-	.country-select :global(.selectContainer) {
-		--border-color: var(--border-color);
-		--background: var(--background-color);
-		--text-color: var(--text-color);
-	}
-
-	.phone-input-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-xs);
-	}
-
-	.phone-country-select {
-		width: 100%;
-	}
-
-	.phone-input-container {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-xs);
-		margin-top: var(--spacing-xs);
-	}
-
-	.country-code {
-		color: var(--secondary-color);
-		font-size: var(--font-size-sm);
-		padding: var(--spacing-xs);
-		min-width: 60px;
-	}
-
-	.phone-select :global(.selectContainer) {
-		--border-color: var(--border-color);
-		--background: var(--background-color);
-		--text-color: var(--text-color);
-	}
-
-	.input-field {
-		flex: 1;
-		min-width: 0;
 	}
 </style>

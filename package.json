@@ -43,10 +43,8 @@
 	"dependencies": {
 		"@stripe/stripe-js": "^4.9.0",
 		"alea": "^1.0.1",
-		"libphonenumber-js": "^1.11.15",
 		"simplex-noise": "^4.0.3",
 		"svelte-heros": "^7.0.2",
-		"svelte-select": "^5.8.3",
 		"three": "^0.170.0"
 	}
 }
