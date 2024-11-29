@@ -4,7 +4,7 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
-	import { fetchWooCommerceData, notifyCreativeHubOrder } from '$lib/api';
+	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { countries } from '$lib/data/countries';
@@ -43,49 +43,50 @@
 
 	onMount(async () => {
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-		elements = stripe.elements();
 
-		// Create payment request button with proper error handling
+		// Create and mount payment element with all payment methods
 		try {
-			paymentRequest = stripe.paymentRequest({
-				country: $userInfo.country || 'AT',
+			elements = stripe.elements({
+				mode: 'payment',
+				amount: Math.round((subtotal + shippingCost) * 100),
 				currency: 'eur',
-				total: {
-					label: 'Total',
-					amount: Math.round((subtotal + shippingCost) * 100) // Include shipping cost
+				appearance: {
+					theme: 'stripe',
+					variables: {
+						fontFamily: 'SUSE, sans-serif',
+						colorPrimary: '#0a0a1a',
+						colorBackground: '#ffffff',
+						colorText: '#333333'
+					}
 				},
-				requestPayerName: true,
-				requestPayerEmail: true
+				payment_method_types: ['card', 'paypal', 'wechat_pay', 'eps']
 			});
 
-			const canMakePayment = await paymentRequest.canMakePayment();
-			if (canMakePayment) {
-				prButton = elements.create('paymentRequestButton', { paymentRequest });
-				prButton.mount('#payment-request-button');
-			} else {
-				document.getElementById('payment-request-button').style.display = 'none';
-			}
-		} catch (error) {
-			console.error('Payment Request Button Error:', error);
-			document.getElementById('payment-request-button').style.display = 'none';
-		}
-
-		// Card Element setup with error handling
-		try {
-			cardElement = elements.create('card', {
-				style: {
-					base: {
-						color: 'var(--text-color)',
-						fontFamily: 'var(--font-primary)',
-						fontSize: '16px',
-						'::placeholder': { color: 'var(--secondary-color)' }
+			const paymentElement = elements.create('payment', {
+				layout: {
+					type: 'tabs',
+					defaultCollapsed: false
+				},
+				paymentMethodOrder: ['card', 'paypal', 'wechat_pay', 'eps'],
+				defaultValues: {
+					billingDetails: {
+						name: `${$userInfo.firstName} ${$userInfo.lastName}`,
+						email: $userInfo.email,
+						phone: $userInfo.phone,
+						address: {
+							country: $userInfo.country,
+							postal_code: $userInfo.postalCode,
+							line1: $userInfo.address,
+							city: $userInfo.city
+						}
 					}
 				}
 			});
-			cardElement.mount('#card-element');
+			
+			paymentElement.mount('#payment-element');
 		} catch (error) {
-			console.error('Card Element Error:', error);
-			paymentError = 'Failed to load payment form. Please refresh the page.';
+			console.error('Payment Element Error:', error);
+				paymentError = 'Failed to load payment form. Please refresh the page.';
 		}
 	});
 
@@ -100,8 +101,8 @@
 			validationErrors.email = 'Valid email is required.';
 		if (!user.address) validationErrors.address = 'Address is required.';
 		if (!user.city) validationErrors.city = 'City is required.';
-		if (!user.postalCode || !/^\d{5}(-\d{4})?$/.test(user.postalCode))
-			validationErrors.postalCode = 'Valid postal code is required.';
+		if (!user.postalCode || !/^\d{4,5}(-\d{4})?$/.test(user.postalCode))
+			validationErrors.postalCode = 'Valid postal code required (minimum 4 digits)';
 		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
 			validationErrors.phone = 'Valid phone number is required.';
 
@@ -114,7 +115,7 @@
 		return sum + (itemPrice * item.quantity);
 	}, 0);
 
-	$: shippingCost = 15.00;
+	$: shippingCost = 10;
 	$: total = subtotal + shippingCost;
 
 	async function handlePayment() {
@@ -125,135 +126,115 @@
 		}
 
 		try {
-			// Create PaymentIntent
-			console.log('Creating PaymentIntent...');
+			// 1. Create PaymentIntent
 			const response = await fetch('/checkout', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+				headers: { 
+					'Content-Type': 'application/json'
+				},
 				body: JSON.stringify({ 
-					amount: Math.round((subtotal + shippingCost) * 100), // Include shipping cost
+					amount: Math.round((subtotal + shippingCost) * 100),
 					currency: 'eur'
 				})
 			});
 
-			const result = await response.json();
-			if (!result.success || !result.clientSecret) {
-				throw new Error(result.error || 'PaymentIntent creation failed');
+			if (!response.ok) {
+				throw new Error('Failed to create payment intent');
 			}
 
-			const clientSecret = result.clientSecret;
-			const user = get(userInfo);
+			const { clientSecret } = await response.json();
 
-			// Confirm card payment
-			console.log('Confirming payment with Stripe...');
-			const confirmation = await stripe.confirmCardPayment(clientSecret, {
-				payment_method: {
-					card: cardElement,
-					billing_details: { 
-						name: `${user.firstName} ${user.lastName}`,
-						email: user.email,
-						address: {
-							city: user.city,
-							country: user.country,
-							line1: user.address,
-							postal_code: user.postalCode
+			// 2. Submit the Payment Element form
+			const { error: submitError } = await elements.submit();
+			if (submitError) {
+				throw new Error(submitError.message);
+			}
+
+			// Store order data in sessionStorage for after successful payment
+			const orderData = {
+				firstName: $userInfo.firstName,
+				lastName: $userInfo.lastName,
+				email: $userInfo.email,
+				phone: $userInfo.phone,
+				address: $userInfo.address,
+				city: $userInfo.city,
+				postalCode: $userInfo.postalCode,
+				country: $userInfo.country,
+				items: cartItems
+			};
+			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+
+			// 3. Confirm payment with redirect handling for all payment methods
+			const { error, paymentIntent } = await stripe.confirmPayment({
+				elements,
+				clientSecret,
+				confirmParams: {
+					return_url: `${window.location.origin}/order-confirmation/new`,
+					payment_method_data: {
+						billing_details: {
+							name: `${$userInfo.firstName} ${$userInfo.lastName}`,
+							email: $userInfo.email,
+							phone: $userInfo.phone,
+							address: {
+								city: $userInfo.city,
+								country: $userInfo.country,
+								line1: $userInfo.address,
+								postal_code: $userInfo.postalCode
+							}
 						}
 					}
-				}
+				},
+				redirect: 'if_required' // This handles both direct and redirect-based payments
 			});
 
-			if (confirmation.error) {
-				throw new Error(confirmation.error.message);
+			if (error) {
+				throw new Error(error.message);
 			}
 
-			if (confirmation.paymentIntent && confirmation.paymentIntent.status === 'succeeded') {
-				// Create WooCommerce order
-				console.log('Payment successful, creating WooCommerce order...');
-				const orderId = await createWooCommerceOrder();
-				
-				if (!orderId) {
-					throw new Error('Failed to create WooCommerce order.');
-				}
-
-				try {
-					// Notify CreativeHub
-					console.log('Notifying CreativeHub...');
-					await notifyCreativeHubOrder(orderId);
-					console.log('CreativeHub notification successful');
-				} catch (creativeHubError) {
-					console.error('Failed to notify CreativeHub:', creativeHubError);
-					// Continue with checkout even if CreativeHub notification fails
-				}
-
-				// Update user info and session
-				userInfo.update((info) => {
-					const updatedInfo = { ...info, orderId };
-					sessionStorage.setItem('orderId', orderId);
-					return updatedInfo;
-				});
-
-				// Clear cart and redirect
-				paymentSuccess = true;
-				cart.set([]);
-				window.location.href = `/order-confirmation/${orderId}`;
-			}
 		} catch (error) {
-			console.error('Payment/Order Creation Error:', error);
-			paymentError = error.message || 'An error occurred during the payment process. Please try again.';
+			console.error('Payment Error:', error);
+			paymentError = error.message || 'An error occurred during payment. Please try again.';
 		}
 	}
 
-	async function createWooCommerceOrder() {
-		try {
-			const user = get(userInfo);
-			const cartData = get(cart).map((item) => ({
-				product_id: item.id,
-				quantity: item.quantity
-			}));
-
-			const orderData = {
+	async function createWooCommerceOrder(orderData) {
+		const response = await fetchWooCommerceData('orders', {
+			method: 'POST',
+			body: JSON.stringify({
 				payment_method: 'stripe',
-				payment_method_title: 'Stripe',
-				set_paid: true,
+				payment_method_title: 'Credit Card (Stripe)',
+				set_paid: true,  // Set to true since payment is confirmed
+				status: 'processing',  // Set to processing since payment is complete
 				billing: {
-					first_name: user.firstName,
-					last_name: user.lastName,
-					address_1: user.address,
-					city: user.city,
-					postcode: user.postalCode,
-					country: user.country,
-					email: user.email,
-					phone: user.phone
+					first_name: orderData.firstName,
+					last_name: orderData.lastName,
+					address_1: orderData.address,
+					city: orderData.city,
+					postcode: orderData.postalCode,
+					country: orderData.country,
+					email: orderData.email,
+					phone: orderData.phone || ''
 				},
 				shipping: {
-					first_name: user.firstName,
-					last_name: user.lastName,
-					address_1: user.address,
-					city: user.city,
-					postcode: user.postalCode,
-					country: user.country
+					first_name: orderData.firstName,
+					last_name: orderData.lastName,
+					address_1: orderData.address,
+					city: orderData.city,
+					postcode: orderData.postalCode,
+					country: orderData.country
 				},
-				line_items: cartData,
-				shipping_lines: [{ 
-					method_id: 'flat_rate', 
-					method_title: 'Flat Rate', 
-					total: shippingCost.toFixed(2) // Use the defined shipping cost
-				}]
-			};
+				line_items: orderData.items.map(item => ({
+					product_id: item.id,
+					quantity: item.quantity
+				}))
+			})
+		});
 
-			const result = await fetchWooCommerceData('orders', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(orderData)
-			});
-
-			if (!result.id) throw new Error('Order creation failed in WooCommerce');
-			console.log('Order created in WooCommerce:', result);
-			return result.id;
-		} catch (error) {
-			console.error('WooCommerce Order Creation Error:', error);
-			throw new Error('Failed to create order in WooCommerce. Please contact support.');
+		if (!response || !response.id) {
+			throw new Error('Failed to create order - no order ID received');
 		}
+
+		return response;
 	}
 
 	// Helper function to parse and format price
@@ -540,9 +521,8 @@
 					
 					<div id="payment-request-button" class="mb-lg"></div>
 					
-					<div class="card-payment">
-						<label class="text-base text-secondary mb-sm block">Credit or Debit Card</label>
-						<div id="card-element" class="card-element mb-md"></div>
+					<div class="payment-element-container">
+						<div id="payment-element" class="mb-md"></div>
 						{#if paymentError}
 							<p class="error mb-sm">{paymentError}</p>
 						{/if}
@@ -685,5 +665,40 @@
 	.mx-3 {
 		margin-left: 0.75rem;
 		margin-right: 0.75rem;
+	}
+
+	.payment-element-container {
+		background: var(--background-color);
+		padding: var(--spacing-md);
+		border: 1px solid var(--secondary-bg-color);
+		border-radius: 0.25rem;
+	}
+
+	#payment-element {
+		margin-bottom: var(--spacing-md);
+		font-family: var(--font-primary);
+	}
+
+	.error {
+		color: var(--error-color);
+		font-size: var(--font-size-small);
+		font-family: var(--font-primary);
+	}
+
+	.button-primary {
+		background-color: var(--primary-color);
+		color: var(--background-color);
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: none;
+		border-radius: 0.25rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-family: var(--font-primary);
+	}
+
+	.button-primary:hover {
+		background-color: var(--secondary-color);
+		transform: translateY(-1px);
 	}
 </style>

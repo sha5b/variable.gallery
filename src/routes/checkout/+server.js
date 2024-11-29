@@ -1,29 +1,34 @@
 import { json } from '@sveltejs/kit';
-import { createPaymentIntent } from '$lib/api';
+import Stripe from 'stripe';
 
 export async function POST({ request }) {
+    const stripe = new Stripe(import.meta.env.VITE_STRIPE_SECRET_KEY);
+    
     try {
         const { amount, currency } = await request.json();
 
-        // Validate required parameters
         if (!amount || !currency) {
-            console.error('Missing required parameters:', { amount, currency });
-            return json({ success: false, error: 'Missing required parameters: amount and/or currency' });
+            return json({ 
+                success: false, 
+                error: 'Missing required parameters: amount and/or currency' 
+            }, { status: 400 });
         }
 
-        // Call the createPaymentIntent helper function
-        const response = await createPaymentIntent(amount, currency);
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount,
+            currency,
+            payment_method_types: ['card', 'paypal', 'wechat_pay', 'eps']
+        });
 
-        // Check if client_secret was successfully retrieved
-        if (!response.client_secret) {
-            console.error('Failed to retrieve client_secret from Stripe:', response);
-            return json({ success: false, error: 'Failed to retrieve client_secret from Stripe' });
-        }
-
-        // Return the clientSecret in the response
-        return json({ success: true, clientSecret: response.client_secret });
+        return json({ 
+            success: true, 
+            clientSecret: paymentIntent.client_secret 
+        });
     } catch (error) {
-        console.error('Error creating PaymentIntent:', error);
-        return json({ success: false, error: 'Failed to create PaymentIntent', details: error.message });
+        console.error('Stripe Error:', error);
+        return json({ 
+            success: false, 
+            error: error.message 
+        }, { status: 500 });
     }
 }

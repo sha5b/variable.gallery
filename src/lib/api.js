@@ -161,9 +161,25 @@ export async function fetchProductWithVariations(productId) {
     return { product, variation: variations.length > 0 ? variations[0] : null };
 }
 
-export async function createPaymentIntent(amount, currency) {
-    const body = JSON.stringify({ amount, currency });
-    return await handleFetch(() => fetchStripeData('payment_intents', { method: 'POST', body }), {});
+export async function createPaymentIntent(amount, currency, paymentMethodTypes) {
+    const stripe = require('stripe')(import.meta.env.VITE_STRIPE_SECRET_KEY);
+    
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount,
+            currency,
+            payment_method_types: paymentMethodTypes,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: 'always'
+            }
+        });
+        
+        return paymentIntent;
+    } catch (error) {
+        console.error('Stripe PaymentIntent Error:', error);
+        throw error;
+    }
 }
 
 // Add new optimized fetch functions for partial data
