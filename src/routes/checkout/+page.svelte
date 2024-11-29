@@ -126,7 +126,27 @@
 		}
 
 		try {
-			// 1. Create PaymentIntent
+			// Clear any existing pending order data
+			sessionStorage.removeItem('pendingOrderData');
+
+			// Store new order data
+			const orderData = {
+				firstName: $userInfo.firstName,
+				lastName: $userInfo.lastName,
+				email: $userInfo.email,
+				phone: $userInfo.phone,
+				address: $userInfo.address,
+				city: $userInfo.city,
+				postalCode: $userInfo.postalCode,
+				country: $userInfo.country,
+				items: cartItems,
+				total: total,
+				subtotal: subtotal,
+				shippingCost: shippingCost
+			};
+			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+
+			// Rest of payment logic...
 			const response = await fetch('/checkout', {
 				method: 'POST',
 				headers: { 
@@ -144,27 +164,18 @@
 
 			const { clientSecret } = await response.json();
 
-			// 2. Submit the Payment Element form
+			// Create WooCommerce order before confirming payment
+			const wooOrder = await createWooCommerceOrder(orderData);
+			
+			// Store WooCommerce order ID
+			sessionStorage.setItem('wooOrderId', wooOrder.id);
+
+			// Submit and confirm payment
 			const { error: submitError } = await elements.submit();
 			if (submitError) {
 				throw new Error(submitError.message);
 			}
 
-			// Store order data in sessionStorage for after successful payment
-			const orderData = {
-				firstName: $userInfo.firstName,
-				lastName: $userInfo.lastName,
-				email: $userInfo.email,
-				phone: $userInfo.phone,
-				address: $userInfo.address,
-				city: $userInfo.city,
-				postalCode: $userInfo.postalCode,
-				country: $userInfo.country,
-				items: cartItems
-			};
-			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
-
-			// 3. Confirm payment with redirect handling for all payment methods
 			const { error, paymentIntent } = await stripe.confirmPayment({
 				elements,
 				clientSecret,
@@ -188,12 +199,18 @@
 			});
 
 			if (error) {
+				// If payment fails, clean up the created order
+				sessionStorage.removeItem('wooOrderId');
 				throw new Error(error.message);
 			}
 
 		} catch (error) {
 			console.error('Payment Error:', error);
 			paymentError = error.message || 'An error occurred during payment. Please try again.';
+			
+			// Clean up session storage on error
+			sessionStorage.removeItem('pendingOrderData');
+			sessionStorage.removeItem('wooOrderId');
 		}
 	}
 
