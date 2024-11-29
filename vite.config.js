@@ -3,14 +3,7 @@ import { defineConfig, searchForWorkspaceRoot } from 'vite';
 
 export default defineConfig({
 	plugins: [sveltekit()],
-	build: {
-        rollupOptions: {
-            external: ['stripe']
-        }
-    },
-    ssr: {
-        noExternal: ['@stripe/stripe-js']
-    },
+	
 	server: {
 		fs: {
 			allow: [
