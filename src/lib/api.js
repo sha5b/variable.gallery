@@ -45,17 +45,23 @@ async function fetchData(baseURL, endpoint, options = {}, authType = null) {
         headers['Authorization'] = `Bearer ${options.apiKey}`;
     }
 
-    const response = await fetch(url, {
-        method: options.method || 'GET',
-        headers,
-        body: options.body || null,
-    });
+    try {
+        const response = await fetch(url, {
+            method: options.method || 'GET',
+            headers,
+            body: options.body || null,
+        });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error: ${response.status} - ${errorText}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Error: ${response.status} - ${errorText}`);
+            throw new Error(`Error: ${response.status} - ${errorText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
     }
-    return await response.json();
 }
 
 // Unified error handling function for fetch requests

@@ -191,6 +191,12 @@
 				throw new Error(error.message);
 			}
 
+			// 4. Create WooCommerce order
+			const wooOrder = await createWooCommerceOrder(orderData);
+			
+			// 5. Redirect to order confirmation page
+			goto(`/order-confirmation/${wooOrder.id}`);
+
 		} catch (error) {
 			console.error('Payment Error:', error);
 			paymentError = error.message || 'An error occurred during payment. Please try again.';

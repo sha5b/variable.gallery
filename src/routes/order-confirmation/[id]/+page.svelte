@@ -6,6 +6,7 @@
     import { cart } from '$lib/stores/cartStore';
     import { get } from 'svelte/store'; // Import get to access store value
     import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+	import { goto } from '$app/navigation'; // Add this import
 
 	let orderData = null;
 	let paymentStatusMessage = 'Checking payment status...';
@@ -78,44 +79,45 @@
 	}
 
 	onMount(async () => {
-		const orderId = $page.params.id;
-		console.log('Order ID from params:', orderId);
+    const orderId = $page.params.id;
+    console.log('Order ID from params:', orderId);
 
-		if (!orderId) {
-			goto('/order-error');
-			return;
-		}
+    if (!orderId) {
+        return;
+    }
 
-		try {
-			const urlParams = new URLSearchParams(window.location.search);
-			const redirectStatus = urlParams.get('redirect_status');
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectStatus = urlParams.get('redirect_status');
+        console.log('Redirect Status:', redirectStatus);
 
-			if (redirectStatus === 'succeeded') {
-				// Get the stored order data
-				const orderDataString = sessionStorage.getItem('pendingOrderData');
-				if (!orderDataString) {
-					throw new Error('No order data found');
-				}
+        if (redirectStatus === 'succeeded' || !redirectStatus) { // Check for succeeded or absence of redirect_status
+            // Get the stored order data
+            const orderDataString = sessionStorage.getItem('pendingOrderData');
+            console.log('Order Data from Session:', orderDataString);
 
-				const pendingOrder = JSON.parse(orderDataString);
-				const wooCommerceResponse = await createWooCommerceOrder(pendingOrder);
+            if (!orderDataString) {
+                throw new Error('No order data found');
+            }
 
-				if (wooCommerceResponse && wooCommerceResponse.id) {
-					// Clear stored data and cart after successful order creation
-					sessionStorage.removeItem('pendingOrderData');
-					cart.set([]);
-					paymentStatusMessage = 'Payment was successful!';
-					orderData = wooCommerceResponse;
-				}
-			} else {
-				paymentStatusMessage = 'Payment was not successful. Please try again.';
-				goto('/order-error');
-			}
-		} catch (error) {
-			console.error('Error:', error);
-			goto('/order-error');
-		}
-	});
+            const pendingOrder = JSON.parse(orderDataString);
+            const wooCommerceResponse = await createWooCommerceOrder(pendingOrder);
+
+            if (wooCommerceResponse && wooCommerceResponse.id) {
+                // Clear stored data and cart after successful order creation
+                sessionStorage.removeItem('pendingOrderData');
+                cart.set([]);
+                paymentStatusMessage = 'Payment was successful!';
+                orderData = wooCommerceResponse;
+            }
+        } else {
+            paymentStatusMessage = 'Payment was not successful. Please try again.';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        paymentStatusMessage = 'An error occurred while processing your order. Please try again.';
+    }
+});
 </script>
 
 <svelte:head>
