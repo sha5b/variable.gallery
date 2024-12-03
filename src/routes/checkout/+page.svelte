@@ -105,8 +105,8 @@
 			validationErrors.email = 'Valid email is required.';
 		if (!user.address) validationErrors.address = 'Address is required.';
 		if (!user.city) validationErrors.city = 'City is required.';
-		if (!user.postalCode || !/^\d{4,5}(-\d{4})?$/.test(user.postalCode))
-			validationErrors.postalCode = 'Valid postal code required (minimum 4 digits)';
+		if (!user.postalCode || user.postalCode.length < 3) 
+			validationErrors.postalCode = 'Valid postal code required (minimum 3 characters)';
 		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
 			validationErrors.phone = 'Valid phone number is required.';
 
