@@ -91,27 +91,20 @@
         const redirectStatus = urlParams.get('redirect_status');
         console.log('Redirect Status:', redirectStatus);
 
-        if (redirectStatus === 'succeeded' || !redirectStatus) { // Check for succeeded or absence of redirect_status
-            // Get the stored order data
-            const orderDataString = sessionStorage.getItem('pendingOrderData');
-            console.log('Order Data from Session:', orderDataString);
-
-            if (!orderDataString) {
-                throw new Error('No order data found');
-            }
-
-            const pendingOrder = JSON.parse(orderDataString);
-            const wooCommerceResponse = await createWooCommerceOrder(pendingOrder);
-
-            if (wooCommerceResponse && wooCommerceResponse.id) {
-                // Clear stored data and cart after successful order creation
+        if (redirectStatus === 'succeeded' || !redirectStatus) {
+            // Fetch the existing order details
+            const response = await fetchWooCommerceData(`orders/${orderId}`);
+            if (response && response.id) {
+                // Clear session storage and cart
                 sessionStorage.removeItem('pendingOrderData');
+                sessionStorage.removeItem('wooOrderId');
                 cart.set([]);
                 paymentStatusMessage = 'Payment was successful!';
-                orderData = wooCommerceResponse;
+                orderData = response;
             }
         } else {
             paymentStatusMessage = 'Payment was not successful. Please try again.';
+            // Optionally, you could delete the WooCommerce order here if payment failed
         }
     } catch (error) {
         console.error('Error:', error);

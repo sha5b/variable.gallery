@@ -119,7 +119,7 @@
 		return sum + itemPrice * item.quantity;
 	}, 0);
 
-	$: shippingCost = 10;
+	$: shippingCost = 15;
 	$: total = subtotal + shippingCost;
 
 	async function handlePayment() {
@@ -169,14 +169,20 @@
 				country: $userInfo.country,
 				items: cartItems
 			};
+
+			// Create WooCommerce order first
+			const wooOrder = await createWooCommerceOrder(orderData);
+			
+			// Store the order ID in sessionStorage
+			sessionStorage.setItem('wooOrderId', wooOrder.id);
 			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
 
-			// 3. Confirm payment with redirect handling for all payment methods
+			// Confirm payment with Stripe
 			const { error, paymentIntent } = await stripe.confirmPayment({
 				elements,
 				clientSecret,
 				confirmParams: {
-					return_url: `${window.location.origin}/order-confirmation/new`,
+					return_url: `${window.location.origin}/order-confirmation/${wooOrder.id}`, // Use actual order ID
 					payment_method_data: {
 						billing_details: {
 							name: `${$userInfo.firstName} ${$userInfo.lastName}`,
@@ -191,23 +197,20 @@
 						}
 					}
 				},
-				redirect: 'if_required' // This handles both direct and redirect-based payments
+				redirect: 'if_required'
 			});
 
 			if (error) {
 				throw new Error(error.message);
 			}
 
-			// 4. Create WooCommerce order
-			const wooOrder = await createWooCommerceOrder(orderData);
-
-			// 5. Redirect to order confirmation page
+			// If we get here without a redirect, payment was successful
 			goto(`/order-confirmation/${wooOrder.id}`);
 		} catch (error) {
 			console.error('Payment Error:', error);
 			paymentError = error.message || 'An error occurred during payment. Please try again.';
 		} finally {
-			showLoadingSpinner = false; // Hide the spinner after payment process
+			showLoadingSpinner = false;
 		}
 	}
 
