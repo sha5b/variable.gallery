@@ -8,12 +8,14 @@
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { countries } from '$lib/data/countries';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte'; // Import the spinner
 
 	export let data;
 	const { products } = data;
 
 	let stripe, elements, cardElement, paymentRequest, prButton;
 	let paymentSuccess = false;
+	let showLoadingSpinner = false; // State to control spinner visibility
 	let paymentError = '';
 	$: cartItems = $cart;
 	let validationErrors = {};
@@ -22,7 +24,8 @@
 	const pageSEO = {
 		...defaultSEO,
 		title: 'Checkout | variable.gallery',
-		description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
+		description:
+			'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
 		keywords: [
 			...defaultSEO.keywords,
 			'checkout',
@@ -34,7 +37,8 @@
 		openGraph: {
 			...defaultSEO.openGraph,
 			title: 'Checkout | variable.gallery',
-			description: 'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
+			description:
+				'Securely complete your purchase of digital artworks and NFTs. Enter your shipping and payment details to finalize your order.',
 			url: 'https://variable.gallery/checkout'
 		}
 	};
@@ -82,11 +86,11 @@
 					}
 				}
 			});
-			
+
 			paymentElement.mount('#payment-element');
 		} catch (error) {
 			console.error('Payment Element Error:', error);
-				paymentError = 'Failed to load payment form. Please refresh the page.';
+			paymentError = 'Failed to load payment form. Please refresh the page.';
 		}
 	});
 
@@ -112,7 +116,7 @@
 	// Calculate totals
 	$: subtotal = cartItems.reduce((sum, item) => {
 		const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-		return sum + (itemPrice * item.quantity);
+		return sum + itemPrice * item.quantity;
 	}, 0);
 
 	$: shippingCost = 10;
@@ -120,8 +124,11 @@
 
 	async function handlePayment() {
 		paymentError = '';
+		showLoadingSpinner = true; // Show the loading spinner
+
 		if (!validateForm()) {
 			console.error('Form validation failed:', validationErrors);
+			showLoadingSpinner = false; // Hide the spinner if validation fails
 			return;
 		}
 
@@ -129,10 +136,10 @@
 			// 1. Create PaymentIntent
 			const response = await fetch('/checkout', {
 				method: 'POST',
-				headers: { 
+				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ 
+				body: JSON.stringify({
 					amount: Math.round((subtotal + shippingCost) * 100),
 					currency: 'eur'
 				})
@@ -193,13 +200,14 @@
 
 			// 4. Create WooCommerce order
 			const wooOrder = await createWooCommerceOrder(orderData);
-			
+
 			// 5. Redirect to order confirmation page
 			goto(`/order-confirmation/${wooOrder.id}`);
-
 		} catch (error) {
 			console.error('Payment Error:', error);
 			paymentError = error.message || 'An error occurred during payment. Please try again.';
+		} finally {
+			showLoadingSpinner = false; // Hide the spinner after payment process
 		}
 	}
 
@@ -209,8 +217,8 @@
 			body: JSON.stringify({
 				payment_method: 'stripe',
 				payment_method_title: 'Credit Card (Stripe)',
-				set_paid: true,  // Set to true since payment is confirmed
-				status: 'processing',  // Set to processing since payment is complete
+				set_paid: true, // Set to true since payment is confirmed
+				status: 'processing', // Set to processing since payment is complete
 				billing: {
 					first_name: orderData.firstName,
 					last_name: orderData.lastName,
@@ -229,7 +237,7 @@
 					postcode: orderData.postalCode,
 					country: orderData.country
 				},
-				line_items: orderData.items.map(item => ({
+				line_items: orderData.items.map((item) => ({
 					product_id: item.id,
 					quantity: item.quantity
 				}))
@@ -255,7 +263,7 @@
 		// Force reactive update of totals
 		subtotal = cartItems.reduce((sum, item) => {
 			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-			return sum + (itemPrice * item.quantity);
+			return sum + itemPrice * item.quantity;
 		}, 0);
 	}
 
@@ -264,7 +272,7 @@
 		// Force reactive update of totals
 		subtotal = cartItems.reduce((sum, item) => {
 			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-			return sum + (itemPrice * item.quantity);
+			return sum + itemPrice * item.quantity;
 		}, 0);
 	}
 
@@ -281,7 +289,7 @@
 		// Force reactive update of totals
 		subtotal = cartItems.reduce((sum, item) => {
 			const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-			return sum + (itemPrice * item.quantity);
+			return sum + itemPrice * item.quantity;
 		}, 0);
 	}
 </script>
@@ -290,18 +298,20 @@
 	<title>{pageSEO.title}</title>
 	{#each metaTags as tag}
 		{#if tag.name}
-			<meta name={tag.name} content={tag.content}>
+			<meta name={tag.name} content={tag.content} />
 		{:else if tag.property}
-			<meta property={tag.property} content={tag.content}>
+			<meta property={tag.property} content={tag.content} />
 		{/if}
 	{/each}
 </svelte:head>
 
+<LoadingSpinner visible={showLoadingSpinner} />
+
 <div class="px-page pb-12">
-	<div class="checkout-container gap-md flex w-full flex-col md:flex-row">
+	<div class="checkout-container flex w-full flex-col gap-md md:flex-row">
 		<!-- Left Column: Shipping Information -->
-		<div class="shipping-info bg-background rounded-lg md:w-1/2">
-			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Shipping Information</h2>
+		<div class="shipping-info rounded-lg bg-background md:w-1/2">
+			<h2 class="text-xlarge mb-lg pb-md font-heading text-primary">Shipping Information</h2>
 			<form class="shipping-form space-y-md">
 				<div class="form-group">
 					<label for="firstName" class="text-sm text-secondary">First Name</label>
@@ -388,29 +398,25 @@
 
 				<div class="form-group">
 					<label for="country">Country</label>
-					<select
-						id="country"
-						bind:value={$userInfo.country}
-						class="input-field"
-					>
+					<select id="country" bind:value={$userInfo.country} class="input-field">
 						<option value="">Select a country</option>
 						<optgroup label="European Union">
-							{#each countries.filter(c => c.group === 'EU') as country}
+							{#each countries.filter((c) => c.group === 'EU') as country}
 								<option value={country.code}>{country.flag} {country.name}</option>
 							{/each}
 						</optgroup>
 						<optgroup label="Other European Countries">
-							{#each countries.filter(c => c.group === 'Europe') as country}
+							{#each countries.filter((c) => c.group === 'Europe') as country}
 								<option value={country.code}>{country.flag} {country.name}</option>
 							{/each}
 						</optgroup>
 						<optgroup label="Other Developed Countries">
-							{#each countries.filter(c => c.group === 'Developed') as country}
+							{#each countries.filter((c) => c.group === 'Developed') as country}
 								<option value={country.code}>{country.flag} {country.name}</option>
 							{/each}
 						</optgroup>
 						<optgroup label="Rest of World">
-							{#each countries.filter(c => c.group === 'Other') as country}
+							{#each countries.filter((c) => c.group === 'Other') as country}
 								<option value={country.code}>{country.flag} {country.name}</option>
 							{/each}
 						</optgroup>
@@ -423,13 +429,11 @@
 				<div class="form-group">
 					<label for="phone">Phone</label>
 					<div class="phone-input-group">
-						<select 
-							class="country-code input-field" 
-							bind:value={$userInfo.phoneCountryCode}
-						>
+						<select class="country-code input-field" bind:value={$userInfo.phoneCountryCode}>
 							{#each countries as country}
 								<option value={country.phoneCode}>
-									{country.flag} {country.phoneCode}
+									{country.flag}
+									{country.phoneCode}
 								</option>
 							{/each}
 						</select>
@@ -449,15 +453,15 @@
 		</div>
 
 		<!-- Right Column: Cart Summary and Payment -->
-		<div class="order-summary bg-background rounded-lg md:w-1/2">
-			<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Cart Summary</h2>
-			
+		<div class="order-summary rounded-lg bg-background md:w-1/2">
+			<h2 class="text-xlarge mb-lg pb-md font-heading text-primary">Cart Summary</h2>
+
 			<!-- Cart Items -->
 			{#if cartItems.length === 0}
 				<div class="flex flex-col items-center justify-center py-12 text-secondary">
 					<p>Your cart is empty</p>
-					<button 
-						class="mt-4 text-primary hover:text-secondary underline"
+					<button
+						class="mt-4 text-primary underline hover:text-secondary"
 						on:click={() => goto('/shop')}
 					>
 						Continue Shopping
@@ -467,10 +471,10 @@
 				{#each cartItems as item}
 					<div class="detail-row clean">
 						<div class="flex gap-md">
-							<img 
-								src={item.images[0]?.src || '/placeholder.jpg'} 
+							<img
+								src={item.images[0]?.src || '/placeholder.jpg'}
 								alt={item.name}
-								class="h-24 w-24 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+								class="h-24 w-24 cursor-pointer object-cover transition-opacity hover:opacity-80"
 								on:click={() => goto(`/shop/${item.id}`)}
 								on:keydown={(e) => e.key === 'Enter' && goto(`/shop/${item.id}`)}
 								role="button"
@@ -495,10 +499,7 @@
 							<span class="text-lg font-semibold text-primary">
 								{formatPrice(item.quantity * item.price)}
 							</span>
-							<button 
-								class="remove-btn" 
-								on:click={() => handleRemoveItem(item.id)}
-							>
+							<button class="remove-btn" on:click={() => handleRemoveItem(item.id)}>
 								Remove
 							</button>
 						</div>
@@ -506,7 +507,7 @@
 				{/each}
 
 				<!-- Price Summary -->
-				<div class="space-y-2 mt-lg pt-md border-t border-secondary">
+				<div class="mt-lg space-y-2 border-t border-secondary pt-md">
 					<div class="detail-row clean">
 						<span class="detail-label">Subtotal</span>
 						<span class="detail-value">{formatPrice(subtotal)}</span>
@@ -522,19 +523,17 @@
 				</div>
 
 				<!-- Payment Section -->
-				<div class="payment-section mt-lg pt-md border-t border-secondary">
-					<h2 class="text-xlarge font-heading text-primary mb-lg pb-md">Payment Details</h2>
-					
+				<div class="payment-section mt-lg border-t border-secondary pt-md">
+					<h2 class="text-xlarge mb-lg pb-md font-heading text-primary">Payment Details</h2>
+
 					<div id="payment-request-button" class="mb-lg"></div>
-					
+
 					<div class="payment-element-container">
 						<div id="payment-element" class="mb-md"></div>
 						{#if paymentError}
 							<p class="error mb-sm">{paymentError}</p>
 						{/if}
-						<button class="button-primary w-full" on:click={handlePayment}>
-							Pay Now
-						</button>
+						<button class="button-primary w-full" on:click={handlePayment}> Pay Now </button>
 					</div>
 				</div>
 			{/if}
@@ -599,7 +598,7 @@
 	}
 
 	.remove-btn {
-		background: #E76F51;  /* coral/red background */
+		background: #e76f51; /* coral/red background */
 		color: white;
 		border: none;
 		padding: var(--spacing-xs) var(--spacing-sm);
