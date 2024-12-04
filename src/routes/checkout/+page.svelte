@@ -105,7 +105,7 @@
 			validationErrors.email = 'Valid email is required.';
 		if (!user.address) validationErrors.address = 'Address is required.';
 		if (!user.city) validationErrors.city = 'City is required.';
-		if (!user.postalCode || user.postalCode.length < 3) 
+		if (!user.postalCode || user.postalCode.length < 3)
 			validationErrors.postalCode = 'Valid postal code required (minimum 3 characters)';
 		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
 			validationErrors.phone = 'Valid phone number is required.';
@@ -172,7 +172,7 @@
 
 			// Create WooCommerce order first
 			const wooOrder = await createWooCommerceOrder(orderData);
-			
+
 			// Store the order ID in sessionStorage
 			sessionStorage.setItem('wooOrderId', wooOrder.id);
 			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
