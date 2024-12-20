@@ -154,8 +154,8 @@
 		<!-- Title and Description -->
 		<div class="mb-8">
 			{#if product}
-				<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
-				<p class="text-primary text-base">
+				<h1 class="product-title">{product.name}</h1>
+				<p class="text-base">
 					{@html product.short_description || product.description || ''}
 				</p>
 			{/if}
@@ -259,10 +259,10 @@
 	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
 		<div class="flex flex-col items-start md:w-1/2">
 			<div class="artist-details space-y-md">
-				<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
+				<h2 class="section-title">About the Artist</h2>
 				
 				<!-- Artist Info -->
-				<div class="technical-details space-y-4">
+				<div class="technical-details space-y-4 mt-4">
 					<div class="detail-row clean">
 						<span class="detail-label">Name</span>
 						<span class="detail-value">{artistInfo?.title?.rendered || ''}</span>
@@ -280,7 +280,7 @@
 
 					{#if bioOpen}
 						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-							<p class="text-primary text-base">
+							<p class="text-base">
 								{artistInfo?.acf?.description || 'No description available.'}
 							</p>
 						</div>

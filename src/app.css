@@ -392,13 +392,13 @@ h6, .h6 {
   padding: 0.1rem 0.4rem;
   background-color: rgba(240, 240, 240, 0.8);
   color: var(--text-color);
-  border-radius: 999px;
-  font-size: 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   transition: all var(--transition-fast) var(--transition-timing);
   cursor: pointer;
   user-select: none;
-  margin: 0 0.2rem;
+  margin: 0.2rem;
 }
 
 .tag:hover,

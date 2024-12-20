@@ -128,6 +128,7 @@
 .filter-section {
     border-bottom: 1px solid var(--secondary-bg-color);
     padding: var(--spacing-sm) 0;
+    margin: 0;
 }
 
 .filter-section:last-child {
@@ -138,6 +139,13 @@
     font-size: var(--font-size-base);
     color: var(--primary-color);
     font-weight: 600;
+    padding: 0;
+    margin: 0;
+}
+
+details > summary {
+    padding: 0;
+    margin: 0;
 }
 
 .filter-select {
@@ -147,48 +155,91 @@
     background-color: var(--background-color);
 }
 
-.pill-group {
-    display: inline;
+/* Category Pills */
+.filter-section:first-child .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-xs) 0;
     background: none;
-    pointer-events: none;
 }
 
-.pill-group > button {
+.filter-section:first-child .pill-group > button {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-2xs) var(--spacing-sm);
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast) var(--transition-timing);
+    cursor: pointer;
+    user-select: none;
+    border: none;
+}
+
+.filter-section:first-child .pill-group > button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-1px);
+}
+
+.filter-section:first-child .pill-filled {
+    background-color: var(--secondary-color) !important;
+    transform: translateY(-1px);
+}
+
+/* Regular Tags */
+.filter-section:not(:first-child) .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2xs);
+    margin: var(--spacing-2xs) 0;
+}
+
+.filter-section:not(:first-child) .pill-group > button {
     display: inline-block;
     padding: 0.1rem 0.4rem;
     background-color: rgba(240, 240, 240, 0.8);
     color: var(--text-color);
-    border-radius: 999px;
-    font-size: 0.65rem;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     transition: all var(--transition-fast) var(--transition-timing);
     cursor: pointer;
     user-select: none;
-    margin: 0 0.2rem;
     border: none;
-    pointer-events: auto;
 }
 
-.pill-group > button:hover {
+.filter-section:not(:first-child) .pill-group > button:hover {
     background-color: var(--accent-color);
     color: var(--background-color);
 }
 
-.pill-filled {
+.filter-section:not(:first-child) .pill-filled {
     background-color: var(--accent-color) !important;
     color: var(--background-color) !important;
 }
 
-details summary::-webkit-details-marker {
+details > summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
     display: none;
 }
 
-details summary::after {
+details > summary::after {
     content: '+';
-    float: right;
+    font-size: var(--font-size-lg);
+    line-height: 1;
 }
 
-details[open] summary::after {
+details[open] > summary::after {
     content: '−';
 }
 

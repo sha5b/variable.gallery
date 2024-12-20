@@ -10,7 +10,7 @@
 }
 
 .navbar li {
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
 }
 
 .cart-badge {
@@ -22,10 +22,15 @@
     align-items: center;
     width: var(--spacing-md);
     height: var(--spacing-md);
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
     color: var(--background-color);
     font-size: var(--font-size-xs);
-    border-radius: 9999px;
+    border-radius: var(--radius-full);
+    transition: transform var(--transition-fast) var(--transition-timing);
+}
+
+.cart-badge:hover {
+    transform: scale(1.1);
 }
 
 .dropdown-menu {

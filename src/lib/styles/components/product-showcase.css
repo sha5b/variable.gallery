@@ -1,4 +1,19 @@
 /* ProductShowcase specific styles */
+/* Typography */
+.section-title {
+    font-size: var(--font-size-4xl);
+    color: var(--text-color);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-md);
+}
+
+.product-title {
+    font-size: var(--font-size-5xl);
+    color: var(--text-color);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-lg);
+}
+
 .product-layout {
     display: flex;
     flex-direction: column;
@@ -58,14 +73,15 @@
 
 .price-value {
     font-size: var(--font-size-xl);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
 }
 
 .sale-price {
-    color: var(--secondary-color);
+    color: var(--error-color);
     text-decoration: line-through;
     margin-right: var(--spacing-xs);
     font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
 }
 
 .tags-row {
@@ -87,7 +103,12 @@
 .artist-link {
     display: inline-block;
     margin-top: var(--spacing-md);
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-base) var(--transition-timing);
+}
+
+.artist-link:hover {
+    color: var(--accent-color);
 }
 
 .gallery-container {
@@ -115,35 +136,14 @@
     margin-top: var(--spacing-md);
 }
 
-.button-secondary {
+.button-container .btn {
     flex: 1;
-    background-color: var(--background-color);
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    text-align: center;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-base) var(--transition-timing);
 }
 
-.button-secondary:hover {
-    background-color: var(--primary-color);
-    color: var(--background-color);
-}
-
-.button-primary {
-    flex: 1;
-    background-color: var(--primary-color);
-    color: var(--background-color);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all var(--transition-base) var(--transition-timing);
-}
-
-.button-primary:hover {
-    background-color: var(--secondary-color);
+.gallery-container .btn-primary {
+    position: absolute;
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
 }
 
 @media (max-width: 767px) {

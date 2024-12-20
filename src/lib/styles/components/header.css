@@ -19,12 +19,18 @@
 
 .headline {
     font-family: var(--font-heading);
-    font-weight: 900;
+    font-weight: var(--font-weight-bold);
     color: var(--primary-color);
     line-height: 0.85;
     width: 100%;
-    font-size: clamp(4.5rem, 15vw, 20rem);
+    font-size: var(--font-size-6xl);
     margin: 0;
+}
+
+@media (min-width: 640px) {
+    .headline {
+        font-size: clamp(var(--font-size-6xl), 15vw, 20rem);
+    }
 }
 
 @media (min-width: 640px) {
