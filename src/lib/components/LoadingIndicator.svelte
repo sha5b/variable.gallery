@@ -1,12 +1,20 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
+  import '$lib/styles/components/loading.css';
+
   export let isLoading = false;
 
-  let packages = [];
-  let interval;
+  interface Package {
+    name: string;
+    size: string;
+    glitch: boolean;
+  }
 
-  const possiblePackages = [
+  let packages: Package[] = [];
+  let interval: number | NodeJS.Timeout | undefined;
+
+  const possiblePackages: string[] = [
     'hacking_mona_lisa.exe',
     'decrypt_van_gogh_ear.dat',
     'downloading_creativity.zip',
@@ -109,64 +117,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  .loading-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background-color: rgba(0, 0, 0, 0.9);
-    font-family: monospace;
-    color: #00ff00;
-  }
-
-  .package-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 600px;
-  }
-
-  .package-line {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 8px;
-    opacity: 0;
-    animation: fadeIn 0.3s forwards;
-  }
-
-  .package-name {
-    flex: 1;
-  }
-
-  .package-size {
-    margin: 0 20px;
-  }
-
-  .download-complete {
-    color: #00ff00;
-  }
-
-  .glitch {
-    animation: glitch 0.3s infinite;
-    text-shadow: 
-      2px 0 #ff0000,
-      -2px 0 #0000ff;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes glitch {
-    0% { transform: translate(0) }
-    20% { transform: translate(-2px, 2px) }
-    40% { transform: translate(-2px, -2px) }
-    60% { transform: translate(2px, 2px) }
-    80% { transform: translate(2px, -2px) }
-    100% { transform: translate(0) }
-  }
-</style> 

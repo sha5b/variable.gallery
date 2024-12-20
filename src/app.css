@@ -10,6 +10,11 @@
 @import './lib/styles/components/product-showcase.css';
 @import './lib/styles/components/sliders.css';
 @import './lib/styles/components/modal.css';
+@import './lib/styles/components/contact.css';
+@import './lib/styles/components/filter.css';
+@import './lib/styles/components/header.css';
+@import './lib/styles/components/exhibition.css';
+@import './lib/styles/components/loading.css';
 @import './lib/styles/pages/about.css';
 
 /* CSS Reset */

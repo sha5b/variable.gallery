@@ -1,16 +1,85 @@
-<script>
+<script lang="ts">
+	interface Image {
+		src: string;
+	}
+
+	interface Category {
+		name: string;
+	}
+
+	interface Tag {
+		name: string;
+	}
+
+	interface Attribute {
+		name: string;
+		options: string[];
+	}
+
+	interface Product {
+		id: number;
+		name: string;
+		type: string;
+		short_description?: string;
+		description?: string;
+		regular_price?: string;
+		sale_price?: string;
+		stock_quantity?: number;
+		stock_status?: string;
+		weight?: string;
+		dimensions?: {
+			length: string;
+			width: string;
+			height: string;
+		};
+		images: Image[];
+		categories: Category[];
+		tags: Tag[];
+		attributes: Attribute[];
+	}
+
+	interface Variation {
+		id: number;
+		name: string;
+		regular_price: string;
+		stock_quantity: number;
+		stock_status: string;
+	}
+
+	interface Artist {
+		title: {
+			rendered: string;
+		};
+		slug: string;
+		acf?: {
+			location?: string;
+			description?: string;
+		};
+	}
+
+	interface PageData {
+		product: Product;
+		variation: Variation | null;
+		products: Product[];
+		artists: Artist[];
+	}
+
+	type MetaTag = {
+		name?: string;
+		property?: string;
+		content: string;
+	};
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { addItem, toggleCartSlider  } from '$lib/stores/cartStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
-	import Gallery from '$lib/components/Gallery.svelte';
+	import ImageGallery from '$lib/components/ImageGallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { onMount } from 'svelte';
 
-	export let data;
-	
+	export let data: PageData;
 	const { product, variation, products, artists } = data;
 
 	// Create product-specific SEO
@@ -37,8 +106,8 @@
 
 	let bioOpen = false;
 	let primaryCategory = '';
-	let gallery = [];
-	let artistInfo = null;
+	let gallery: string[] = [];
+	let artistInfo: Artist | null = null;
 	let artistName = '';
 
 	// Move the reactive statement to watch product changes
@@ -201,7 +270,7 @@
 
 		<!-- Gallery Component with 2/3 width -->
 		<div class="gallery-container md:w-2/3 relative">
-			<Gallery images={gallery} />
+			<ImageGallery images={gallery} />
 		</div>
 	</div>
 
@@ -214,41 +283,47 @@
 					
 					<!-- Artist Info -->
 					<div class="technical-details space-y-4">
-						<div class="detail-row clean">
-							<span class="detail-label">Name</span>
-							<span class="detail-value">{artistInfo.title.rendered}</span>
-						</div>
-
-						<div class="detail-row clean">
-							<span class="detail-label">Location</span>
-							<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
-						</div>
-
-						<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
-							<span class="detail-label">Bio</span>
-							<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
-						</div>
-
-						{#if bioOpen}
-							<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-								<p class="text-primary text-base">
-									{artistInfo.acf?.description || 'No description available.'}
-								</p>
+						{#if artistInfo}
+							<div class="detail-row clean">
+								<span class="detail-label">Name</span>
+								<span class="detail-value">{artistInfo.title.rendered}</span>
 							</div>
+
+							<div class="detail-row clean">
+								<span class="detail-label">Location</span>
+								<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+							</div>
+
+							<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
+								<span class="detail-label">Bio</span>
+								<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+							</div>
+
+							{#if bioOpen}
+								<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+									<p class="text-primary text-base">
+										{artistInfo.acf?.description || 'No description available.'}
+									</p>
+								</div>
+							{/if}
 						{/if}
 					</div>
 
-					<button 
-						class="button-primary mt-8 w-full"
-						on:click={() => goto(`/artist/${artistInfo.slug}`)}
-					>
-						View Profile
-					</button>
+					{#if artistInfo}
+						<button 
+							class="button-primary mt-8 w-full"
+							on:click={() => goto(`/artist/${artistInfo.slug}`)}
+						>
+							View Profile
+						</button>
+					{/if}
 				</div>
 			</div>
 
 			<div class="placeholder-column flex-1">
-				<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+				{#if artistInfo}
+					<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+				{/if}
 			</div>
 		</div>
 	{/if}

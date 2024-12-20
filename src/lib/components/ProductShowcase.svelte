@@ -1,18 +1,74 @@
-<script>
-	import Gallery from '$lib/components/Gallery.svelte';
+<script lang="ts">
+	interface Image {
+		src: string;
+	}
+
+	interface Category {
+		name: string;
+	}
+
+	interface Tag {
+		name: string;
+	}
+
+	interface Attribute {
+		name: string;
+		options: string[];
+	}
+
+	interface Product {
+		id: number;
+		name: string;
+		type: string;
+		short_description?: string;
+		description?: string;
+		regular_price?: string;
+		stock_quantity?: number;
+		stock_status?: string;
+		weight?: string;
+		dimensions?: {
+			length: string;
+			width: string;
+			height: string;
+		};
+		images: Image[];
+		categories: Category[];
+		tags: Tag[];
+		attributes: Attribute[];
+	}
+
+	interface Variation {
+		id: number;
+		name: string;
+		regular_price: string;
+		stock_quantity: number;
+		stock_status: string;
+	}
+
+	interface Artist {
+		title: {
+			rendered: string;
+		};
+		slug: string;
+		acf?: {
+			location?: string;
+			description?: string;
+		};
+	}
+	import ImageGallery from '$lib/components/ImageGallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import { addItem, toggleCartSlider } from '$lib/stores/cartStore';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 
-	export let products;
-	export let artists;
-	export let product = null;
-	export let variation = null;
+	export let products: Product[];
+	export let artists: Artist[];
+	export let product: Product | null = null;
+	export let variation: Variation | null = null;
 
-	let gallery = [];
-	let artistInfo = null;
+	let gallery: string[] = [];
+	let artistInfo: Artist | null = null;
 	let artistName = '';
 	let primaryCategory = '';
 	let bioOpen = false;
@@ -27,7 +83,7 @@
 		
 		artistInfo = artists.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
-		);
+		) || null;
 		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
@@ -51,7 +107,7 @@
 	}
 
 	// Helper function to get price display
-	function getPriceDisplay(product, variation) {
+	function getPriceDisplay(product: Product, variation: Variation | null): string {
 		if (product.type === 'variable') {
 			return variation?.regular_price 
 				? `€${variation.regular_price}` 
@@ -64,7 +120,7 @@
 	}
 
 	// Helper function to get stock status
-	function getStockStatus(product, variation) {
+	function getStockStatus(product: Product, variation: Variation | null): string {
 		if (product.type === 'variable') {
 			return variation?.stock_status === 'instock' ? 'In Stock' : 'Out of Stock';
 		} else {
@@ -78,10 +134,12 @@
 	<div class="product-details md:w-1/3">
 		<!-- Title and Description -->
 		<div class="mb-8">
-			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
-			<p class="text-primary text-base">
-				{@html product.short_description || product.description}
-			</p>
+			{#if product}
+				<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
+				<p class="text-primary text-base">
+					{@html product.short_description || product.description || ''}
+				</p>
+			{/if}
 		</div>
 
 		<!-- Technical Details -->
@@ -94,10 +152,12 @@
 			{/if}
 
 			<!-- Stock Info -->
-			<div class="detail-row">
-				<span class="detail-label">editions</span>
-				<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
-			</div>
+			{#if product}
+				<div class="detail-row">
+					<span class="detail-label">editions</span>
+					<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
+				</div>
+			{/if}
 
 			<!-- Price -->
 			<div class="detail-row clean price-row">
@@ -125,16 +185,16 @@
 		</div>
 
 		<!-- Additional Info -->
-		{#if product.dimensions || product.weight || product.categories?.length > 0 || product.tags?.length > 0}
+		{#if product && (product.dimensions || product.weight || product.categories?.length > 0 || product.tags?.length > 0)}
 			<div class="additional-info space-y-2 mt-8">
-				{#if product.dimensions}
+				{#if product?.dimensions}
 					<div class="detail-row">
 						<span class="detail-label">dimensions</span>
 						<span class="detail-value">{product.dimensions.length || '0'} x {product.dimensions.width || '0'} x {product.dimensions.height || '0'} cm</span>
 					</div>
 				{/if}
 
-				{#if product.categories?.length > 0}
+				{#if product?.categories?.length > 0}
 					<div class="tags-row">
 						{#each product.categories as category}
 							<span class="pill pill-primary pill-sm">{category.name}</span>
@@ -142,7 +202,7 @@
 					</div>
 				{/if}
 
-				{#if product.tags?.length > 0}
+				{#if product?.tags?.length > 0}
 					<div class="tags-row">
 						{#each product.tags as tag}
 							<span class="pill pill-secondary pill-sm">{tag.name}</span>
@@ -153,17 +213,19 @@
 		{/if}
 
 		<!-- View Details Button -->
-		<button 
-			on:click={() => window.location.href = `/shop/${product.id}`} 
-			class="button-primary w-full mt-8"
-		>
-			View Details
-		</button>
+		{#if product}
+			<button 
+				on:click={() => window.location.href = `/shop/${product.id}`} 
+				class="button-primary w-full mt-8"
+			>
+				View Details
+			</button>
+		{/if}
 	</div>
 
 	<!-- Gallery Component -->
 	<div class="gallery-container md:w-2/3">
-		<Gallery images={gallery} />
+		<ImageGallery images={gallery} />
 		<button 
 			on:click={addToCart} 
 			class="button-primary absolute bottom-4 right-4"
@@ -182,41 +244,49 @@
 				
 				<!-- Artist Info -->
 				<div class="technical-details space-y-4">
-					<div class="detail-row clean">
-						<span class="detail-label">Name</span>
-						<span class="detail-value">{artistInfo.title.rendered}</span>
-					</div>
-
-					<div class="detail-row clean">
-						<span class="detail-label">Location</span>
-						<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
-					</div>
-
-					<div class="detail-row clean cursor-pointer" on:click={() => bioOpen = !bioOpen}>
-						<span class="detail-label">Bio</span>
-						<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
-					</div>
-
-					{#if bioOpen}
-						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-							<p class="text-primary text-base">
-								{artistInfo.acf?.description || 'No description available.'}
-							</p>
+					{#if artistInfo}
+						<div class="detail-row clean">
+							<span class="detail-label">Name</span>
+							<span class="detail-value">{artistInfo.title.rendered}</span>
 						</div>
+					{/if}
+
+					{#if artistInfo}
+						<div class="detail-row clean">
+							<span class="detail-label">Location</span>
+							<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+						</div>
+
+						<div class="detail-row clean cursor-pointer" on:click={() => bioOpen = !bioOpen}>
+							<span class="detail-label">Bio</span>
+							<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+						</div>
+
+						{#if bioOpen}
+							<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+								<p class="text-primary text-base">
+									{artistInfo.acf?.description || 'No description available.'}
+								</p>
+							</div>
+						{/if}
 					{/if}
 				</div>
 
-				<button 
-					class="button-primary mt-8 w-full"
-					on:click={() => goto(`/artist/${artistInfo.slug}`)}
-				>
-					View Profile
-				</button>
+				{#if artistInfo}
+					<button 
+						class="button-primary mt-8 w-full"
+						on:click={() => goto(`/artist/${artistInfo.slug}`)}
+					>
+						View Profile
+					</button>
+				{/if}
 			</div>
 		</div>
 
 		<div class="placeholder-column flex-1">
-			<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+			{#if artistInfo}
+				<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+			{/if}
 		</div>
 	</div>
 {/if}

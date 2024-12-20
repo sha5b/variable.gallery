@@ -1,11 +1,31 @@
-<script>
+<script lang="ts">
+  type MetaTag = {
+    name?: string;
+    property?: string;
+    content: any;
+  };
+
+  type Product = {
+    id: number;
+    name: string;
+    price: string;
+    date_created: string;
+    tags: string[];
+    categories: Array<{
+      name: string;
+    }>;
+    description: string;
+  };
+
   import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
   import { goto } from '$app/navigation';
   import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-  import TagDisplay from '$lib/components/Filter.svelte';
+import ProductFilter from '$lib/components/ProductFilter.svelte';
 
-  export let data;
-  const { products, error } = data;
+  export let data: {
+    products: Product[];
+  };
+  const { products } = data;
 
   // Create page-specific SEO by extending defaultSEO
   const pageSEO = {
@@ -31,12 +51,12 @@
 
   $: metaTags = generateMetaTags(pageSEO);
 
-  let productsByCategory = {};
+  let productsByCategory: { [key: string]: Product[] } = {};
 
   // Organize products by category
   if (products) {
-    products.forEach(product => {
-      product.categories.forEach(category => {
+    products.forEach((product) => {
+      product.categories.forEach((category) => {
         if (!productsByCategory[category.name]) {
           productsByCategory[category.name] = [];
         }
@@ -45,7 +65,7 @@
     });
   }
 
-  function goToProduct(productId) {
+  function goToProduct(productId: number) {
     goto(`/shop/${productId}`);
   }
 </script>
@@ -83,9 +103,6 @@
 </svelte:head>
 
 <div class="shop-container px-page bg-background">
-  {#if error}
-    <p class="text-error">{error}</p>
-  {:else}
     <div class="grid grid-cols-1 gap-md md:grid-cols-2 mb-8">
       {#each Object.keys(productsByCategory) as categoryName}
         <div class="category-container w-full transition-default">
@@ -99,8 +116,7 @@
         </div>
       {/each}
     </div>
-  {/if}
-  <TagDisplay {products} />
+  <ProductFilter {products} />
 </div>
 
 <style>

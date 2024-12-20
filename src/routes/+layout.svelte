@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import { navigating } from '$app/stores';
 	import { page } from '$app/stores';
@@ -7,11 +7,28 @@
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Navbar from '$lib/components/navigation/Navbar.svelte';
 	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
-	import Loading from '$lib/components/Loading.svelte';
+	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
-	export let data;
+	interface Artist {
+		id: number;
+		name: string;
+	}
+
+	interface PageData {
+		artists: Artist[];
+	}
+
+	type MetaTag = {
+		name?: string;
+		property?: string;
+		content: string;
+	};
+
+	type GeneratedMetaTag = MetaTag;
+
+	export let data: PageData;
 	const { artists } = data;
 	
 	$: isOpen = $isCartSliderOpen;
@@ -26,7 +43,7 @@
 		}
 	};
 	
-	$: metaTags = generateMetaTags(pageSEO);
+	$: metaTags = generateMetaTags(pageSEO) as GeneratedMetaTag[];
 
 	function closeCart() {
 		closeCartSlider();
@@ -67,7 +84,7 @@
 	</script>
 </svelte:head>
 
-<Loading isLoading={$navigating} />
+<LoadingIndicator isLoading={!!$navigating} />
 
 <div class="site-wrapper">
 	<Navbar {artists} />

@@ -1,12 +1,41 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import '$lib/styles/components/filter.css';
 
-	export let products = [];
-	let selectedTag = null;
-	let selectedCategory = null;
-	let selectedArtist = null;
+	interface Tag {
+		name: string;
+	}
+
+	interface Category {
+		name: string;
+	}
+
+	interface Attribute {
+		name: string;
+		options: string[];
+	}
+
+	interface Image {
+		src: string;
+	}
+
+	interface Product {
+		id: number;
+		name: string;
+		price: string;
+		date_created: string;
+		tags: Tag[];
+		categories: Category[];
+		attributes: Attribute[];
+		images: Image[];
+	}
+
+	export let products: Product[] = [];
+	let selectedTag: string | null = null;
+	let selectedCategory: string | null = null;
+	let selectedArtist: string | null = null;
 	let minPrice = 0;
 	let maxPrice = 1000;
 	let currentPage = 1;
@@ -43,13 +72,15 @@
 		const matchesTag = !selectedTag || product.tags.some(tag => tag.name === selectedTag);
 		const matchesCategory = !selectedCategory || product.categories.some(cat => cat.name === selectedCategory);
 		const matchesArtist = !selectedArtist || product.attributes.some(attr => 
-			attr.name.toLowerCase() === 'artist' && attr.options.includes(selectedArtist)
+			attr.name.toLowerCase() === 'artist' && attr.options.includes(selectedArtist ?? '')
 		);
 		const matchesPrice = parseFloat(product.price) >= minPrice && parseFloat(product.price) <= maxPrice;
 
 		return matchesTag && matchesCategory && matchesArtist && matchesPrice;
 	}).sort((a, b) => {
-		if (sortBy === 'newest') return new Date(b.date_created) - new Date(a.date_created);
+		if (sortBy === 'newest') {
+			return new Date(b.date_created).getTime() - new Date(a.date_created).getTime();
+		}
 		if (sortBy === 'price-low') return parseFloat(a.price) - parseFloat(b.price);
 		if (sortBy === 'price-high') return parseFloat(b.price) - parseFloat(a.price);
 		return 0;
@@ -62,23 +93,23 @@
 		currentPage * itemsPerPage
 	);
 
-	function handleTagClick(tag) {
+	function handleTagClick(tag: string | null): void {
 		selectedTag = selectedTag === tag ? null : tag;
 		currentPage = 1;
 	}
 
-	function handleCategoryClick(category) {
+	function handleCategoryClick(category: string | null): void {
 		selectedCategory = selectedCategory === category ? null : category;
 		currentPage = 1;
 	}
 
-	function handleArtistClick(artist) {
+	function handleArtistClick(artist: string | null): void {
 		selectedArtist = selectedArtist === artist ? null : artist;
 		currentPage = 1;
 	}
 
-	function handlePriceChange(event, type) {
-		const value = parseFloat(event.target.value);
+	function handlePriceChange(event: Event, type: 'min' | 'max'): void {
+		const value = parseFloat((event.target as HTMLInputElement).value);
 		if (type === 'min') {
 			minPrice = Math.min(value, maxPrice);
 		} else if (type === 'max') {
@@ -87,7 +118,7 @@
 		currentPage = 1;
 	}
 
-	function changePage(page) {
+	function changePage(page: number): void {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 		}
@@ -294,189 +325,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.wrapper {
-		max-width: 100%;
-		margin: 0 auto;
-	}
-
-	.filter-controls {
-		position: sticky;
-		top: 0;
-		z-index: 10;
-		background-color: var(--background-color);
-	}
-
-	.sort-select,
-	.items-select {
-		padding: var(--spacing-xs) var(--spacing-sm);
-		background-color: var(--background-color);
-	}
-
-	.active-filter {
-		cursor: pointer;
-		transition: all 0.3s ease;
-	}
-
-	.product-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-			gap: var(--spacing-md);
-	}
-
-	.product-card {
-		position: relative;
-		background: var(--background-color);
-		overflow: hidden;
-		cursor: pointer;
-		transition: transform 0.3s ease;
-	}
-
-	.product-card:hover {
-		transform: translateY(-4px);
-	}
-
-	.product-card:hover .product-info {
-			opacity: 1;
-	}
-
-	.product-image-container {
-		position: relative;
-		padding-top: 100%;
-	}
-
-	.product-image {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.product-overlay {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		padding: var(--spacing-sm);
-	}
-
-	.product-info {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		padding: var(--spacing-sm);
-		background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-		opacity: 0;
-		transition: opacity 0.3s ease;
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-end;
-	}
-
-	.product-title {
-		color: var(--background-color);
-		font-size: var(--font-size-base);
-		font-weight: bold;
-		margin: 0;
-	}
-
-	.pagination {
-		display: flex;
-		justify-content: center;
-		gap: var(--spacing-xs);
-		margin-top: var(--spacing-lg);
-		padding: var(--spacing-md);
-	}
-
-	.pagination-button {
-		padding: var(--spacing-xs) var(--spacing-sm);
-		background-color: var(--background-color);
-		color: var(--primary-color);
-		cursor: pointer;
-		transition: all 0.3s ease;
-	}
-
-	.pagination-button:hover:not(:disabled) {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-	}
-
-	.pagination-button.active {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-	}
-
-	.pagination-button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	@media (max-width: 768px) {
-		.filter-sidebar {
-			position: relative;
-			top: 0;
-			width: 100%;
-		}
-
-		.product-grid {
-			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		}
-
-		.pagination {
-			flex-wrap: wrap;
-		}
-	}
-
-	.filter-container {
-		background-color: var(--background-color);
-	}
-
-	.filter-section {
-		border-bottom: 1px solid var(--secondary-bg-color);
-		padding: var(--spacing-sm) 0;
-	}
-
-	.filter-section:last-child {
-		border-bottom: none;
-	}
-
-	.section-title {
-		font-size: var(--font-size-base);
-		color: var(--primary-color);
-		font-weight: 600;
-	}
-
-	.filter-select {
-		padding: var(--spacing-xs) var(--spacing-sm);
-		border: 1px solid var(--secondary-bg-color);
-		border-radius: var(--border-radius);
-		background-color: var(--background-color);
-	}
-
-	.pill-group {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spacing-xs);
-	}
-
-	details summary::-webkit-details-marker {
-		display: none;
-	}
-
-	details summary::after {
-		content: '+';
-		float: right;
-	}
-
-	details[open] summary::after {
-		content: '−';
-	}
-</style>

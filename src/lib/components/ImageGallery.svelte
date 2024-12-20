@@ -1,34 +1,34 @@
-<script>
+<script lang="ts">
 	import Modal from '$lib/components/modal/Modal.svelte';
+	import '$lib/styles/components/gallery.css';
 
-	// Props to accept an array of image URLs
-	export let images = [];
+	export let images: string[] = [];
 
 	let modalOpen = false;
 	let currentImageIndex = 0;
-	let hoveredImageIndex = null;
+	let hoveredImageIndex: number | null = null;
 
-	function openModal(index) {
+	function openModal(index: number): void {
 		currentImageIndex = index;
 		modalOpen = true;
 	}
 
-	function closeModal() {
+	function closeModal(): void {
 		modalOpen = false;
 	}
 
-	function handleMouseEnter(index) {
+	function handleMouseEnter(index: number): void {
 		hoveredImageIndex = index;
 	}
 
-	function handleMouseLeave() {
+	function handleMouseLeave(): void {
 		hoveredImageIndex = null;
 		resetImageTransforms();
 	}
 
-	function handleMouseMove(event, imageIndex) {
+	function handleMouseMove(event: MouseEvent, imageIndex: number): void {
 		if (hoveredImageIndex === imageIndex) {
-			const image = event.target;
+			const image = event.target as HTMLImageElement;
 			const rect = image.getBoundingClientRect();
 			const x = (event.clientX - rect.left) / rect.width;
 			const y = (event.clientY - rect.top) / rect.height;
@@ -38,19 +38,17 @@
 		}
 	}
 
-	function resetImageTransforms() {
+	function resetImageTransforms(): void {
 		const images = document.querySelectorAll('.gallery-image');
 		images.forEach((img) => {
-			img.style.transform = 'scale(1)';
-			img.style.transformOrigin = 'center';
+			(img as HTMLElement).style.transform = 'scale(1)';
+			(img as HTMLElement).style.transformOrigin = 'center';
 		});
 	}
 </script>
 
 <!-- Modal for larger view of the images -->
-<Modal images={images} bind:open={modalOpen} bind:currentIndex={currentImageIndex}>
-	<button class="close-modal" on:click={closeModal}>Close</button>
-</Modal>
+<Modal images={images} bind:open={modalOpen} bind:currentIndex={currentImageIndex} />
 
 <div class="image-gallery">
 	{#each images as image, index}

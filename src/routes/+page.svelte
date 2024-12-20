@@ -1,13 +1,68 @@
-<script>
+<script lang="ts">
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-	import Contact from '$lib/components/Contact.svelte';
-	import TagDisplay from '$lib/components/Filter.svelte';
-	import Header from '$lib/components/Header.svelte';
+import ContactForm from '$lib/components/ContactForm.svelte';
+import ProductFilter from '$lib/components/ProductFilter.svelte';
+import HeroSection from '$lib/components/HeroSection.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
 
-	export let data;
+	interface Tag {
+		name: string;
+	}
+
+	interface Category {
+		name: string;
+	}
+
+	interface Image {
+		src: string;
+	}
+
+	interface Attribute {
+		name: string;
+		options: string[];
+	}
+
+	interface Product {
+		id: number;
+		type: string;
+		name: string;
+		price: string;
+		date_created: string;
+		categories: Category[];
+		tags: Tag[];
+		images: Image[];
+		attributes: Attribute[];
+	}
+
+	interface Artist {
+		id: number;
+		name: string;
+	}
+
+	interface PageData {
+		products: Product[];
+		artists: Artist[];
+		exhibitions: any[];
+		media: any[];
+		product?: Product;
+		variation?: any;
+	}
+
+	export let data: PageData;
 	const { products, artists, exhibitions, media } = data;
+
+	interface MetaTag {
+		name?: string;
+		property?: string;
+		content: string;
+	}
+
+	type GeneratedMetaTag = {
+		name?: string;
+		property?: string;
+		content: string;
+	};
 
 	// Create landing page-specific SEO
 	const pageSEO = {
@@ -28,7 +83,7 @@
 			}
 	};
 
-	$: metaTags = generateMetaTags(pageSEO);
+	$: metaTags = generateMetaTags(pageSEO) as GeneratedMetaTag[];
 
 	// Function to get a random type and the corresponding latest product thumbnail
 	let randomType = '';
@@ -39,13 +94,13 @@
 		if (uniqueTypes.length > 0) {
 			randomType = uniqueTypes[Math.floor(Math.random() * uniqueTypes.length)];
 			const latestProductWithType = products.find((product) => product.type === randomType);
-			thumbnail = latestProductWithType ? latestProductWithType.images[0]?.src : '';
+			thumbnail = latestProductWithType?.images[0]?.src ?? '';
 		}
 	}
 
 	getRandomTypeAndThumbnail();
 
-	let productsByCategory = {};
+	let productsByCategory: Record<string, Product[]> = {};
 
 	// Organize products by category
 	if (products) {
@@ -107,7 +162,7 @@
 
 <div class="landing-container px-page">
 	<FeaturedSlider {products} />
-	<Header />
+	<HeroSection />
 	<div class="mb-12 grid grid-cols-1 gap-md md:grid-cols-2 mt-12">
 		{#each Object.keys(productsByCategory) as categoryName}
 			<div class="category-container transition-default w-full">
@@ -119,7 +174,7 @@
 		{/each}
 	</div>
 	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
-	<TagDisplay {products} />
+	<ProductFilter {products} />
 </div>
 
 <style>
