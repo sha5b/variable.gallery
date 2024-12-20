@@ -1,6 +1,6 @@
 .contact-container {
     width: 100%;
-    margin: 2rem 0;
+    margin: var(--spacing-lg) 0;
     text-align: left;
     display: flex;
     flex-direction: column;
@@ -10,13 +10,13 @@
 }
 
 .contact-button {
-    font-size: 1.25rem;
-    padding: 0.5rem 1.5rem;
+    font-size: var(--font-size-xl);
+    padding: var(--spacing-xs) var(--spacing-md);
 }
 
 .contact-text {
-    font-size: 1.125rem;
-    margin-top: 1rem;
+    font-size: var(--font-size-lg);
+    margin-top: var(--spacing-sm);
     text-align: left;
     color: var(--primary-color);
 }

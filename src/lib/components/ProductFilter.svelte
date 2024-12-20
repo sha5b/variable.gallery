@@ -180,24 +180,24 @@
 				</div>
 
 				<!-- Active Filters -->
-				<div class="filter-tags flex flex-wrap gap-sm">
+				<div class="tag-container">
 					{#if selectedCategory}
-						<span class="pill pill-primary pill-sm" on:click={() => handleCategoryClick(selectedCategory)}>
+						<span on:click={() => handleCategoryClick(selectedCategory)}>
 							{selectedCategory} ×
 						</span>
 					{/if}
 					{#if selectedTag}
-						<span class="pill pill-secondary pill-sm" on:click={() => handleTagClick(selectedTag)}>
+						<span on:click={() => handleTagClick(selectedTag)}>
 							{selectedTag} ×
 						</span>
 					{/if}
 					{#if selectedArtist}
-						<span class="pill pill-accent pill-sm" on:click={() => handleArtistClick(selectedArtist)}>
+						<span on:click={() => handleArtistClick(selectedArtist)}>
 							{selectedArtist} ×
 						</span>
 					{/if}
 					{#if priceChanged}
-						<span class="pill pill-neutral pill-sm">
+						<span>
 							€{minPrice} - €{maxPrice}
 						</span>
 					{/if}
@@ -216,7 +216,7 @@
 							{#each uniqueCategories as category}
 								<button 
 									on:click={() => handleCategoryClick(category)}
-									class={`pill ${selectedCategory === category ? 'pill-filled pill-primary' : 'pill-primary'} pill-sm`}
+									class={selectedCategory === category ? 'pill-filled' : ''}
 								>
 									{category}
 								</button>
@@ -231,7 +231,7 @@
 							{#each uniqueTags as tag}
 								<button 
 									on:click={() => handleTagClick(tag)}
-									class={`pill ${selectedTag === tag ? 'pill-filled pill-secondary' : 'pill-secondary'} pill-sm`}
+									class={selectedTag === tag ? 'pill-filled' : ''}
 								>
 									{tag}
 								</button>
@@ -246,7 +246,7 @@
 							{#each uniqueArtists as artist}
 								<button 
 									on:click={() => handleArtistClick(artist)}
-									class={`pill ${selectedArtist === artist ? 'pill-filled pill-accent' : 'pill-accent'} pill-sm`}
+									class={selectedArtist === artist ? 'pill-filled' : ''}
 								>
 									{artist}
 								</button>
@@ -302,15 +302,15 @@
 									class="product-image"
 								/>
 								<div class="product-overlay">
-									<div class="product-tags absolute top-2 left-2 flex flex-wrap gap-1">
-										{#each product.tags as tag}
-											<span class="pill pill-primary pill-sm">{tag.name}</span>
-										{/each}
-									</div>
-									<div class="product-info">
-										<h3 class="product-title">{product.name}</h3>
-										<span class="pill pill-secondary pill-sm">€{parseFloat(product.price).toFixed(2)}</span>
-									</div>
+										<div class="tag-container">
+											{#each product.tags as tag}
+												<span>{tag.name}</span>
+											{/each}
+										</div>
+										<div class="product-info">
+											<h3 class="product-title">{product.name}</h3>
+											<span class="tag">€{parseFloat(product.price).toFixed(2)}</span>
+										</div>
 								</div>
 							</div>
 						</div>

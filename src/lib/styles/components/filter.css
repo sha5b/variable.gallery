@@ -148,9 +148,35 @@
 }
 
 .pill-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    display: inline;
+    background: none;
+    pointer-events: none;
+}
+
+.pill-group > button {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    background-color: rgba(240, 240, 240, 0.8);
+    color: var(--text-color);
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast) var(--transition-timing);
+    cursor: pointer;
+    user-select: none;
+    margin: 0 0.2rem;
+    border: none;
+    pointer-events: auto;
+}
+
+.pill-group > button:hover {
+    background-color: var(--accent-color);
+    color: var(--background-color);
+}
+
+.pill-filled {
+    background-color: var(--accent-color) !important;
+    color: var(--background-color) !important;
 }
 
 details summary::-webkit-details-marker {

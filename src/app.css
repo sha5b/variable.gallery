@@ -5,6 +5,7 @@
 
 /* Import component-specific styles */
 @import './lib/styles/components/navbar.css';
+@import './lib/styles/components/footer.css';
 @import './lib/styles/components/cart-slider.css';
 @import './lib/styles/components/gallery.css';
 @import './lib/styles/components/product-showcase.css';
@@ -305,6 +306,7 @@ h6, .h6 {
   width: 100%;
   max-width: 100%;
   padding: var(--spacing-md) var(--spacing-lg);
+  padding-top: calc(var(--spacing-sm) * 2 + var(--spacing-md) + var(--spacing-md));
   margin: 0 auto;
   box-sizing: border-box;
   background-color: var(--background-color);
@@ -336,6 +338,7 @@ h6, .h6 {
 @media (min-width: 768px) {
   .page-container {
     padding: var(--spacing-lg) var(--spacing-xl);
+    padding-top: calc(var(--spacing-sm) * 2 + var(--spacing-md) + var(--spacing-lg));
   }
 }
 
@@ -378,6 +381,46 @@ h6, .h6 {
 .input:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+/* Tag System */
+.tag,
+.tag-container > span,
+.tags-row > span,
+.product-tag-container > span {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  background-color: rgba(240, 240, 240, 0.8);
+  color: var(--text-color);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast) var(--transition-timing);
+  cursor: pointer;
+  user-select: none;
+  margin: 0 0.2rem;
+}
+
+.tag:hover,
+.tag-container > span:hover,
+.tags-row > span:hover,
+.product-tag-container > span:hover {
+  background-color: var(--accent-color);
+  color: var(--background-color);
+}
+
+.tags-row,
+.tag-container,
+.product-tag-container {
+  display: inline;
+  background: none;
+  pointer-events: none;
+}
+
+.tags-row > span,
+.tag-container > span,
+.product-tag-container > span {
+  pointer-events: auto;
 }
 
 /* Card Component */

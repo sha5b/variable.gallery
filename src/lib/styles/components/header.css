@@ -4,17 +4,17 @@
     width: 100%;
     flex-direction: column;
     justify-content: flex-end;
-    padding-top: 8rem;
+    padding-top: var(--spacing-3xl);
 }
 
 .subheadline {
     font-family: var(--font-primary);
     color: var(--text-color);
-    font-size: 2rem;
+    font-size: var(--font-size-4xl);
     line-height: 2.25rem;
     margin: 0;
     max-width: 90%;
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing-lg);
 }
 
 .headline {
@@ -29,11 +29,11 @@
 
 @media (min-width: 640px) {
     .header-container {
-        padding-top: 10rem;
+        padding-top: calc(var(--spacing-3xl) + var(--spacing-2xl));
     }
 
     .subheadline {
-        font-size: 2.5rem;
+        font-size: calc(var(--font-size-4xl) + var(--font-size-lg));
         line-height: 2.75rem;
         max-width: 80%;
     }
@@ -41,11 +41,11 @@
 
 @media (min-width: 768px) {
     .header-container {
-        padding-top: 12rem;
+        padding-top: calc(var(--spacing-3xl) + var(--spacing-3xl));
     }
 
     .subheadline {
-        font-size: 3rem;
+        font-size: var(--font-size-5xl);
         line-height: 3.5rem;
     }
 }

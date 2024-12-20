@@ -43,7 +43,7 @@
 
 .detail-label {
     color: var(--text-color);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
 }
 
 .detail-value {
@@ -57,15 +57,15 @@
 }
 
 .price-value {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
     font-weight: 700;
 }
 
 .sale-price {
     color: var(--secondary-color);
     text-decoration: line-through;
-    margin-right: 0.5em;
-    font-size: 1rem;
+    margin-right: var(--spacing-xs);
+    font-size: var(--font-size-base);
 }
 
 .tags-row {
@@ -122,8 +122,8 @@
     border: 1px solid var(--primary-color);
     padding: var(--spacing-xs) var(--spacing-sm);
     text-align: center;
-    font-size: 0.875rem;
-    transition: all 0.2s ease-in-out;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-base) var(--transition-timing);
 }
 
 .button-secondary:hover {
@@ -139,7 +139,7 @@
     border: none;
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s ease-in-out;
+    transition: all var(--transition-base) var(--transition-timing);
 }
 
 .button-primary:hover {

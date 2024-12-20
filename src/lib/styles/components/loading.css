@@ -19,7 +19,7 @@
 .package-line {
     display: flex;
     justify-content: space-between;
-    padding: 4px 8px;
+    padding: var(--spacing-2xs) var(--spacing-xs);
     opacity: 0;
     animation: fadeIn 0.3s forwards;
 }
@@ -29,7 +29,7 @@
 }
 
 .package-size {
-    margin: 0 20px;
+    margin: 0 var(--spacing-md);
 }
 
 .download-complete {
@@ -59,9 +59,9 @@
 }
 
 .spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    width: 36px;
-    height: 36px;
+    border: var(--spacing-2xs) solid rgba(0, 0, 0, 0.1);
+    width: calc(var(--spacing-lg) + var(--spacing-xs));
+    height: calc(var(--spacing-lg) + var(--spacing-xs));
     border-radius: 50%;
     border-left-color: #09f;
     animation: spin 1s ease infinite;
@@ -70,7 +70,7 @@
 @keyframes fadeIn {
     from { 
         opacity: 0; 
-        transform: translateY(10px); 
+        transform: translateY(var(--spacing-xs)); 
     }
     to { 
         opacity: 1; 

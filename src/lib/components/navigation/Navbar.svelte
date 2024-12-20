@@ -79,7 +79,7 @@
 	});
 </script>
 
-<nav class="navbar bg-background px-page py-md z-50 flex w-full items-center justify-between">
+<nav class="navbar bg-background flex w-full items-center justify-between">
 	<!-- Logo -->
 	<div class="text-lg font-semibold">
 		<a href="/" class="text-text-color hover:text-primary-color">variable.gallery</a>
