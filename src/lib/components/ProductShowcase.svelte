@@ -154,7 +154,7 @@
 		<!-- Title and Description -->
 		<div class="mb-8">
 			{#if product}
-				<h1 class="product-title">{product.name}</h1>
+				<h2 class="product-title">{product.name}</h2>
 				<p class="text-base">
 					{@html product.short_description || product.description || ''}
 				</p>
@@ -259,7 +259,7 @@
 	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
 		<div class="flex flex-col items-start md:w-1/2">
 			<div class="artist-details space-y-md">
-				<h2 class="section-title">About the Artist</h2>
+				<h3 class="section-title">About the Artist</h3>
 				
 				<!-- Artist Info -->
 				<div class="technical-details space-y-4 mt-4">
