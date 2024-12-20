@@ -44,11 +44,29 @@
 		if (hoveredImageIndex === imageIndex) {
 			const image = /** @type {HTMLImageElement} */ (event.target);
 			const rect = image.getBoundingClientRect();
+			
+			// Calculate distance from center (0 at center, 1 at edges)
+			const centerX = rect.left + rect.width / 2;
+			const centerY = rect.top + rect.height / 2;
+			const distanceX = (event.clientX - centerX) / (rect.width / 2);
+			const distanceY = (event.clientY - centerY) / (rect.height / 2);
+			
+			// Calculate scale based on distance from center (1.2 at center, 1.1 at edges)
+			const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
+			const scale = 1.2 - (distance * 0.1);
+			
+			// Calculate transform origin (50% at center, 0% or 100% at edges)
 			const x = (event.clientX - rect.left) / rect.width;
 			const y = (event.clientY - rect.top) / rect.height;
-
+			
+			// Apply transforms
 			image.style.transformOrigin = `${x * 100}% ${y * 100}%`;
-			image.style.transform = 'scale(1.5)';
+			image.style.transform = `
+				scale(${scale})
+				perspective(1000px)
+				rotateX(${distanceY * -3}deg)
+				rotateY(${distanceX * 3}deg)
+			`;
 		}
 	}
 
@@ -56,7 +74,7 @@
 		const images = document.querySelectorAll('.gallery-image');
 		images.forEach((img) => {
 			const imgElement = /** @type {HTMLElement} */ (img);
-			imgElement.style.transform = 'scale(1)';
+			imgElement.style.transform = 'scale(1) perspective(1000px) rotateX(0deg) rotateY(0deg)';
 			imgElement.style.transformOrigin = 'center';
 		});
 	}

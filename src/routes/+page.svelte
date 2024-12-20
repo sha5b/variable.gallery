@@ -168,13 +168,13 @@
 	</script>
 </svelte:head>
 
-<div class="landing-container px-page">
+<div class="container">
 	<FeaturedSlider {products} />
 	<HeroSection />
-	<div class="mb-12 grid grid-cols-1 gap-md md:grid-cols-2 mt-12">
+	<div class="grid grid-cols-1 gap-md md:grid-cols-2 m-2xl">
 		{#each Object.keys(productsByCategory) as categoryName}
 			<div class="category-container transition-default w-full">
-				<h2 class="my-sm text-6xl font-semibold text-primary">
+				<h2 class="h2 text-primary">
 					{categoryName}
 				</h2>
 				<FeaturedSlider products={productsByCategory[categoryName]} />
@@ -184,13 +184,3 @@
 	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
 	<ProductFilter {products} />
 </div>
-
-<style>
-	.landing-container {
-		width: 100%;
-		max-width: 100%;
-		overflow-x: hidden;
-		box-sizing: border-box;
-		position: relative;
-	}
-</style>
