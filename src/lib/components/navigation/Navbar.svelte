@@ -4,7 +4,15 @@
 	import { cart, isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
 	import { ShoppingCart, ChevronDown } from 'svelte-heros';
 
-	let artists = [];
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+
+	/** @type {Artist[]} */
+	export let artists;
 	let isCartOpen;
 	$: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
 
@@ -19,18 +27,31 @@
 		isMenuOpen = !isMenuOpen;
 	}
 
+	/**
+	 * @param {MouseEvent} event
+	 */
 	function toggleDropdown(event) {
 		event.stopPropagation();
 		isDropdownOpen = !isDropdownOpen;
 	}
 
 	let totalItems = 0;
-	$: totalItems = $cart.reduce((sum, item) => sum + item.quantity, 0);
+	$: totalItems = $cart.reduce(
+		/** 
+		 * @param {number} sum 
+		 * @param {{ quantity: number }} item 
+		 */
+		(sum, item) => sum + item.quantity, 
+		0
+	);
 
 	function closeMenu() {
 		isMenuOpen = false;
 	}
 
+	/**
+	 * @param {MouseEvent} event
+	 */
 	function handleClickOutside(event) {
 		const dropdown = document.querySelector('.dropdown-menu');
 		const dropdownButton = document.querySelector('.dropdown-button');
@@ -38,15 +59,14 @@
 		if (
 			dropdown &&
 			dropdownButton &&
-			!dropdown.contains(event.target) &&
-			!dropdownButton.contains(event.target)
+			!dropdown.contains(/** @type {Node} */ (event.target)) &&
+			!dropdownButton.contains(/** @type {Node} */ (event.target))
 		) {
 			isDropdownOpen = false;
 		}
 	}
 
-	onMount(async () => {
-		artists = await fetchArtists();
+	onMount(() => {
 		if (typeof document !== 'undefined') {
 			document.addEventListener('click', handleClickOutside);
 		}
@@ -59,7 +79,7 @@
 	});
 </script>
 
-<nav class="navbar bg-background px-page py-md z-50 flex w-full items-center justify-between">
+<nav class="navbar bg-background flex w-full items-center justify-between">
 	<!-- Logo -->
 	<div class="text-lg font-semibold">
 		<a href="/" class="text-text-color hover:text-primary-color">variable.gallery</a>
@@ -159,77 +179,3 @@
 		</div>
 	{/if}
 </nav>
-
-<style>
-	.navbar {
-		position: fixed;
-		top: 0;
-		z-index: 50;
-		background-color: var(--background-color);
-		padding-bottom: 1rem;
-		padding-top: 1rem;
-	}
-    li{
-        font-weight: bold;
-    }
-
-	.cart-badge {
-		position: absolute;
-		top: -0.5rem;
-		right: -0.5rem;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		background-color: var(--secondary-color);
-		color: var(--background-color);
-		font-size: 0.75rem;
-		border-radius: 9999px;
-	}
-
-	.dropdown-menu {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		padding: var(--spacing-xs) var(--spacing-sm);
-		background-color: var(--background-color);
-		z-index: 10;
-	}
-
-	.dropdown-button {
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-	}
-
-	.dropdown-item {
-		padding: var(--spacing-xs) 0;
-		text-align: left;
-		white-space: nowrap;
-	}
-
-	.burger-icon div {
-		background-color: var(--text-color);
-	}
-
-	.menu-container {
-		max-height: 100vh;
-		overflow-y: auto;
-		padding-top: 1rem;
-	}
-
-	.icon {
-		width: 1rem;
-		height: 1rem;
-	}
-
-	.cart-icon {
-		width: 1.5rem;
-		height: 1.5rem;
-		color: var(--text-color);
-	}
-</style>

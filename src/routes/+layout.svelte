@@ -7,10 +7,30 @@
 	import Footer from '$lib/components/navigation/Footer.svelte';
 	import Navbar from '$lib/components/navigation/Navbar.svelte';
 	import CartSlider from '$lib/components/navigation/CartSlider.svelte';
-	import Loading from '$lib/components/Loading.svelte';
+	import LoadingIndicator from '$lib/components/LoadingIndicator.svelte';
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Artist[]} artists
+	 */
+
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
+
+	/** @type {PageData} */
 	export let data;
 	const { artists } = data;
 	
@@ -26,6 +46,7 @@
 		}
 	};
 	
+	/** @type {Array<MetaTag>} */
 	$: metaTags = generateMetaTags(pageSEO);
 
 	function closeCart() {
@@ -67,7 +88,7 @@
 	</script>
 </svelte:head>
 
-<Loading isLoading={$navigating} />
+<LoadingIndicator isLoading={!!$navigating} />
 
 <div class="site-wrapper">
 	<Navbar {artists} />
@@ -91,5 +112,6 @@
 		width: 100%;
 		max-width: 100%;
 		overflow-x: hidden;
+		padding-top: 5rem;
 	}
 </style>

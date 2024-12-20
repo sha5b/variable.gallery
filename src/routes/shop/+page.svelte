@@ -1,11 +1,53 @@
 <script>
+  /**
+   * @typedef {Object} MetaTag
+   * @property {string} [name]
+   * @property {string} [property]
+   * @property {any} content
+   */
+
+  /**
+   * @typedef {Object} Image
+   * @property {string} src
+   */
+
+  /**
+   * @typedef {Object} Category
+   * @property {string} name
+   */
+
+  /**
+   * @typedef {Object} Tag
+   * @property {string} name
+   */
+
+  /**
+   * @typedef {Object} Attribute
+   * @property {string} name
+   * @property {string[]} options
+   */
+
+  /**
+   * @typedef {Object} Product
+   * @property {number} id
+   * @property {string} name
+   * @property {string} price
+   * @property {string} date_created
+   * @property {Tag[]} tags
+   * @property {Category[]} categories
+   * @property {string} description
+   * @property {Image[]} images
+   * @property {Attribute[]} attributes
+   */
+
   import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
   import { goto } from '$app/navigation';
   import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-  import TagDisplay from '$lib/components/Filter.svelte';
+  import ProductFilter from '$lib/components/ProductFilter.svelte';
 
+  /** @type {{products: Product[]}} */
   export let data;
-  const { products, error } = data;
+  const { products } = data;
 
   // Create page-specific SEO by extending defaultSEO
   const pageSEO = {
@@ -29,14 +71,16 @@
     }
   };
 
+  /** @type {Array<{name?: string, property?: string, content: string}>} */
   $: metaTags = generateMetaTags(pageSEO);
 
+  /** @type {Record<string, Product[]>} */
   let productsByCategory = {};
 
   // Organize products by category
   if (products) {
-    products.forEach(product => {
-      product.categories.forEach(category => {
+    products.forEach((product) => {
+      product.categories.forEach((category) => {
         if (!productsByCategory[category.name]) {
           productsByCategory[category.name] = [];
         }
@@ -45,6 +89,9 @@
     });
   }
 
+  /**
+   * @param {number} productId
+   */
   function goToProduct(productId) {
     goto(`/shop/${productId}`);
   }
@@ -82,39 +129,31 @@
   </script>
 </svelte:head>
 
-<div class="shop-container px-page bg-background">
-  {#if error}
-    <p class="text-error">{error}</p>
-  {:else}
-    <div class="grid grid-cols-1 gap-md md:grid-cols-2 mb-8">
-      {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full transition-default">
-          <h2 class="text-6xl font-semibold my-sm text-primary">
-            {categoryName}
-          </h2>
-          
-          <!-- Use FeaturedSlider for each category's products -->
-          <FeaturedSlider products={productsByCategory[categoryName]} />
-          
-        </div>
-      {/each}
+<div class="page-container">
+    <div class="content-section space-y-md">
+        <section class="space-y-sm">
+            <p>
+                Explore our curated collection of digital artworks, NFTs, and experimental media. 
+                Each piece is carefully selected to represent the forefront of digital art innovation.
+            </p>
+        </section>
+
+        <section class="space-y-md">
+            <div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+                {#each Object.keys(productsByCategory) as categoryName}
+                    <div class="category-container w-full">
+                        <h3 class="h3">
+                            {categoryName}
+                        </h3>
+                        <FeaturedSlider products={productsByCategory[categoryName]} />
+                    </div>
+                {/each}
+            </div>
+        </section>
+
+        <section class="space-y-md">
+            <h2 class="section-title">Browse All Art</h2>
+            <ProductFilter {products} />
+        </section>
     </div>
-  {/if}
-  <TagDisplay {products} />
 </div>
-
-<style>
-  .shop-container {
-    background-color: var(--background-color);
-  }
-  
-  .category-container {
-    position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .text-error {
-    color: var(--error-color);
-  }
-</style>

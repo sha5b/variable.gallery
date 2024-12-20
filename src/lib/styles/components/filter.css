@@ -1,0 +1,368 @@
+.wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--spacing-xl) 0;
+}
+
+.filter-controls {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: var(--background-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    align-items: center;
+}
+
+.filter-controls > div {
+    min-height: var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.filter-controls > div > .tag-container {
+    flex: 1;
+}
+
+.filter-controls > div > div:last-child {
+    margin-left: auto;
+}
+
+.sort-select,
+.items-select {
+    position: relative;
+    z-index: 21;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--background-color);
+    border: none;
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    transition: all var(--transition-base) var(--transition-timing);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+}
+
+.sort-select:hover,
+.items-select:hover {
+    color: var(--primary-color);
+}
+
+.sort-select:focus,
+.items-select:focus {
+    outline: none;
+}
+
+.sort-select option,
+.items-select option {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding: var(--spacing-sm);
+}
+
+.active-filter {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.tag-container span {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-2xs) var(--spacing-sm);
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    user-select: none;
+}
+
+.tag-container span:hover {
+    background-color: var(--secondary-color);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) 0;
+}
+
+.product-card {
+    position: relative;
+    background: var(--background-color);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform var(--transition-base) var(--transition-timing);
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+}
+
+.product-card:hover .product-info {
+    opacity: 1;
+}
+
+.product-image-container {
+    position: relative;
+    padding-top: 100%;
+}
+
+.product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--spacing-sm);
+}
+
+.product-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--spacing-xl);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
+    opacity: 0;
+    transition: opacity var(--transition-base) var(--transition-timing);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.product-title {
+    color: var(--background-color);
+    font-size: var(--font-size-base);
+    font-weight: bold;
+    margin: 0;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    padding: var(--spacing-xl) 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.pagination-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all var(--transition-base) var(--transition-timing);
+}
+
+.pagination-button:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.pagination-button.active {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--secondary-bg-color);
+}
+
+.filter-container {
+    padding: var(--spacing-xl) 0;
+}
+
+.filter-section {
+    padding: var(--spacing-lg) 0;
+    margin: 0;
+}
+
+.section-title {
+    font-size: var(--font-size-lg);
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+    padding: 0;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+details > summary {
+    padding: 0;
+    margin: 0;
+}
+
+.filter-select {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    transition: border-color var(--transition-base) var(--transition-timing);
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Category Pills */
+.filter-section:first-child .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin: var(--spacing-xs) 0;
+    background: none;
+}
+
+.filter-section:first-child .pill-group > button {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-2xs) var(--spacing-sm);
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast) var(--transition-timing);
+    cursor: pointer;
+    user-select: none;
+    border: none;
+}
+
+.filter-section:first-child .pill-group > button:hover {
+    background-color: var(--secondary-color);
+}
+
+.filter-section:first-child .pill-filled {
+    background-color: var(--secondary-color) !important;
+}
+
+/* Regular Tags */
+.filter-section:not(:first-child) .pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2xs);
+    margin: var(--spacing-2xs) 0;
+    position: relative;
+    z-index: 10;
+}
+
+.filter-section:not(:first-child) .pill-group > button {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    background-color: rgba(240, 240, 240, 0.8);
+    color: var(--text-color);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast) var(--transition-timing);
+    cursor: pointer;
+    user-select: none;
+    border: none;
+}
+
+.filter-section:not(:first-child) .pill-group > button:hover {
+    background-color: var(--accent-color);
+    color: var(--background-color);
+}
+
+.filter-section:not(:first-child) .pill-filled {
+    background-color: var(--accent-color) !important;
+    color: var(--background-color) !important;
+    box-shadow: none;
+    border: none;
+}
+
+details > summary {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: var(--spacing-lg) 0;
+    transition: color var(--transition-base) var(--transition-timing);
+}
+
+details > summary:hover {
+    color: var(--primary-color);
+}
+
+details > summary::-webkit-details-marker {
+    display: none;
+}
+
+details > summary::after {
+    content: '+';
+    font-size: var(--font-size-2xl);
+    line-height: 1;
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+}
+
+details[open] > summary::after {
+    content: '−';
+}
+
+details[open] summary {
+    margin-bottom: var(--spacing-md);
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .filter-sidebar {
+        position: relative;
+        top: 0;
+        width: 100%;
+    }
+
+    .filter-controls > div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .filter-controls > div > div:last-child {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--spacing-sm);
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+}

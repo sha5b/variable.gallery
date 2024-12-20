@@ -1,16 +1,86 @@
 <script>
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
+
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
+
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} type
+	 * @property {string} [short_description]
+	 * @property {string} [description]
+	 * @property {string} [regular_price]
+	 * @property {string} [sale_price]
+	 * @property {number} [stock_quantity]
+	 * @property {string} [stock_status]
+	 * @property {string} [weight]
+	 * @property {{length: string, width: string, height: string}} [dimensions]
+	 * @property {Image[]} images
+	 * @property {Category[]} categories
+	 * @property {Tag[]} tags
+	 * @property {Attribute[]} attributes
+	 */
+
+	/**
+	 * @typedef {Object} Variation
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} regular_price
+	 * @property {number} stock_quantity
+	 * @property {string} stock_status
+	 */
+
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Product} product
+	 * @property {Variation|null} variation
+	 * @property {Product[]} products
+	 * @property {Artist[]} artists
+	 */
+
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { addItem, toggleCartSlider  } from '$lib/stores/cartStore';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
-	import Gallery from '$lib/components/Gallery.svelte';
+	import ImageGallery from '$lib/components/ImageGallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { onMount } from 'svelte';
 
+	/** @type {PageData} */
 	export let data;
-	
 	const { product, variation, products, artists } = data;
 
 	// Create product-specific SEO
@@ -33,11 +103,14 @@
 		}
 	};
 
+	/** @type {Array<{name?: string, property?: string, content: string}>} */
 	$: metaTags = generateMetaTags(pageSEO);
 
 	let bioOpen = false;
 	let primaryCategory = '';
+	/** @type {string[]} */
 	let gallery = [];
+	/** @type {Artist|null} */
 	let artistInfo = null;
 	let artistName = '';
 
@@ -52,7 +125,7 @@
 		
 		artistInfo = artists.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
-		);
+		) || null;
 		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
@@ -201,7 +274,7 @@
 
 		<!-- Gallery Component with 2/3 width -->
 		<div class="gallery-container md:w-2/3 relative">
-			<Gallery images={gallery} />
+			<ImageGallery images={gallery} />
 		</div>
 	</div>
 
@@ -214,41 +287,47 @@
 					
 					<!-- Artist Info -->
 					<div class="technical-details space-y-4">
-						<div class="detail-row clean">
-							<span class="detail-label">Name</span>
-							<span class="detail-value">{artistInfo.title.rendered}</span>
-						</div>
-
-						<div class="detail-row clean">
-							<span class="detail-label">Location</span>
-							<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
-						</div>
-
-						<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
-							<span class="detail-label">Bio</span>
-							<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
-						</div>
-
-						{#if bioOpen}
-							<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-								<p class="text-primary text-base">
-									{artistInfo.acf?.description || 'No description available.'}
-								</p>
+						{#if artistInfo}
+							<div class="detail-row clean">
+								<span class="detail-label">Name</span>
+								<span class="detail-value">{artistInfo.title.rendered}</span>
 							</div>
+
+							<div class="detail-row clean">
+								<span class="detail-label">Location</span>
+								<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+							</div>
+
+							<div class="detail-row clean cursor-pointer" on:click={() => (bioOpen = !bioOpen)}>
+								<span class="detail-label">Bio</span>
+								<span class="detail-value">View {bioOpen ? '−' : '+'}</span>
+							</div>
+
+							{#if bioOpen}
+								<div class="bio-drawer" transition:slide={{ duration: 300 }}>
+									<p class="text-primary text-base">
+										{artistInfo.acf?.description || 'No description available.'}
+									</p>
+								</div>
+							{/if}
 						{/if}
 					</div>
 
-					<button 
-						class="button-primary mt-8 w-full"
-						on:click={() => goto(`/artist/${artistInfo.slug}`)}
-					>
-						View Profile
-					</button>
+					{#if artistInfo}
+						<button 
+							class="button-primary mt-8 w-full"
+							on:click={() => goto(`/artist/${artistInfo?.slug || ''}`)}
+						>
+							View Profile
+						</button>
+					{/if}
 				</div>
 			</div>
 
 			<div class="placeholder-column flex-1">
-				<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+				{#if artistInfo}
+					<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+				{/if}
 			</div>
 		</div>
 	{/if}

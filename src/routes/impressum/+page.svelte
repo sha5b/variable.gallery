@@ -1,5 +1,19 @@
-<!-- Impressum.svelte -->
 <script>
+    /**
+     * @typedef {Object} CompanyInfo
+     * @property {string} name
+     * @property {string} email
+     * @property {string} location
+     * @property {string} established
+     * @property {string} founder
+     */
+
+    /**
+     * @typedef {Object} MetaTag
+     * @property {string} [name]
+     * @property {string} [property]
+     * @property {string} content
+     */
     import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
     let companyInfo = {
@@ -31,6 +45,7 @@
         }
     };
 
+    /** @type {MetaTag[]} */
     $: metaTags = generateMetaTags(pageSEO);
 </script>
 
@@ -45,20 +60,20 @@
     {/each}
 </svelte:head>
 
-<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
-    <div class="flex flex-col md:flex-row gap-lg items-start">
+<div class="page-container">
+    <div class="content-section flex flex-col md:flex-row gap-lg items-start">
         <!-- Left Column -->
         <div class="w-full md:w-1/2 space-y-md">
             <section class="space-y-sm">
-                <h1 class="text-xlarge font-bold text-[var(--text-color)]">Impressum</h1>
-                <p class="text-base text-[var(--text-color)]">
+                <h1 class="h1">Impressum</h1>
+                <p>
                     Legal information for {companyInfo.name}, a virtual art gallery specializing in digital art, NFTs, and experimental media formats.
                 </p>
             </section>
 
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Gallery Information</h2>
-                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                <h2 class="section-title">Gallery Information</h2>
+                <ul class="list-disc pl-4 mt-2">
                     <li>Founder & Director: {companyInfo.founder}</li>
                     <li>Established: {companyInfo.established}</li>
                     <li>Registration: Digital Commerce Registry Berlin</li>
@@ -68,9 +83,9 @@
             </section>
 
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Legal Entity</h2>
-                <p class="text-base text-[var(--text-color)]">variable.gallerie GmbH</p>
-                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                <h2 class="section-title">Legal Entity</h2>
+                <p>variable.gallerie GmbH</p>
+                <ul class="list-disc pl-4 mt-2">
                     <li>Represented by: {companyInfo.founder}</li>
                     <li>Registered Office: Berlin, Germany</li>
                     <li>Digital Operations: Global</li>
@@ -81,11 +96,11 @@
         <!-- Right Column -->
         <div class="w-full md:w-1/2 space-y-md">
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Contact Information</h2>
-                <p class="text-base text-[var(--text-color)]">
+                <h2 class="section-title">Contact Information</h2>
+                <p>
                     For inquiries about digital art acquisitions, artist submissions, and technical support:
                 </p>
-                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                <ul class="list-disc pl-4 mt-2">
                     <li>General Inquiries: <a href="mailto:{companyInfo.email}" class="text-accent hover:underline">{companyInfo.email}</a></li>
                     <li>Artist Relations: <a href="mailto:space@variable.gallery" class="text-accent hover:underline">artists@variable.gallery</a></li>
                     <li>Technical Support: <a href="mailto:space@variable.gallery" class="text-accent hover:underline">space@variable.gallery</a></li>
@@ -93,8 +108,8 @@
             </section>
 
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Responsible for Content</h2>
-                <p class="text-base text-[var(--text-color)]">
+                <h2 class="section-title">Responsible for Content</h2>
+                <p>
                     According to § 55 Abs. 2 RStV:
                 </p>
                 <p class="text-base text-[var(--text-color)]">
@@ -105,8 +120,8 @@
             </section>
 
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Platform Features</h2>
-                <ul class="list-disc pl-4 mt-2 text-[var(--text-color)]">
+                <h2 class="section-title">Platform Features</h2>
+                <ul class="list-disc pl-4 mt-2">
                     <li>Digital Art Sales & Distribution</li>
                     <li>NFT Minting & Trading</li>
                     <li>Virtual Exhibitions</li>
@@ -117,12 +132,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .about-container {
-        padding-top: var(--spacing-xl);
-        padding-bottom: var(--spacing-xl);
-        line-height: 1.75;
-    }
-</style>
-  

@@ -1,20 +1,83 @@
 <script>
-	import Gallery from '$lib/components/Gallery.svelte';
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
+
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
+
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} type
+	 * @property {string} [short_description]
+	 * @property {string} [description]
+	 * @property {string} [regular_price]
+	 * @property {number} [stock_quantity]
+	 * @property {string} [stock_status]
+	 * @property {string} [weight]
+	 * @property {{length: string, width: string, height: string}} [dimensions]
+	 * @property {Image[]} images
+	 * @property {Category[]} categories
+	 * @property {Tag[]} tags
+	 * @property {Attribute[]} attributes
+	 */
+
+	/**
+	 * @typedef {Object} Variation
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} regular_price
+	 * @property {number} stock_quantity
+	 * @property {string} stock_status
+	 */
+
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+	import ImageGallery from '$lib/components/ImageGallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
 	import { addItem, toggleCartSlider } from '$lib/stores/cartStore';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 
+	/** @type {Product[]} */
 	export let products;
+	/** @type {Artist[]} */
 	export let artists;
+	/** @type {Product|null} */
 	export let product = null;
+	/** @type {Variation|null} */
 	export let variation = null;
 
+	/** @type {string[]} */
 	let gallery = [];
+	/** @type {Artist|null} */
 	let artistInfo = null;
+	/** @type {string} */
 	let artistName = '';
+	/** @type {string} */
 	let primaryCategory = '';
+	/** @type {boolean} */
 	let bioOpen = false;
 
 	$: if (product) {
@@ -27,7 +90,7 @@
 		
 		artistInfo = artists.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
-		);
+		) || null;
 		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
@@ -51,6 +114,12 @@
 	}
 
 	// Helper function to get price display
+	/**
+	 * Helper function to get price display
+	 * @param {Product} product
+	 * @param {Variation|null} variation
+	 * @returns {string}
+	 */
 	function getPriceDisplay(product, variation) {
 		if (product.type === 'variable') {
 			return variation?.regular_price 
@@ -64,6 +133,12 @@
 	}
 
 	// Helper function to get stock status
+	/**
+	 * Helper function to get stock status
+	 * @param {Product} product
+	 * @param {Variation|null} variation
+	 * @returns {string}
+	 */
 	function getStockStatus(product, variation) {
 		if (product.type === 'variable') {
 			return variation?.stock_status === 'instock' ? 'In Stock' : 'Out of Stock';
@@ -75,13 +150,15 @@
 
 <div class="product-layout">
 	<!-- Product Details -->
-	<div class="product-details md:w-1/3">
+	<div class="product-details">
 		<!-- Title and Description -->
 		<div class="mb-8">
-			<h1 class="product-title text-xlarge text-primary font-bold mb-4">{product.name}</h1>
-			<p class="text-primary text-base">
-				{@html product.short_description || product.description}
-			</p>
+			{#if product}
+				<h2 class="product-title">{product.name}</h2>
+				<p class="text-base">
+					{@html product.short_description || product.description || ''}
+				</p>
+			{/if}
 		</div>
 
 		<!-- Technical Details -->
@@ -94,10 +171,12 @@
 			{/if}
 
 			<!-- Stock Info -->
-			<div class="detail-row">
-				<span class="detail-label">editions</span>
-				<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
-			</div>
+			{#if product}
+				<div class="detail-row">
+					<span class="detail-label">editions</span>
+					<span class="detail-value">{variation?.stock_quantity || product.stock_quantity || 'N/A'}</span>
+				</div>
+			{/if}
 
 			<!-- Price -->
 			<div class="detail-row clean price-row">
@@ -125,16 +204,16 @@
 		</div>
 
 		<!-- Additional Info -->
-		{#if product.dimensions || product.weight || product.categories?.length > 0 || product.tags?.length > 0}
+		{#if product && (product.dimensions || product.weight || product.categories?.length > 0 || product.tags?.length > 0)}
 			<div class="additional-info space-y-2 mt-8">
-				{#if product.dimensions}
+				{#if product?.dimensions}
 					<div class="detail-row">
 						<span class="detail-label">dimensions</span>
 						<span class="detail-value">{product.dimensions.length || '0'} x {product.dimensions.width || '0'} x {product.dimensions.height || '0'} cm</span>
 					</div>
 				{/if}
 
-				{#if product.categories?.length > 0}
+				{#if product?.categories?.length > 0}
 					<div class="tags-row">
 						{#each product.categories as category}
 							<span class="pill pill-primary pill-sm">{category.name}</span>
@@ -142,7 +221,7 @@
 					</div>
 				{/if}
 
-				{#if product.tags?.length > 0}
+				{#if product?.tags?.length > 0}
 					<div class="tags-row">
 						{#each product.tags as tag}
 							<span class="pill pill-secondary pill-sm">{tag.name}</span>
@@ -153,17 +232,19 @@
 		{/if}
 
 		<!-- View Details Button -->
-		<button 
-			on:click={() => window.location.href = `/shop/${product.id}`} 
-			class="button-primary w-full mt-8"
-		>
-			View Details
-		</button>
+		{#if product}
+			<button 
+				on:click={() => window.location.href = `/shop/${product.id}`} 
+				class="button-primary w-full mt-8"
+			>
+				View Details
+			</button>
+		{/if}
 	</div>
 
 	<!-- Gallery Component -->
-	<div class="gallery-container md:w-2/3">
-		<Gallery images={gallery} />
+	<div class="gallery-container">
+		<ImageGallery images={gallery} />
 		<button 
 			on:click={addToCart} 
 			class="button-primary absolute bottom-4 right-4"
@@ -175,21 +256,21 @@
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
-		<div class="flex flex-col items-start md:w-1/2">
+	<div class="artist-container">
+		<div class="artist-info">
 			<div class="artist-details space-y-md">
-				<h3 class="text-xlarge text-primary font-bold mb-8">about the artist</h3>
+				<h3 class="section-title">About the Artist</h3>
 				
 				<!-- Artist Info -->
-				<div class="technical-details space-y-4">
+				<div class="technical-details space-y-4 mt-4">
 					<div class="detail-row clean">
 						<span class="detail-label">Name</span>
-						<span class="detail-value">{artistInfo.title.rendered}</span>
+						<span class="detail-value">{artistInfo?.title?.rendered || ''}</span>
 					</div>
 
 					<div class="detail-row clean">
 						<span class="detail-label">Location</span>
-						<span class="detail-value">{artistInfo.acf?.location || 'Unknown'}</span>
+						<span class="detail-value">{artistInfo?.acf?.location || 'Unknown'}</span>
 					</div>
 
 					<div class="detail-row clean cursor-pointer" on:click={() => bioOpen = !bioOpen}>
@@ -199,215 +280,30 @@
 
 					{#if bioOpen}
 						<div class="bio-drawer" transition:slide={{ duration: 300 }}>
-							<p class="text-primary text-base">
-								{artistInfo.acf?.description || 'No description available.'}
+							<p class="text-base">
+								{artistInfo?.acf?.description || 'No description available.'}
 							</p>
 						</div>
 					{/if}
 				</div>
 
-				<button 
-					class="button-primary mt-8 w-full"
-					on:click={() => goto(`/artist/${artistInfo.slug}`)}
-				>
-					View Profile
-				</button>
+				{#if artistInfo}
+					<button 
+						class="button-primary mt-8 w-full"
+						on:click={() => goto(`/artist/${artistInfo?.slug || ''}`)}
+					>
+						View Profile
+					</button>
+				{/if}
 			</div>
 		</div>
 
 		<div class="placeholder-column flex-1">
-			<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+			{#if artistInfo}
+				<ArtistSlider {products} artistName={artistInfo.title.rendered} />
+			{/if}
 		</div>
 	</div>
 {/if}
 
 <!-- <CategorySlider {products} category={primaryCategory} /> -->
-
-<style>
-	.product-layout {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-md);
-		width: 100%;
-	}
-
-	.gallery-container {
-		width: 100%;
-		position: relative;
-	}
-
-	@media (min-width: 768px) {
-		.product-layout {
-			flex-direction: row;
-			align-items: flex-start;
-		}
-	}
-
-	.product-details {
-	}
-
-	.image-gallery {
-		width: 100%;
-		flex: 1 1 67%;
-		position: relative;
-	}
-
-	.artist-container {
-		background-color: var(--background-color);
-		padding: var(--spacing-xl) 0;
-	}
-
-	.artist-details {
-		width: 100%;
-	}
-
-	.detail-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: var(--spacing-xs) 0;
-		border-bottom: 1px solid var(--secondary-bg-color);
-	}
-
-	.detail-label {
-		color: var(--text-color);
-		font-size: 0.875rem;
-	}
-
-	.detail-value {
-		color: var(--text-color);
-		text-align: right;
-	}
-
-	.price-row {
-		border-bottom: none;
-		margin-top: var(--spacing-md);
-	}
-
-	.price-value {
-		font-size: 1.25rem;
-		font-weight: 700;
-	}
-
-	.sale-price {
-		color: var(--secondary-color);
-		text-decoration: line-through;
-		margin-right: 0.5em;
-		font-size: 1rem;
-	}
-
-	.tags-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--spacing-xs);
-		margin-top: var(--spacing-xs);
-	}
-
-	.additional-info {
-		padding-top: var(--spacing-md);
-		border-top: 1px solid var(--secondary-bg-color);
-	}
-
-	.button-primary {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		border-radius: 0;
-		text-align: center;
-		font-size: 0.875rem;
-	}
-
-	.button-primary:hover {
-		background-color: var(--secondary-color);
-	}
-
-	@media (max-width: 767px) {
-		.product-layout {
-			flex-direction: column;
-		}
-
-		.product-details {
-			flex: 0 0 100%;
-			width: 100%;
-			margin-bottom: var(--spacing-md);
-		}
-
-		.artist-container {
-		}
-	}
-
-	.bio-drawer {
-		padding: var(--spacing-sm) 0;
-	}
-
-	.artist-link {
-		display: inline-block;
-		margin-top: var(--spacing-md);
-		font-weight: 500;
-	}
-
-	.gallery-container {
-		position: relative;
-	}
-
-	.gallery-container .button-primary {
-		position: absolute;
-		bottom: var(--spacing-sm);
-		right: var(--spacing-sm);
-		padding: var(--spacing-sm) var(--spacing-md);
-	}
-
-	.detail-row.clean {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: var(--spacing-xs) 0;
-		border-bottom: 1px solid var(--secondary-bg-color);
-	}
-
-	.button-container {
-		display: flex;
-		gap: var(--spacing-sm);
-		margin-top: var(--spacing-md);
-	}
-
-	.button-secondary {
-		flex: 1;
-		background-color: var(--background-color);
-		color: var(--primary-color);
-		border: 1px solid var(--primary-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		text-align: center;
-		font-size: 0.875rem;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.button-secondary:hover {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-	}
-
-	.button-primary {
-		flex: 1;
-	}
-
-	.button-group {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-sm);
-	}
-
-	.button-primary {
-		background-color: var(--primary-color);
-		color: var(--background-color);
-		padding: var(--spacing-xs) var(--spacing-sm);
-		border: none;
-		cursor: pointer;
-		font-weight: 500;
-		transition: all 0.2s ease-in-out;
-	}
-
-	.button-primary:hover {
-		background-color: var(--secondary-color);
-	}
-</style>
