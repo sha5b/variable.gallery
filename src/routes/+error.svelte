@@ -8,15 +8,8 @@
     });
 </script>
 
-<div class="error-page flex-center flex-col text-text-color px-page">
-    <h1 class="text-xlarge font-heading">{errorMessage}</h1>
-    <p class="margin-md text-base">It seems you've entered an uncharted territory of our gallery. Try heading back to explore the curated worlds we have.</p>
-    <a href="/" class="button-primary mt-4">Return to Home</a>
+<div class="container flex items-center justify-center flex-col min-h-screen bg-background">
+    <h1 class="h1">{errorMessage}</h1>
+    <p class="m-md">It seems you've entered an uncharted territory of our gallery. Try heading back to explore the curated worlds we have.</p>
+    <a href="/" class="btn btn-primary">Return to Home</a>
 </div>
-
-<style>
-    .error-page {
-        height: 100vh;
-        background-color: var(--background-color);
-    }
-</style>

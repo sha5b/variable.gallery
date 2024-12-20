@@ -1,0 +1,22 @@
+.contact-container {
+    width: 100%;
+    margin: var(--spacing-lg) 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.contact-button {
+    font-size: var(--font-size-xl);
+    padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.contact-text {
+    font-size: var(--font-size-lg);
+    margin-top: var(--spacing-sm);
+    text-align: left;
+    color: var(--primary-color);
+}

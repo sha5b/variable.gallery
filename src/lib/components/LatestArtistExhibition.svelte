@@ -1,8 +1,29 @@
 <script>
+    import '$lib/styles/components/exhibition.css';
+
+    /**
+     * @typedef {Object} Media
+     * @property {number} id
+     * @property {string} source_url
+     */
+
+    /**
+     * @typedef {Object} Exhibition
+     * @property {{fingerprint: number}} acf
+     * @property {{rendered: string}} title
+     * @property {string} description
+     */
+
+    /** @type {Exhibition | null} */
     export let exhibition = null;
+    /** @type {Media[]} */
     export let media = [];
 
-    // Function to get media URL by fingerprint ID
+    /**
+     * Function to get media URL by fingerprint ID
+     * @param {number} fingerprintId
+     * @returns {string}
+     */
     function getMediaUrlByFingerprint(fingerprintId) {
         const mediaItem = media.find(item => item.id === fingerprintId);
         return mediaItem ? mediaItem.source_url : '';
@@ -20,42 +41,3 @@
 {:else}
     <p>No virtual exhibitions available for this artist.</p>
 {/if}
-
-<style>
-	.exhibition {
-		margin-bottom: 2rem;
-		position: relative;
-		max-width: 100%;
-		cursor: pointer;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.exhibition-image-container {
-		position: relative;
-		width: 100%;
-		overflow: hidden;
-	}
-
-	.exhibition img {
-		width: 100%;
-		height: auto;
-		display: block;
-	}
-
-	.exhibition-title {
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		margin: 0;
-		color: var(--text-color);
-		font-size: 8rem;
-		font-weight: bold;
-	}
-
-	.exhibition-description {
-		font-size: 1rem;
-		color: var(--text-color);
-		margin-top: 1rem;
-	}
-</style>

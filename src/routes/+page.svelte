@@ -1,13 +1,72 @@
 <script>
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-	import Contact from '$lib/components/Contact.svelte';
-	import TagDisplay from '$lib/components/Filter.svelte';
-	import Header from '$lib/components/Header.svelte';
+	import ContactForm from '$lib/components/ContactForm.svelte';
+	import ProductFilter from '$lib/components/ProductFilter.svelte';
+	import HeroSection from '$lib/components/HeroSection.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
 
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
+
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
+
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
+
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} type
+	 * @property {string} name
+	 * @property {string} price
+	 * @property {string} date_created
+	 * @property {Category[]} categories
+	 * @property {Tag[]} tags
+	 * @property {Image[]} images
+	 * @property {Attribute[]} attributes
+	 */
+
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Product[]} products
+	 * @property {Artist[]} artists
+	 * @property {any[]} exhibitions
+	 * @property {any[]} media
+	 * @property {Product} [product]
+	 * @property {any} [variation]
+	 */
+
+	/** @type {PageData} */
 	export let data;
 	const { products, artists, exhibitions, media } = data;
+
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
 
 	// Create landing page-specific SEO
 	const pageSEO = {
@@ -28,10 +87,13 @@
 			}
 	};
 
+	/** @type {Array<MetaTag>} */
 	$: metaTags = generateMetaTags(pageSEO);
 
 	// Function to get a random type and the corresponding latest product thumbnail
+	/** @type {string} */
 	let randomType = '';
+	/** @type {string} */
 	let thumbnail = '';
 
 	function getRandomTypeAndThumbnail() {
@@ -39,12 +101,13 @@
 		if (uniqueTypes.length > 0) {
 			randomType = uniqueTypes[Math.floor(Math.random() * uniqueTypes.length)];
 			const latestProductWithType = products.find((product) => product.type === randomType);
-			thumbnail = latestProductWithType ? latestProductWithType.images[0]?.src : '';
+			thumbnail = latestProductWithType?.images[0]?.src ?? '';
 		}
 	}
 
 	getRandomTypeAndThumbnail();
 
+	/** @type {Record<string, Product[]>} */
 	let productsByCategory = {};
 
 	// Organize products by category
@@ -105,29 +168,39 @@
 	</script>
 </svelte:head>
 
-<div class="landing-container px-page">
-	<FeaturedSlider {products} />
-	<Header />
-	<div class="mb-12 grid grid-cols-1 gap-md md:grid-cols-2 mt-12">
-		{#each Object.keys(productsByCategory) as categoryName}
-			<div class="category-container transition-default w-full">
-				<h2 class="my-sm text-6xl font-semibold text-primary">
-					{categoryName}
-				</h2>
-				<FeaturedSlider products={productsByCategory[categoryName]} />
-			</div>
-		{/each}
-	</div>
-	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
-	<TagDisplay {products} />
-</div>
+<div class="page-container">
+	<div class="content-section space-y-md">
 
-<style>
-	.landing-container {
-		width: 100%;
-		max-width: 100%;
-		overflow-x: hidden;
-		box-sizing: border-box;
-		position: relative;
-	}
-</style>
+		<section class="space-y-md">
+			<FeaturedSlider {products} />
+		</section>
+
+		<section class="space-y-md">
+			<HeroSection />
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Browse Collections</h2>
+			<div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+				{#each Object.keys(productsByCategory) as categoryName}
+					<div class="category-container w-full space-y-sm">
+						<h3 class="h3">
+							{categoryName}
+						</h3>
+						<FeaturedSlider products={productsByCategory[categoryName]} />
+					</div>
+				{/each}
+			</div>
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Featured Artists</h2>
+			<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Discover Art</h2>
+			<ProductFilter {products} />
+		</section>
+	</div>
+</div>

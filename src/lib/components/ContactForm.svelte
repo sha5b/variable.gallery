@@ -1,5 +1,6 @@
 <script>
 	import ContactModal from '$lib/components/modal/ContactModal.svelte';
+	import '$lib/styles/components/contact.css';
 
 	let isModalOpen = false;
 
@@ -12,11 +13,11 @@
 	}
 </script>
 
-<div class="w-full my-8 text-left flex flex-col h-full justify-end items-start">
-	<button class="button-primary text-xl px-6 py-2" on:click={handleButtonClick}>
+<div class="contact-container">
+	<button class="button-primary contact-button" on:click={handleButtonClick}>
 		Contact Us
 	</button>
-	<p class="text-lg mt-4 text-left text-primary">
+	<p class="contact-text">
 		If you have any questions or inquiries, feel free to reach out to us!
 	</p>
 </div>
