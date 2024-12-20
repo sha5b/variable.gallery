@@ -1,0 +1,112 @@
+/* Slider Styles */
+
+/* Artist Slider */
+.artist-slider-container {
+    width: 100%;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.artist-slider-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.artist-slider-title {
+    color: var(--primary-color);
+    padding: var(--spacing-sm) 0;
+}
+
+.artist-slider {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.artist-card {
+    flex: 0 0 300px;
+    height: 300px;
+    position: relative;
+    overflow: hidden;
+    transition: flex 0.9s ease;
+    cursor: pointer;
+}
+
+.artist-card:hover {
+    flex: 0 0 600px;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-tag-container {
+    position: absolute;
+    top: var(--spacing-xs);
+    left: var(--spacing-xs);
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    z-index: 10;
+}
+
+/* Category Slider */
+.category-slider-container {
+    width: 100%;
+    overflow: hidden;
+    padding-left: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+    transition: all 0.3s ease;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.category-title {
+    color: var(--primary-color);
+    padding: var(--spacing-sm) 0;
+}
+
+.category-slider {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.category-card {
+    flex: 0 0 250px;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+    transition: flex 0.9s ease;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    flex: 0 0 500px;
+}
+
+/* Responsive styles */
+@media (max-width: 767px) {
+    .artist-slider-container,
+    .category-slider-container {
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .artist-slider,
+    .category-slider {
+        gap: var(--spacing-sm);
+    }
+
+    .artist-card,
+    .category-card {
+        flex: 0 0 80%;
+        scroll-snap-align: start;
+    }
+}

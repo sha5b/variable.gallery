@@ -178,11 +178,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.about-container {
-		padding-top: var(--spacing-xl);
-		padding-bottom: var(--spacing-xl);
-		line-height: 1.75;
-	}
-</style>
