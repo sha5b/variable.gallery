@@ -18,6 +18,7 @@
      * @property {Object} title
      * @property {string} title.rendered
      * @property {string} slug
+     * @property {{description?: string, location?: string}} [acf]
      */
 
     /**
@@ -135,24 +136,21 @@
         </section>
 
         <section class="space-y-md">
-            <h2 class="section-title">Current Artists</h2>
-            <div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-xl md:grid-cols-2">
                 {#each artists as artist}
                     {#if getLatestVirtualExhibitionForArtist(artist.id) !== undefined}
-                        <div class="card space-y-md">
-                            <div class="space-y-sm">
-                                <a href={`/artist/${artist.slug}`}>
-                                    <h3 class="h3">
-                                        {artist.title.rendered}
-                                    </h3>
-                                </a>
-                                <p class="text-base">
-                                    Explore the latest works and exhibitions from {artist.title.rendered}.
-                                </p>
-                            </div>
-                            <div class="flex items-center justify-center overflow-hidden">
+                        <div class="space-y-lg">
+                            <a href={`/artist/${artist.slug}`}>
+                                <h3 class="h3">
+                                    {artist.title.rendered}
+                                </h3>
+                            </a>
+                            <div class="overflow-hidden">
                                 <ArtistSlider {products} artistName={artist.title.rendered} />
                             </div>
+                            <p class="text-base">
+                                {artist.acf?.description || `Artist based in ${artist.acf?.location || 'various locations'}`}
+                            </p>
                         </div>
                     {/if}
                 {/each}

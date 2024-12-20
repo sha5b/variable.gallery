@@ -132,7 +132,6 @@
 <div class="page-container">
     <div class="content-section space-y-md">
         <section class="space-y-sm">
-            <h1 class="h1">Digital Art Shop</h1>
             <p>
                 Explore our curated collection of digital artworks, NFTs, and experimental media. 
                 Each piece is carefully selected to represent the forefront of digital art innovation.
@@ -140,7 +139,6 @@
         </section>
 
         <section class="space-y-md">
-            <h2 class="section-title">Featured Collections</h2>
             <div class="grid grid-cols-1 gap-lg md:grid-cols-2">
                 {#each Object.keys(productsByCategory) as categoryName}
                     <div class="category-container w-full">

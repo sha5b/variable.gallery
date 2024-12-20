@@ -8,23 +8,18 @@
   }
 </script>
 
-<div class="border mb-4">
-  <button on:click={toggleOpen} class="w-full p-4 flex justify-between items-center text-left text-[var(--primary-color)] font-semibold hover:bg-[var(--background-color)] transition">
-    {title}
-    <span>{isOpen ? '−' : '+'}</span>
+<div class="border-b border-[var(--border-color)] mb-[var(--spacing-lg)]">
+  <button 
+    on:click={toggleOpen} 
+    class="w-full p-[var(--spacing-md)] flex justify-between items-center text-left font-[var(--font-weight-semibold)]"
+    style="transition: all var(--transition-base) var(--transition-timing);"
+  >
+    <span class="text-[var(--font-size-base)]">{title}</span>
+    <span class="text-[var(--font-size-lg)]">{isOpen ? '−' : '+'}</span>
   </button>
   {#if isOpen}
-    <div class="p-4 text-[var(--text-color)]">
+    <div class="p-[var(--spacing-md)] space-y-[var(--spacing-md)]" style="transition: all var(--transition-base) var(--transition-timing);">
       {@html content}
     </div>
   {/if}
 </div>
-
-<style>
-  button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-  }
-</style>

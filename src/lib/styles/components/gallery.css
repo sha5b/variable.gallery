@@ -9,18 +9,10 @@
 .gallery-card {
     flex: 1;
     height: 100%;
-    transition: flex 0.6s ease, transform 0.3s ease;
+    transition: flex 0.6s ease;
     overflow: hidden;
     position: relative;
     cursor: pointer;
-}
-
-.gallery-card:hover .gallery-image {
-    transform: scale(1.1);
-}
-
-.gallery-hover {
-    flex: 75%;
 }
 
 .gallery-image {
@@ -28,6 +20,14 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
+}
+
+.gallery-hover {
+    flex: 75%;
+}
+
+.gallery-card:hover .gallery-image {
+    transform: scale(1.1);
 }
 
 /* Responsive adjustments */

@@ -112,5 +112,6 @@
 		width: 100%;
 		max-width: 100%;
 		overflow-x: hidden;
+		padding-top: 5rem;
 	}
 </style>

@@ -69,14 +69,37 @@ h2.product-title {
     .artist-container {
         flex-direction: row;
         gap: var(--spacing-2xl);
+        align-items: stretch;
+        min-height: 400px;
     }
 
     .artist-info {
         width: 50%;
+        display: flex;
+        flex-direction: column;
     }
 
     .placeholder-column {
         width: 50%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .placeholder-column :global(.slider-container) {
+        flex: 1;
+        height: 100%;
+    }
+
+    .placeholder-column :global(.slider-container .swiper) {
+        height: 100%;
+    }
+
+    .placeholder-column :global(.slider-container .swiper-wrapper) {
+        height: 100%;
+    }
+
+    .placeholder-column :global(.slider-container .swiper-slide) {
+        height: 100%;
     }
 }
 
@@ -85,6 +108,7 @@ h2.product-title {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    height: 100%;
 }
 
 .detail-row {

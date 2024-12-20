@@ -5,13 +5,54 @@
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
+	/** @typedef {{
+	*   id: number,
+	*   title: { rendered: string },
+	*   acf?: {
+	*     location?: string,
+	*     yearsActive?: string,
+	*     specialties?: string,
+	*     description?: string,
+	*     profileImage?: string,
+	*     socialMedia?: Array<{ platform: string, url: string }>
+	*   }
+	* }} Artist */
+
+	/** @typedef {{
+	*   attributes: Array<{
+	*     name: string,
+	*     options: string[]
+	*   }>
+	* }} Product */
+
+	/** @typedef {{
+	*   title: { rendered: string },
+	*   acf?: {
+	*     date?: string,
+	*     location?: string,
+	*     virtual?: boolean,
+	*     link?: { url: string },
+	*     artist?: number[]
+	*   }
+	* }} Exhibition */
+
+	/** @typedef {{
+	*   name?: string,
+	*   property?: string,
+	*   content: string
+	* }} MetaTag */
+
+	/** @type {{ products: Product[], artists: Artist[], exhibitions: Exhibition[] }} */
 	export let data;
+
 	let { products, artists, exhibitions } = data;
 	let bioOpen = false;
-	console.log(exhibitions);
 
+	/** @type {Artist|null} */
 	let filteredArtist = null;
+	/** @type {Product[]} */
 	let artistProducts = [];
+	/** @type {Exhibition[]} */
 	let artistExhibitions = [];
 
 	let currentPage = 1;
@@ -19,29 +60,47 @@
 
 	$: {
 		const artistTitle = $page.params.title.toLowerCase().replace(/-/g, ' ').trim();
-		filteredArtist = artists.find(
+		const foundArtist = artists.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistTitle
-		);
+		) || null;
+		filteredArtist = foundArtist;
 
-		if (filteredArtist) {
+		if (foundArtist) {
 			artistProducts = products.filter((product) =>
 				product.attributes.some(
 					(attr) =>
 						attr.name.toLowerCase() === 'artist' &&
-						attr.options.includes(filteredArtist.title.rendered)
+						attr.options.includes(foundArtist.title.rendered)
 				)
 			);
 
 			artistExhibitions = exhibitions
-				.filter((exhibition) => exhibition.acf?.artist?.includes(filteredArtist.id))
+				.filter((exhibition) => {
+					const artistIds = exhibition.acf?.artist || [];
+					return artistIds.includes(foundArtist.id);
+				})
 				.sort((a, b) => {
-					const dateA = new Date(a.acf?.date?.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-					const dateB = new Date(b.acf?.date?.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-					return dateB - dateA;
+					/** @param {Exhibition} exhibition */
+					const getDate = (exhibition) => {
+						const dateStr = exhibition.acf?.date;
+						return dateStr ? new Date(dateStr.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')) : new Date(0);
+					};
+					return getDate(b).getTime() - getDate(a).getTime();
 				});
+		} else {
+			artistProducts = [];
+			artistExhibitions = [];
 		}
 	}
 
+	/**
+	 * @param {string} dateString
+	 * @returns {string}
+	 */
+	/** 
+	 * @param {string|undefined} dateString 
+	 * @returns {string}
+	 */
 	function formatDate(dateString) {
 		if (!dateString) return 'No date';
 		const date = new Date(dateString.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
@@ -58,12 +117,18 @@
 		currentPage * exhibitionsPerPage
 	);
 
+	/**
+	 * @param {number} page
+	 */
 	function changePage(page) {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 		}
 	}
 
+	/**
+	 * @param {Exhibition} exhibition
+	 */
 	function handleExhibitionClick(exhibition) {
 		if (exhibition.acf?.link?.url) {
 			window.open(exhibition.acf.link.url, '_blank');
@@ -107,16 +172,16 @@
 	{/each}
 </svelte:head>
 
-<div class="artist-page-container">
+<div class="page-container">
 	{#if filteredArtist}
-		<div class="product-layout">
+		<div class="flex flex-col md:flex-row gap-lg">
 			<!-- Left Column: Artist Details Section -->
-			<div class="product-details md:w-1/3">
+			<div class="md:w-1/3">
 				<h1 class="text-xlarge text-primary font-bold mb-8">{filteredArtist.title.rendered}</h1>
 
 				<!-- Artist Info -->
-				<div class="technical-details space-y-4">
-					<div class="detail-row clean">
+				<div class="space-y-md">
+					<div class="flex justify-between items-center border-b border-secondary-bg-color p-xs">
 						<span class="detail-label">Location</span>
 						<span class="detail-value">{filteredArtist.acf?.location || 'Unknown location'}</span>
 					</div>
@@ -243,34 +308,13 @@
 </div>
 
 <style>
-	.artist-page-container {
-		width: 100%;
-		max-width: 100%;
-		overflow-x: hidden;
-		padding: var(--spacing-md);
-		box-sizing: border-box;
-	}
-
-	@media (min-width: 768px) {
-		.artist-page-container {
-			padding: var(--page-padding);
-		}
-	}
-
-	.product-layout {
-		display: flex;
-		gap: var(--spacing-md);
-		width: 100%;
-		margin-bottom: var(--spacing-xl);
-	}
-
 	.exhibition-card {
-		background-color: var(--background-color);
-		padding: var(--spacing-md);
-		transition: transform 0.2s ease;
+		background-color: var(--surface-color);
+		padding: var(--spacing-lg);
+		transition: all var(--transition-base) var(--transition-timing);
 	}
 
-	.exhibition-card.cursor-pointer:hover {
+	.exhibition-card:hover {
 		transform: translateY(-2px);
 	}
 
@@ -278,28 +322,22 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: var(--spacing-xs) 0;
-		border-bottom: 1px solid var(--secondary-bg-color);
+		padding: var(--spacing-xs);
 	}
 
 	.detail-label {
+		font-size: var(--font-size-sm);
 		color: var(--text-color);
-		font-size: 0.875rem;
 	}
 
 	.detail-value {
+		font-size: var(--font-size-sm);
 		color: var(--text-color);
 		text-align: right;
 	}
 
 	.bio-drawer {
-		padding: var(--spacing-sm) 0;
-	}
-
-	@media (max-width: 767px) {
-		.product-layout {
-			flex-direction: column;
-		}
+		padding: var(--spacing-sm);
 	}
 
 	.pagination {
@@ -315,7 +353,7 @@
 		background-color: var(--background-color);
 		color: var(--primary-color);
 		cursor: pointer;
-		transition: all 0.3s ease;
+		transition: all var(--transition-base) var(--transition-timing);
 	}
 
 	.pagination-button:hover:not(:disabled) {

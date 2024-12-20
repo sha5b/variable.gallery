@@ -154,33 +154,9 @@
 	<div class="flex flex-col gap-lg">
 		<!-- Filter Controls - Simplified -->
 		<div class="filter-controls bg-background p-md rounded-lg">
-			<div class="flex flex-wrap gap-md justify-between items-center">
-				<!-- Display Options -->
-				<div class="flex gap-md items-center">
-					<select 
-						id="sort-select"
-						bind:value={sortBy}
-						class="filter-select"
-					>
-						<option value="newest">Newest</option>
-						<option value="price-low">Price: Low to High</option>
-						<option value="price-high">Price: High to Low</option>
-					</select>
-
-					<select 
-						id="items-select"
-						bind:value={itemsPerPage}
-						class="filter-select"
-						on:change={() => currentPage = 1}
-					>
-						{#each itemsPerPageOptions as option}
-							<option value={option}>{option} per page</option>
-						{/each}
-					</select>
-				</div>
-
+			<div class="flex items-center justify-between">
 				<!-- Active Filters -->
-				<div class="tag-container">
+				<div class="tag-container flex-shrink-0">
 					{#if selectedCategory}
 						<span on:click={() => handleCategoryClick(selectedCategory)}>
 							{selectedCategory} ×
@@ -201,6 +177,30 @@
 							€{minPrice} - €{maxPrice}
 						</span>
 					{/if}
+				</div>
+
+				<!-- Display Options -->
+				<div class="flex items-center gap-md ml-auto">
+					<select 
+						id="sort-select"
+						bind:value={sortBy}
+						class="sort-select"
+					>
+						<option value="newest">Newest</option>
+						<option value="price-low">Price: Low to High</option>
+						<option value="price-high">Price: High to Low</option>
+					</select>
+
+					<select 
+						id="items-select"
+						bind:value={itemsPerPage}
+						class="items-select"
+						on:change={() => currentPage = 1}
+					>
+						{#each itemsPerPageOptions as option}
+							<option value={option}>{option} per page</option>
+						{/each}
+					</select>
 				</div>
 			</div>
 		</div>

@@ -158,11 +158,11 @@
 </svelte:head>
 
 <div class="page-container">
-	<div class="content-section flex flex-col md:flex-row gap-lg items-start">
-		<div class="w-full md:w-1/2 space-y-md">
-			<section class="space-y-sm">
+	<div class="content-section flex flex-col md:flex-row gap-xl">
+		<div class="w-full md:w-1/2 space-y-xl">
+			<section class="space-y-md">
 				<h1 class="h1">About {companyInfo.name}</h1>
-				<p>
+				<p class="text-base">
 					A visionary art platform stationed in lunar orbit, redefining the way art is distributed, experienced, and valued. Pioneering creative models and fostering artistic freedom, we empower creators and collectors alike.
 				</p>
 			</section>
@@ -174,19 +174,19 @@
 			<LegalInfoDropdown title="Modern Art Distribution Ecosystems" content={modernArtDistributionContent} />
 		</div>
 
-		<div class="w-full md:w-1/2 space-y-md">
-			<section class="space-y-sm">
-				<h2 class="section-title">Orbital Platform</h2>
+		<div class="w-full md:w-1/2 space-y-xl">
+			<section class="space-y-md">
+				<h2 class="h2">Orbital Platform</h2>
 				<p>
 					Operating from a lunar satellite, our platform transcends earthly limitations, creating a bridge between the infinite possibilities of space and the timeless beauty of art.
 				</p>
 			</section>
 
-			<section class="space-y-sm">
-				<h2 class="section-title">Contact Information</h2>
-				<div class="space-y-xs">
+			<section class="space-y-md">
+				<h2 class="h2">Contact Information</h2>
+				<div class="space-y-sm">
 					<p><strong>Location:</strong> {companyInfo.location}</p>
-					<p><strong>Email:</strong> <a href={`mailto:${companyInfo.email}`} class="text-accent hover:underline">{companyInfo.email}</a></p>
+					<p><strong>Email:</strong> <a href={`mailto:${companyInfo.email}`}>{companyInfo.email}</a></p>
 					<p><strong>Established:</strong> {companyInfo.established}</p>
 					<p><strong>Founder:</strong> {companyInfo.founder}</p>
 				</div>

@@ -170,16 +170,8 @@
 
 <div class="page-container">
 	<div class="content-section space-y-md">
-		<section class="space-y-sm">
-			<h1 class="h1">Welcome to variable.gallery</h1>
-			<p>
-				Experience art in a new dimension. Explore our curated collection of digital artworks, NFTs, 
-				and experimental media from emerging and established artists.
-			</p>
-		</section>
 
 		<section class="space-y-md">
-			<h2 class="section-title">Featured Works</h2>
 			<FeaturedSlider {products} />
 		</section>
 
