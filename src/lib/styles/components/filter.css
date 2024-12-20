@@ -1,6 +1,7 @@
 .wrapper {
     max-width: 100%;
     margin: 0 auto;
+    padding: var(--spacing-xl) 0;
 }
 
 .filter-controls {
@@ -8,12 +9,31 @@
     top: 0;
     z-index: 10;
     background-color: var(--background-color);
+    padding: var(--spacing-lg) 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sort-select,
 .items-select {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background-color: var(--background-color);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--text-color);
+    transition: all var(--transition-base) var(--transition-timing);
+}
+
+.sort-select:hover,
+.items-select:hover {
+    border-color: var(--secondary-color);
+}
+
+.sort-select:focus,
+.items-select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .active-filter {
@@ -23,8 +43,9 @@
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg) 0;
 }
 
 .product-card {
@@ -32,7 +53,8 @@
     background: var(--background-color);
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    border: 1px solid var(--border-color);
+    transition: transform var(--transition-base) var(--transition-timing);
 }
 
 .product-card:hover {
@@ -74,10 +96,10 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: var(--spacing-sm);
-    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: var(--spacing-xl);
+    background-color: rgba(0, 0, 0, 0.8);
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--transition-base) var(--transition-timing);
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
@@ -93,41 +115,49 @@
 .pagination {
     display: flex;
     justify-content: center;
-    gap: var(--spacing-xs);
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+    padding: var(--spacing-xl) 0;
+    border-top: 1px solid var(--border-color);
 }
 
 .pagination-button {
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
     background-color: var(--background-color);
     color: var(--primary-color);
+    border: 1px solid var(--border-color);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base) var(--transition-timing);
 }
 
 .pagination-button:hover:not(:disabled) {
     background-color: var(--primary-color);
     color: var(--background-color);
+    border-color: var(--primary-color);
 }
 
 .pagination-button.active {
     background-color: var(--primary-color);
     color: var(--background-color);
+    border-color: var(--primary-color);
 }
 
 .pagination-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    background-color: var(--secondary-bg-color);
 }
 
 .filter-container {
-    background-color: var(--background-color);
+    padding: var(--spacing-xl) 0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .filter-section {
-    border-bottom: 1px solid var(--secondary-bg-color);
-    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--spacing-lg) 0;
     margin: 0;
 }
 
@@ -136,11 +166,12 @@
 }
 
 .section-title {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
     color: var(--primary-color);
-    font-weight: 600;
+    font-weight: var(--font-weight-bold);
     padding: 0;
     margin: 0;
+    letter-spacing: -0.02em;
 }
 
 details > summary {
@@ -149,10 +180,19 @@ details > summary {
 }
 
 .filter-select {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--secondary-bg-color);
-    border-radius: var(--border-radius);
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
     background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: var(--font-size-base);
+    transition: border-color var(--transition-base) var(--transition-timing);
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: var(--primary-color);
+    outline: none;
 }
 
 /* Category Pills */
@@ -227,6 +267,12 @@ details > summary {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    padding: var(--spacing-lg) 0;
+    transition: color var(--transition-base) var(--transition-timing);
+}
+
+details > summary:hover {
+    color: var(--primary-color);
 }
 
 details > summary::-webkit-details-marker {
@@ -235,12 +281,19 @@ details > summary::-webkit-details-marker {
 
 details > summary::after {
     content: '+';
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-2xl);
     line-height: 1;
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
 }
 
 details[open] > summary::after {
     content: '−';
+}
+
+details[open] summary {
+    margin-bottom: var(--spacing-md);
+    color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
