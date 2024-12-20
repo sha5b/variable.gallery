@@ -150,7 +150,7 @@
 
 <div class="product-layout">
 	<!-- Product Details -->
-	<div class="product-details md:w-1/3">
+	<div class="product-details">
 		<!-- Title and Description -->
 		<div class="mb-8">
 			{#if product}
@@ -243,7 +243,7 @@
 	</div>
 
 	<!-- Gallery Component -->
-	<div class="gallery-container md:w-2/3">
+	<div class="gallery-container">
 		<ImageGallery images={gallery} />
 		<button 
 			on:click={addToCart} 
@@ -256,8 +256,8 @@
 
 <!-- Artist Details Section -->
 {#if artistInfo}
-	<div class="artist-container gap-md bg-background flex flex-col md:flex-row">
-		<div class="flex flex-col items-start md:w-1/2">
+	<div class="artist-container">
+		<div class="artist-info">
 			<div class="artist-details space-y-md">
 				<h3 class="section-title">About the Artist</h3>
 				

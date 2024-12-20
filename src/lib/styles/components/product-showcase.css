@@ -20,11 +20,11 @@ h2.product-title {
 .product-layout {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-2xl);
     width: 100%;
 }
 
 .product-details {
+    width: 100%;
     padding: 0;
 }
 
@@ -38,17 +38,46 @@ h2.product-title {
     .product-layout {
         flex-direction: row;
         align-items: flex-start;
+        gap: var(--spacing-2xl);
+    }
+
+    .product-details {
+        width: 33.333%;
+        flex: 0 0 33.333%;
+    }
+
+    .gallery-container {
+        width: 66.666%;
+        flex: 0 0 66.666%;
     }
 }
 
 .image-gallery {
     width: 100%;
-    flex: 1 1 67%;
+    height: 100%;
     position: relative;
 }
 
 .artist-container {
     margin-top: var(--spacing-2xl);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .artist-container {
+        flex-direction: row;
+        gap: var(--spacing-2xl);
+    }
+
+    .artist-info {
+        width: 50%;
+    }
+
+    .placeholder-column {
+        width: 50%;
+    }
 }
 
 .artist-details {
@@ -126,10 +155,6 @@ h2.product-title {
     color: var(--primary-color);
 }
 
-.gallery-container {
-    position: relative;
-}
-
 .gallery-container .button-primary,
 .button-primary {
     background-color: var(--primary-color);
@@ -139,6 +164,7 @@ h2.product-title {
     cursor: pointer;
     font-weight: var(--font-weight-medium);
     transition: all var(--transition-base) var(--transition-timing);
+    width: 100%;
 }
 
 .gallery-container .button-primary:hover,
@@ -151,6 +177,7 @@ h2.product-title {
     position: absolute;
     bottom: var(--spacing-lg);
     right: var(--spacing-lg);
+    width: auto;
 }
 
 .detail-row.clean {
@@ -159,7 +186,6 @@ h2.product-title {
 
 @media (max-width: 767px) {
     .product-details {
-        width: 100%;
         margin-bottom: var(--spacing-lg);
     }
 
@@ -178,12 +204,5 @@ h2.product-title {
     .gallery-container .button-primary {
         bottom: var(--spacing-md);
         right: var(--spacing-md);
-    }
-}
-
-@media (min-width: 1024px) {
-    .gallery-container {
-        max-width: 800px;
-        margin: 0 auto;
     }
 }
