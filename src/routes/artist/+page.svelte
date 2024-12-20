@@ -124,22 +124,39 @@
 </svelte:head>
 
 <div class="page-container">
-    <div class="content-section grid grid-cols-1 gap-lg md:grid-cols-2">
-        {#each artists as artist}
-            {#if getLatestVirtualExhibitionForArtist(artist.id) !== undefined}
-                <div class="card">
-                    <div class="space-y-sm">
-                        <a href={`/artist/${artist.slug}`}>
-                            <h2 class="section-title">
-                                {artist.title.rendered}
-                            </h2>
-                        </a>
-                    </div>
-                    <div class="flex items-center justify-center overflow-hidden">
-                        <ArtistSlider {products} artistName={artist.title.rendered} />
-                    </div>
-                </div>
-            {/if}
-        {/each}
+    <div class="content-section space-y-md">
+        <section class="space-y-sm">
+            <h1 class="h1">Featured Artists</h1>
+            <p>
+                Meet our exceptional digital artists pushing the boundaries of art and technology. 
+                Each artist brings a unique perspective to the digital art landscape through virtual exhibitions, 
+                NFT collections, and experimental media.
+            </p>
+        </section>
+
+        <section class="space-y-md">
+            <h2 class="section-title">Current Artists</h2>
+            <div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+                {#each artists as artist}
+                    {#if getLatestVirtualExhibitionForArtist(artist.id) !== undefined}
+                        <div class="card space-y-md">
+                            <div class="space-y-sm">
+                                <a href={`/artist/${artist.slug}`}>
+                                    <h3 class="h3">
+                                        {artist.title.rendered}
+                                    </h3>
+                                </a>
+                                <p class="text-base">
+                                    Explore the latest works and exhibitions from {artist.title.rendered}.
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-center overflow-hidden">
+                                <ArtistSlider {products} artistName={artist.title.rendered} />
+                            </div>
+                        </div>
+                    {/if}
+                {/each}
+            </div>
+        </section>
     </div>
 </div>

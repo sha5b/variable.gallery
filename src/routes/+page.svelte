@@ -169,22 +169,46 @@
 </svelte:head>
 
 <div class="page-container">
-	<div class="content-section">
-		<FeaturedSlider {products} />
-	</div>
-	<div class="content-section">
-		<HeroSection />
-	</div>
-	<div class="content-section grid grid-cols-1 gap-md md:grid-cols-2">
-		{#each Object.keys(productsByCategory) as categoryName}
-			<div class="category-container w-full">
-				<h2 class="section-title">
-					{categoryName}
-				</h2>
-				<FeaturedSlider products={productsByCategory[categoryName]} />
+	<div class="content-section space-y-md">
+		<section class="space-y-sm">
+			<h1 class="h1">Welcome to variable.gallery</h1>
+			<p>
+				Experience art in a new dimension. Explore our curated collection of digital artworks, NFTs, 
+				and experimental media from emerging and established artists.
+			</p>
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Featured Works</h2>
+			<FeaturedSlider {products} />
+		</section>
+
+		<section class="space-y-md">
+			<HeroSection />
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Browse Collections</h2>
+			<div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+				{#each Object.keys(productsByCategory) as categoryName}
+					<div class="category-container w-full space-y-sm">
+						<h3 class="h3">
+							{categoryName}
+						</h3>
+						<FeaturedSlider products={productsByCategory[categoryName]} />
+					</div>
+				{/each}
 			</div>
-		{/each}
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Featured Artists</h2>
+			<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
+		</section>
+
+		<section class="space-y-md">
+			<h2 class="section-title">Discover Art</h2>
+			<ProductFilter {products} />
+		</section>
 	</div>
-	<ProductShowcase {products} {artists} product={data.product} variation={data.variation} />
-	<ProductFilter {products} />
 </div>

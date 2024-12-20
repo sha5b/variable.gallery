@@ -101,69 +101,85 @@
 </svelte:head>
 
 <div class="page-container">
-	<div class="content-section grid grid-cols-1 md:grid-cols-3 gap-lg">
-		<!-- Cart Items Section -->
-		<div class="card md:col-span-2 space-y-md">
+	<div class="content-section space-y-md">
+		<section class="space-y-sm">
 			<h1 class="h1">Shopping Cart</h1>
-			
-			{#if $cart.length === 0}
-				<p>Your cart is empty.</p>
-			{:else}
-				{#each $cart as item}
-					<div class="flex justify-between items-start p-md border-b border-secondary">
-						<div class="flex gap-md">
-							<img 
-								src={item.images[0]?.src} 
-								alt={item.name} 
-								class="h-24 w-24 object-cover"
-							/>
-							<div class="flex flex-col justify-between">
-								<div>
-									<h3 class="text-base font-semibold">{item.name}</h3>
-									{#if item.variation}
-										<p class="text-sm text-secondary">{item.variation.name}</p>
-									{/if}
-									<p>{formatPrice(item.price)}</p>
-								</div>
-								<div class="flex items-center gap-xs">
-									<button class="btn btn-sm" on:click={() => decreaseQuantity(item)}>−</button>
-									<span class="mx-3">{item.quantity}</span>
-									<button class="btn btn-sm" on:click={() => increaseQuantity(item)}>+</button>
+			<p>
+				Review your selected digital artworks and NFTs. Adjust quantities or remove items before proceeding to checkout.
+			</p>
+		</section>
+
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+			<!-- Cart Items Section -->
+			<section class="card md:col-span-2 space-y-md">
+				<h2 class="section-title">Cart Items</h2>
+				
+				{#if $cart.length === 0}
+					<div class="flex flex-col items-center justify-center p-lg">
+						<p>Your cart is empty.</p>
+						<button class="btn btn-primary mt-md" on:click={() => goto('/shop')}>
+							Continue Shopping
+						</button>
+					</div>
+				{:else}
+					{#each $cart as item}
+						<div class="flex justify-between items-start p-md border-b border-secondary">
+							<div class="flex gap-md">
+								<img 
+									src={item.images[0]?.src} 
+									alt={item.name} 
+									class="h-24 w-24 object-cover"
+								/>
+								<div class="flex flex-col justify-between">
+									<div>
+										<h3 class="text-base font-semibold">{item.name}</h3>
+										{#if item.variation}
+											<p class="text-sm text-secondary">{item.variation.name}</p>
+										{/if}
+										<p>{formatPrice(item.price)}</p>
+									</div>
+									<div class="flex items-center gap-xs">
+										<button class="btn btn-sm" on:click={() => decreaseQuantity(item)}>−</button>
+										<span class="mx-3">{item.quantity}</span>
+										<button class="btn btn-sm" on:click={() => increaseQuantity(item)}>+</button>
+									</div>
 								</div>
 							</div>
+							<div class="flex flex-col items-end justify-between">
+								<span class="text-lg font-semibold">{formatPrice(item.quantity * item.price)}</span>
+								<button class="btn btn-sm btn-outline text-error" on:click={() => removeItem(item.id)}>
+									Remove
+								</button>
+							</div>
 						</div>
-						<div class="flex flex-col items-end justify-between">
-							<span class="text-lg font-semibold">{formatPrice(item.quantity * item.price)}</span>
-							<button class="btn btn-sm btn-outline text-error" on:click={() => removeItem(item.id)}>
-								Remove
-							</button>
-						</div>
+					{/each}
+				{/if}
+			</section>
+
+			<!-- Cart Summary Section -->
+			<section class="card space-y-md">
+				<h2 class="section-title">Order Summary</h2>
+				
+				<div class="space-y-sm">
+					<div class="flex justify-between p-md border-b border-secondary">
+						<span>Subtotal</span>
+						<span>{formatPrice(total)}</span>
 					</div>
-				{/each}
-			{/if}
-		</div>
 
-		<!-- Cart Summary Section -->
-		<div class="card space-y-md">
-			<h2 class="section-title">Order Summary</h2>
-			
-			<div class="flex justify-between p-md border-b border-secondary">
-				<span>Subtotal</span>
-				<span>{formatPrice(total)}</span>
-			</div>
+					<div class="flex justify-between p-md">
+						<span class="font-bold">Total</span>
+						<span class="text-lg font-bold">{formatPrice(total)}</span>
+					</div>
+				</div>
 
-			<div class="flex justify-between p-md">
-				<span class="font-bold">Total</span>
-				<span class="text-lg font-bold">{formatPrice(total)}</span>
-			</div>
-
-			<button 
-				class="btn btn-primary w-full" 
-				on:click={proceedToCheckout}
-				disabled={$cart.length === 0}
-			>
-				Proceed to Checkout
-			</button>
+				<button 
+					class="btn btn-primary w-full" 
+					on:click={proceedToCheckout}
+					disabled={$cart.length === 0}
+				>
+					Proceed to Checkout
+				</button>
+			</section>
 		</div>
 	</div>
 </div>

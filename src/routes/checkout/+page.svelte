@@ -382,10 +382,19 @@
 <LoadingSpinner visible={showLoadingSpinner} />
 
 <div class="page-container">
-	<div class="content-section grid grid-cols-1 md:grid-cols-2 gap-lg">
-		<!-- Left Column: Shipping Information -->
-		<div class="card space-y-md">
-			<h2 class="section-title">Shipping Information</h2>
+	<div class="content-section space-y-md">
+		<section class="space-y-sm">
+			<h1 class="h1">Checkout</h1>
+			<p>
+				Complete your purchase securely. Review your cart, provide shipping details, and process payment 
+				to receive your digital artworks and NFTs.
+			</p>
+		</section>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+			<!-- Left Column: Shipping Information -->
+			<div class="card space-y-md">
+				<h2 class="section-title">Shipping Information</h2>
 			<form class="form-group">
 				<div class="form-group">
 					<label for="firstName">First Name</label>
@@ -526,9 +535,10 @@
 			</form>
 		</div>
 
-		<!-- Right Column: Cart Summary and Payment -->
-		<div class="card space-y-md">
-			<h2 class="section-title">Cart Summary</h2>
+			<!-- Right Column: Cart Summary and Payment -->
+			<div class="card space-y-md">
+				<section class="space-y-md">
+					<h2 class="section-title">Order Summary</h2>
 
 			<!-- Cart Items -->
 			{#if cartItems.length === 0}
@@ -594,7 +604,7 @@
 				</div>
 
 				<!-- Payment Section -->
-				<div class="border-t border-secondary pt-md">
+				<section class="border-t border-secondary pt-md space-y-md">
 					<h2 class="section-title">Payment Details</h2>
 
 					<div id="payment-request-button" class="mb-md"></div>
@@ -606,8 +616,10 @@
 						{/if}
 						<button class="btn btn-primary w-full" on:click={handlePayment}> Pay Now </button>
 					</div>
-				</div>
+				</section>
 			{/if}
+			</section>
+			</div>
 		</div>
 	</div>
 </div>

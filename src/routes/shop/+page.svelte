@@ -130,17 +130,32 @@
 </svelte:head>
 
 <div class="page-container">
-    <div class="content-section grid grid-cols-1 gap-md md:grid-cols-2">
-      {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full">
-          <h2 class="section-title">
-            {categoryName}
-          </h2>
-          <FeaturedSlider products={productsByCategory[categoryName]} />
-        </div>
-      {/each}
-    </div>
-    <div class="content-section">
-      <ProductFilter {products} />
+    <div class="content-section space-y-md">
+        <section class="space-y-sm">
+            <h1 class="h1">Digital Art Shop</h1>
+            <p>
+                Explore our curated collection of digital artworks, NFTs, and experimental media. 
+                Each piece is carefully selected to represent the forefront of digital art innovation.
+            </p>
+        </section>
+
+        <section class="space-y-md">
+            <h2 class="section-title">Featured Collections</h2>
+            <div class="grid grid-cols-1 gap-lg md:grid-cols-2">
+                {#each Object.keys(productsByCategory) as categoryName}
+                    <div class="category-container w-full">
+                        <h3 class="h3">
+                            {categoryName}
+                        </h3>
+                        <FeaturedSlider products={productsByCategory[categoryName]} />
+                    </div>
+                {/each}
+            </div>
+        </section>
+
+        <section class="space-y-md">
+            <h2 class="section-title">Browse All Art</h2>
+            <ProductFilter {products} />
+        </section>
     </div>
 </div>
