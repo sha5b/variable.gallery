@@ -90,7 +90,7 @@
       </div>
 
       <!-- Thumbnails -->
-      <div class="w-full h-20 mt-4 flex justify-center items-center gap-2 overflow-x-auto">
+      <div class="w-full h-20 mt-4 flex justify-center items-center gap-2 overflow-x-auto modal-scrollbar-hide">
         {#each images as image, i}
           <button
             class="h-16 w-16 flex-shrink-0 border-2 transition-all duration-200 {i === currentIndex ? 'border-white opacity-100' : 'border-transparent opacity-50'}"
@@ -107,16 +107,3 @@
     </div>
   </div>
 {/if}
-
-<style>
-  /* Hide scrollbar for thumbnail navigation */
-  div::-webkit-scrollbar {
-    display: none;
-  }
-  
-  div {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-</style>
-  

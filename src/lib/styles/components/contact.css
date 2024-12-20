@@ -1,0 +1,22 @@
+.contact-container {
+    width: 100%;
+    margin: 2rem 0;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.contact-button {
+    font-size: 1.25rem;
+    padding: 0.5rem 1.5rem;
+}
+
+.contact-text {
+    font-size: 1.125rem;
+    margin-top: 1rem;
+    text-align: left;
+    color: var(--primary-color);
+}

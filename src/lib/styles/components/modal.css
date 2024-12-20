@@ -1,0 +1,9 @@
+/* Modal styles */
+.modal-scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.modal-scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

@@ -9,6 +9,7 @@
 @import './lib/styles/components/gallery.css';
 @import './lib/styles/components/product-showcase.css';
 @import './lib/styles/components/sliders.css';
+@import './lib/styles/components/modal.css';
 @import './lib/styles/pages/about.css';
 
 /* CSS Reset */
