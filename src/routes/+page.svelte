@@ -168,13 +168,17 @@
 	</script>
 </svelte:head>
 
-<div class="container">
-	<FeaturedSlider {products} />
-	<HeroSection />
-	<div class="grid grid-cols-1 gap-md md:grid-cols-2 m-2xl">
+<div class="page-container">
+	<div class="content-section">
+		<FeaturedSlider {products} />
+	</div>
+	<div class="content-section">
+		<HeroSection />
+	</div>
+	<div class="content-section grid grid-cols-1 gap-md md:grid-cols-2">
 		{#each Object.keys(productsByCategory) as categoryName}
-			<div class="category-container transition-default w-full">
-				<h2 class="h2 text-primary">
+			<div class="category-container w-full">
+				<h2 class="section-title">
 					{categoryName}
 				</h2>
 				<FeaturedSlider products={productsByCategory[categoryName]} />

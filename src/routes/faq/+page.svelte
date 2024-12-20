@@ -1,5 +1,17 @@
-<!-- FAQPage.svelte -->
 <script>
+    /**
+     * @typedef {Object} FAQ
+     * @property {string} question
+     * @property {string} answer
+     * @property {boolean} isOpen
+     */
+
+    /**
+     * @typedef {Object} MetaTag
+     * @property {string} [name]
+     * @property {string} [property]
+     * @property {string} content
+     */
     import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
     import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
   
@@ -26,8 +38,10 @@
         }
     };
 
+    /** @type {MetaTag[]} */
     $: metaTags = generateMetaTags(pageSEO);
 
+    /** @type {FAQ[]} */
     let faqs = [
         {
             question: "What types of artworks can I purchase?",
@@ -56,6 +70,7 @@
         }
     ];
 
+    /** @type {FAQ[]} */
     let technicalFaqs = [
         {
             question: "Do you offer authenticity certificates?",
@@ -114,13 +129,13 @@
     </script>
 </svelte:head>
 
-<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
-    <div class="flex flex-col md:flex-row gap-lg items-start">
+<div class="page-container">
+    <div class="content-section flex flex-col md:flex-row gap-lg items-start">
         <!-- Left Column -->
         <div class="w-full md:w-1/2 space-y-md">
             <section class="space-y-sm">
-                <h1 class="text-xlarge font-bold text-[var(--text-color)]">Frequently Asked Questions</h1>
-                <p class="text-base text-[var(--text-color)]">
+                <h1 class="h1">Frequently Asked Questions</h1>
+                <p>
                     Find answers to common questions about our lunar art gallery, digital exhibitions, and space-time curated collections.
                 </p>
             </section>
@@ -137,8 +152,8 @@
         <!-- Right Column -->
         <div class="w-full md:w-1/2 space-y-md">
             <section class="space-y-sm">
-                <h2 class="text-large font-semibold text-[var(--text-color)]">Technical & Payment</h2>
-                <p class="text-base text-[var(--text-color)]">
+                <h2 class="section-title">Technical & Payment</h2>
+                <p>
                     Information about our quantum transmission systems, payment options, and space-time adjusted services.
                 </p>
             </section>
@@ -153,12 +168,3 @@
         </div>
     </div>
 </div>
-
-<style>
-    .about-container {
-        padding-top: var(--spacing-xl);
-        padding-bottom: var(--spacing-xl);
-        line-height: 1.75;
-    }
-</style>
-  

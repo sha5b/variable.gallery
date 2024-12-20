@@ -381,11 +381,11 @@
 
 <LoadingSpinner visible={showLoadingSpinner} />
 
-<div class="container p-2xl">
-	<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div class="page-container">
+	<div class="content-section grid grid-cols-1 md:grid-cols-2 gap-lg">
 		<!-- Left Column: Shipping Information -->
-		<div class="card">
-			<h2 class="h2">Shipping Information</h2>
+		<div class="card space-y-md">
+			<h2 class="section-title">Shipping Information</h2>
 			<form class="form-group">
 				<div class="form-group">
 					<label for="firstName">First Name</label>
@@ -527,8 +527,8 @@
 		</div>
 
 		<!-- Right Column: Cart Summary and Payment -->
-		<div class="card">
-			<h2 class="h2">Cart Summary</h2>
+		<div class="card space-y-md">
+			<h2 class="section-title">Cart Summary</h2>
 
 			<!-- Cart Items -->
 			{#if cartItems.length === 0}
@@ -540,7 +540,7 @@
 				</div>
 			{:else}
 				{#each cartItems as item}
-					<div class="flex justify-between items-start p-md border-b border-secondary-bg">
+					<div class="flex justify-between items-start p-md border-b border-secondary">
 						<div class="flex gap-md">
 							<img
 								src={item.images[0]?.src || '/placeholder.jpg'}
@@ -578,7 +578,7 @@
 				{/each}
 
 				<!-- Price Summary -->
-				<div class="mt-lg space-y-sm border-t border-secondary-bg pt-md">
+				<div class="space-y-sm border-t border-secondary pt-md">
 					<div class="flex justify-between">
 						<span>Subtotal</span>
 						<span>{formatPrice(subtotal)}</span>
@@ -594,10 +594,10 @@
 				</div>
 
 				<!-- Payment Section -->
-				<div class="mt-lg border-t border-secondary-bg pt-md">
-					<h2 class="h2">Payment Details</h2>
+				<div class="border-t border-secondary pt-md">
+					<h2 class="section-title">Payment Details</h2>
 
-					<div id="payment-request-button" class="mb-lg"></div>
+					<div id="payment-request-button" class="mb-md"></div>
 
 					<div class="card">
 						<div id="payment-element" class="mb-md"></div>

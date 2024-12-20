@@ -129,35 +129,18 @@
   </script>
 </svelte:head>
 
-<div class="shop-container px-page bg-background">
-    <div class="grid grid-cols-1 gap-md md:grid-cols-2 mb-8">
+<div class="page-container">
+    <div class="content-section grid grid-cols-1 gap-md md:grid-cols-2">
       {#each Object.keys(productsByCategory) as categoryName}
-        <div class="category-container w-full transition-default">
-          <h2 class="text-6xl font-semibold my-sm text-primary">
+        <div class="category-container w-full">
+          <h2 class="section-title">
             {categoryName}
           </h2>
-          
-          <!-- Use FeaturedSlider for each category's products -->
           <FeaturedSlider products={productsByCategory[categoryName]} />
-          
         </div>
       {/each}
     </div>
-  <ProductFilter {products} />
+    <div class="content-section">
+      <ProductFilter {products} />
+    </div>
 </div>
-
-<style>
-  .shop-container {
-    background-color: var(--background-color);
-  }
-  
-  .category-container {
-    position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
-
-  .text-error {
-    color: var(--error-color);
-  }
-</style>

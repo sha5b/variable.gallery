@@ -1,4 +1,19 @@
 <script>
+    /**
+     * @typedef {Object} CompanyInfo
+     * @property {string} name
+     * @property {string} email
+     * @property {string} location
+     * @property {string} established
+     * @property {string} founder
+     */
+
+    /**
+     * @typedef {Object} MetaTag
+     * @property {string} [name]
+     * @property {string} [property]
+     * @property {any} content
+     */
 	import LegalInfoDropdown from '$lib/components/base/LegalInfoDropdown.svelte';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
@@ -31,11 +46,12 @@
 		}
 	};
 
+	/** @type {MetaTag[]} */
 	$: metaTags = generateMetaTags(pageSEO);
 
 	// Content Sections
 	const distributionModelContent = `
-		<h3 class="text-large font-semibold">Art Distribution Ecosystem</h3>
+		<h3 class="h3">Art Distribution Ecosystem</h3>
 		<p>Our platform redefines how art moves from creator to collector, offering a dual approach:</p>
 		<ul class="list-disc pl-4 mt-2">
 			<li><strong>Digital Formats:</strong> Enabling seamless global distribution:
@@ -57,7 +73,7 @@
 	`;
 
 	const economicModelContent = `
-		<h3 class="text-large font-semibold">Economic Structure</h3>
+		<h3 class="h3">Economic Structure</h3>
 		<p>Our revenue-sharing system ensures both artistic freedom and sustainability:</p>
 		<ul class="list-disc pl-4 mt-2">
 			<li><strong>Transparent Revenue Allocation:</strong>
@@ -73,7 +89,7 @@
 	`;
 
 	const philosophyContent = `
-		<h3 class="text-large font-semibold">Experimental Approach</h3>
+		<h3 class="h3">Experimental Approach</h3>
 		<p>variable.gallery thrives on experimentation:</p>
 		<ul class="list-disc pl-4 mt-2">
 			<li>Breaking boundaries between physical and digital art</li>
@@ -84,7 +100,7 @@
 	`;
 
 	const transactionProtocolContent = `
-		<h3 class="text-large font-semibold">Transaction & Delivery Protocol</h3>
+		<h3 class="h3">Transaction & Delivery Protocol</h3>
 		<p>We prioritize clarity and convenience in transactions:</p>
 		<ul class="list-disc pl-4 mt-2">
 			<li>Standardized pricing for print and 3D-printed reproductions</li>
@@ -100,7 +116,7 @@
 	`;
 
 	const modernArtDistributionContent = `
-		<h2 class="text-large font-semibold">Exploring Modern Art Distribution Ecosystems: Bridging Digital and Physical Realms</h2>
+		<h2 class="h2">Exploring Modern Art Distribution Ecosystems: Bridging Digital and Physical Realms</h2>
 		<p>The art world is undergoing a fascinating transformation, driven by technology, decentralization, and evolving business models. This shift is reshaping how art is created, distributed, and consumed, empowering artists and collectors to participate in an interconnected, sustainable ecosystem.</p>
 
 		<h3>1. E-commerce and Print-on-Demand Platforms</h3>
@@ -141,12 +157,12 @@
     {/each}
 </svelte:head>
 
-<div class="about-container w-full px-page md:px-page-md pt-[var(--spacing-xl)]">
-	<div class="flex flex-col md:flex-row gap-lg items-start">
+<div class="page-container">
+	<div class="content-section flex flex-col md:flex-row gap-lg items-start">
 		<div class="w-full md:w-1/2 space-y-md">
 			<section class="space-y-sm">
-				<h1 class="text-xlarge font-bold text-[var(--text-color)]">About {companyInfo.name}</h1>
-				<p class="text-base text-[var(--text-color)]">
+				<h1 class="h1">About {companyInfo.name}</h1>
+				<p>
 					A visionary art platform stationed in lunar orbit, redefining the way art is distributed, experienced, and valued. Pioneering creative models and fostering artistic freedom, we empower creators and collectors alike.
 				</p>
 			</section>
@@ -160,15 +176,15 @@
 
 		<div class="w-full md:w-1/2 space-y-md">
 			<section class="space-y-sm">
-				<h2 class="text-large font-semibold text-[var(--text-color)]">Orbital Platform</h2>
-				<p class="text-base text-[var(--text-color)]">
+				<h2 class="section-title">Orbital Platform</h2>
+				<p>
 					Operating from a lunar satellite, our platform transcends earthly limitations, creating a bridge between the infinite possibilities of space and the timeless beauty of art.
 				</p>
 			</section>
 
 			<section class="space-y-sm">
-				<h2 class="text-large font-semibold text-[var(--text-color)]">Contact Information</h2>
-				<div class="space-y-xs text-base text-[var(--text-color)]">
+				<h2 class="section-title">Contact Information</h2>
+				<div class="space-y-xs">
 					<p><strong>Location:</strong> {companyInfo.location}</p>
 					<p><strong>Email:</strong> <a href={`mailto:${companyInfo.email}`} class="text-accent hover:underline">{companyInfo.email}</a></p>
 					<p><strong>Established:</strong> {companyInfo.established}</p>

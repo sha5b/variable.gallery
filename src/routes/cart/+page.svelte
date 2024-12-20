@@ -100,17 +100,17 @@
 	{/each}
 </svelte:head>
 
-<div class="container p-2xl">
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<div class="page-container">
+	<div class="content-section grid grid-cols-1 md:grid-cols-3 gap-lg">
 		<!-- Cart Items Section -->
-		<div class="card md:col-span-2">
-			<h1 class="h1">Cart</h1>
+		<div class="card md:col-span-2 space-y-md">
+			<h1 class="h1">Shopping Cart</h1>
 			
 			{#if $cart.length === 0}
 				<p>Your cart is empty.</p>
 			{:else}
 				{#each $cart as item}
-					<div class="flex justify-between items-start p-md border-b border-secondary-bg">
+					<div class="flex justify-between items-start p-md border-b border-secondary">
 						<div class="flex gap-md">
 							<img 
 								src={item.images[0]?.src} 
@@ -144,10 +144,10 @@
 		</div>
 
 		<!-- Cart Summary Section -->
-		<div class="card">
-			<h2 class="h2">Summary</h2>
+		<div class="card space-y-md">
+			<h2 class="section-title">Order Summary</h2>
 			
-			<div class="flex justify-between p-md border-b border-secondary-bg">
+			<div class="flex justify-between p-md border-b border-secondary">
 				<span>Subtotal</span>
 				<span>{formatPrice(total)}</span>
 			</div>
@@ -158,7 +158,7 @@
 			</div>
 
 			<button 
-				class="btn btn-primary w-full mt-lg" 
+				class="btn btn-primary w-full" 
 				on:click={proceedToCheckout}
 				disabled={$cart.length === 0}
 			>
