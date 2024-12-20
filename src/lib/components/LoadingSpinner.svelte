@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
     import '$lib/styles/components/loading.css';
     
     export let visible = false;

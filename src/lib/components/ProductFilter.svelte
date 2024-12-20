@@ -1,41 +1,50 @@
-<script lang="ts">
+<script>
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import '$lib/styles/components/filter.css';
 
-	interface Tag {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
 
-	interface Category {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
 
-	interface Attribute {
-		name: string;
-		options: string[];
-	}
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
 
-	interface Image {
-		src: string;
-	}
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
 
-	interface Product {
-		id: number;
-		name: string;
-		price: string;
-		date_created: string;
-		tags: Tag[];
-		categories: Category[];
-		attributes: Attribute[];
-		images: Image[];
-	}
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} price
+	 * @property {string} date_created
+	 * @property {Tag[]} tags
+	 * @property {Category[]} categories
+	 * @property {Attribute[]} attributes
+	 * @property {Image[]} images
+	 */
 
-	export let products: Product[] = [];
-	let selectedTag: string | null = null;
-	let selectedCategory: string | null = null;
-	let selectedArtist: string | null = null;
+	/** @type {Product[]} */
+	export let products = [];
+	/** @type {string|null} */
+	let selectedTag = null;
+	/** @type {string|null} */
+	let selectedCategory = null;
+	/** @type {string|null} */
+	let selectedArtist = null;
 	let minPrice = 0;
 	let maxPrice = 1000;
 	let currentPage = 1;
@@ -93,23 +102,36 @@
 		currentPage * itemsPerPage
 	);
 
-	function handleTagClick(tag: string | null): void {
+	/**
+	 * @param {string|null} tag
+	 */
+	function handleTagClick(tag) {
 		selectedTag = selectedTag === tag ? null : tag;
 		currentPage = 1;
 	}
 
-	function handleCategoryClick(category: string | null): void {
+	/**
+	 * @param {string|null} category
+	 */
+	function handleCategoryClick(category) {
 		selectedCategory = selectedCategory === category ? null : category;
 		currentPage = 1;
 	}
 
-	function handleArtistClick(artist: string | null): void {
+	/**
+	 * @param {string|null} artist
+	 */
+	function handleArtistClick(artist) {
 		selectedArtist = selectedArtist === artist ? null : artist;
 		currentPage = 1;
 	}
 
-	function handlePriceChange(event: Event, type: 'min' | 'max'): void {
-		const value = parseFloat((event.target as HTMLInputElement).value);
+	/**
+	 * @param {Event} event
+	 * @param {'min'|'max'} type
+	 */
+	function handlePriceChange(event, type) {
+		const value = parseFloat(/** @type {HTMLInputElement} */ (event.target).value);
 		if (type === 'min') {
 			minPrice = Math.min(value, maxPrice);
 		} else if (type === 'max') {
@@ -118,7 +140,10 @@
 		currentPage = 1;
 	}
 
-	function changePage(page: number): void {
+	/**
+	 * @param {number} page
+	 */
+	function changePage(page) {
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 		}

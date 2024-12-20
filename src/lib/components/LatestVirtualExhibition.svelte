@@ -1,33 +1,37 @@
-<script lang="ts">
+<script>
     import '$lib/styles/components/exhibition.css';
 
-    interface Media {
-        id: number;
-        source_url: string;
-    }
+    /**
+     * @typedef {Object} Media
+     * @property {number} id
+     * @property {string} source_url
+     */
 
-    interface Exhibition {
-        acf: {
-            virtual: boolean;
-            fingerprint: number;
-        };
-        title: {
-            rendered: string;
-        };
-        description: string;
-        date: string;
-    }
+    /**
+     * @typedef {Object} Exhibition
+     * @property {{virtual: boolean, fingerprint: number}} acf
+     * @property {{rendered: string}} title
+     * @property {string} description
+     * @property {string} date
+     */
 
-    export let exhibitions: Exhibition[] = [];
-    export let media: Media[] = [];
+    /** @type {Exhibition[]} */
+    export let exhibitions = [];
+    /** @type {Media[]} */
+    export let media = [];
   
     // Filter exhibitions to only include virtual ones and sort by date to get the latest
+    /** @type {Exhibition|undefined} */
     const latestVirtualExhibition = exhibitions
         .filter(exhibition => exhibition.acf.virtual === true)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
   
-    // Function to get media URL by fingerprint ID
-    function getMediaUrlByFingerprint(fingerprintId: number): string {
+    /**
+     * Function to get media URL by fingerprint ID
+     * @param {number} fingerprintId
+     * @returns {string}
+     */
+    function getMediaUrlByFingerprint(fingerprintId) {
         const mediaItem = media.find(item => item.id === fingerprintId);
         return mediaItem ? mediaItem.source_url : '';
     }

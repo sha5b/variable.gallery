@@ -1,20 +1,25 @@
-<script lang="ts">
+<script>
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
   import '$lib/styles/components/loading.css';
 
+  /** @type {boolean} */
   export let isLoading = false;
 
-  interface Package {
-    name: string;
-    size: string;
-    glitch: boolean;
-  }
+  /**
+   * @typedef {Object} Package
+   * @property {string} name
+   * @property {string} size
+   * @property {boolean} glitch
+   */
 
-  let packages: Package[] = [];
-  let interval: number | NodeJS.Timeout | undefined;
+  /** @type {Package[]} */
+  let packages = [];
+  /** @type {number|ReturnType<typeof setInterval>|undefined} */
+  let interval;
 
-  const possiblePackages: string[] = [
+  /** @type {string[]} */
+  const possiblePackages = [
     'hacking_mona_lisa.exe',
     'decrypt_van_gogh_ear.dat',
     'downloading_creativity.zip',

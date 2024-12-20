@@ -4,7 +4,15 @@
 	import { cart, isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
 	import { ShoppingCart, ChevronDown } from 'svelte-heros';
 
-	let artists = [];
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
+
+	/** @type {Artist[]} */
+	export let artists;
 	let isCartOpen;
 	$: isCartSliderOpen.subscribe((value) => (isCartOpen = value));
 
@@ -19,18 +27,31 @@
 		isMenuOpen = !isMenuOpen;
 	}
 
+	/**
+	 * @param {MouseEvent} event
+	 */
 	function toggleDropdown(event) {
 		event.stopPropagation();
 		isDropdownOpen = !isDropdownOpen;
 	}
 
 	let totalItems = 0;
-	$: totalItems = $cart.reduce((sum, item) => sum + item.quantity, 0);
+	$: totalItems = $cart.reduce(
+		/** 
+		 * @param {number} sum 
+		 * @param {{ quantity: number }} item 
+		 */
+		(sum, item) => sum + item.quantity, 
+		0
+	);
 
 	function closeMenu() {
 		isMenuOpen = false;
 	}
 
+	/**
+	 * @param {MouseEvent} event
+	 */
 	function handleClickOutside(event) {
 		const dropdown = document.querySelector('.dropdown-menu');
 		const dropdownButton = document.querySelector('.dropdown-button');
@@ -38,15 +59,14 @@
 		if (
 			dropdown &&
 			dropdownButton &&
-			!dropdown.contains(event.target) &&
-			!dropdownButton.contains(event.target)
+			!dropdown.contains(/** @type {Node} */ (event.target)) &&
+			!dropdownButton.contains(/** @type {Node} */ (event.target))
 		) {
 			isDropdownOpen = false;
 		}
 	}
 
-	onMount(async () => {
-		artists = await fetchArtists();
+	onMount(() => {
 		if (typeof document !== 'undefined') {
 			document.addEventListener('click', handleClickOutside);
 		}

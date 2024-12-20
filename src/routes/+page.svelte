@@ -1,68 +1,72 @@
-<script lang="ts">
+<script>
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-import ContactForm from '$lib/components/ContactForm.svelte';
-import ProductFilter from '$lib/components/ProductFilter.svelte';
-import HeroSection from '$lib/components/HeroSection.svelte';
+	import ContactForm from '$lib/components/ContactForm.svelte';
+	import ProductFilter from '$lib/components/ProductFilter.svelte';
+	import HeroSection from '$lib/components/HeroSection.svelte';
 	import ProductShowcase from '$lib/components/ProductShowcase.svelte';
 
-	interface Tag {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
 
-	interface Category {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
 
-	interface Image {
-		src: string;
-	}
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
 
-	interface Attribute {
-		name: string;
-		options: string[];
-	}
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
 
-	interface Product {
-		id: number;
-		type: string;
-		name: string;
-		price: string;
-		date_created: string;
-		categories: Category[];
-		tags: Tag[];
-		images: Image[];
-		attributes: Attribute[];
-	}
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} type
+	 * @property {string} name
+	 * @property {string} price
+	 * @property {string} date_created
+	 * @property {Category[]} categories
+	 * @property {Tag[]} tags
+	 * @property {Image[]} images
+	 * @property {Attribute[]} attributes
+	 */
 
-	interface Artist {
-		id: number;
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
 
-	interface PageData {
-		products: Product[];
-		artists: Artist[];
-		exhibitions: any[];
-		media: any[];
-		product?: Product;
-		variation?: any;
-	}
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Product[]} products
+	 * @property {Artist[]} artists
+	 * @property {any[]} exhibitions
+	 * @property {any[]} media
+	 * @property {Product} [product]
+	 * @property {any} [variation]
+	 */
 
-	export let data: PageData;
+	/** @type {PageData} */
+	export let data;
 	const { products, artists, exhibitions, media } = data;
 
-	interface MetaTag {
-		name?: string;
-		property?: string;
-		content: string;
-	}
-
-	type GeneratedMetaTag = {
-		name?: string;
-		property?: string;
-		content: string;
-	};
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
 
 	// Create landing page-specific SEO
 	const pageSEO = {
@@ -83,10 +87,13 @@ import HeroSection from '$lib/components/HeroSection.svelte';
 			}
 	};
 
-	$: metaTags = generateMetaTags(pageSEO) as GeneratedMetaTag[];
+	/** @type {Array<MetaTag>} */
+	$: metaTags = generateMetaTags(pageSEO);
 
 	// Function to get a random type and the corresponding latest product thumbnail
+	/** @type {string} */
 	let randomType = '';
+	/** @type {string} */
 	let thumbnail = '';
 
 	function getRandomTypeAndThumbnail() {
@@ -100,7 +107,8 @@ import HeroSection from '$lib/components/HeroSection.svelte';
 
 	getRandomTypeAndThumbnail();
 
-	let productsByCategory: Record<string, Product[]> = {};
+	/** @type {Record<string, Product[]>} */
+	let productsByCategory = {};
 
 	// Organize products by category
 	if (products) {

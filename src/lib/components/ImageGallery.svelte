@@ -1,34 +1,48 @@
-<script lang="ts">
+<script>
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import '$lib/styles/components/gallery.css';
 
-	export let images: string[] = [];
+	/** @type {string[]} */
+	export let images = [];
 
+	/** @type {boolean} */
 	let modalOpen = false;
+	/** @type {number} */
 	let currentImageIndex = 0;
-	let hoveredImageIndex: number | null = null;
+	/** @type {number|null} */
+	let hoveredImageIndex = null;
 
-	function openModal(index: number): void {
+	/**
+	 * @param {number} index
+	 */
+	function openModal(index) {
 		currentImageIndex = index;
 		modalOpen = true;
 	}
 
-	function closeModal(): void {
+	function closeModal() {
 		modalOpen = false;
 	}
 
-	function handleMouseEnter(index: number): void {
+	/**
+	 * @param {number} index
+	 */
+	function handleMouseEnter(index) {
 		hoveredImageIndex = index;
 	}
 
-	function handleMouseLeave(): void {
+	function handleMouseLeave() {
 		hoveredImageIndex = null;
 		resetImageTransforms();
 	}
 
-	function handleMouseMove(event: MouseEvent, imageIndex: number): void {
+	/**
+	 * @param {MouseEvent} event
+	 * @param {number} imageIndex
+	 */
+	function handleMouseMove(event, imageIndex) {
 		if (hoveredImageIndex === imageIndex) {
-			const image = event.target as HTMLImageElement;
+			const image = /** @type {HTMLImageElement} */ (event.target);
 			const rect = image.getBoundingClientRect();
 			const x = (event.clientX - rect.left) / rect.width;
 			const y = (event.clientY - rect.top) / rect.height;
@@ -38,11 +52,12 @@
 		}
 	}
 
-	function resetImageTransforms(): void {
+	function resetImageTransforms() {
 		const images = document.querySelectorAll('.gallery-image');
 		images.forEach((img) => {
-			(img as HTMLElement).style.transform = 'scale(1)';
-			(img as HTMLElement).style.transformOrigin = 'center';
+			const imgElement = /** @type {HTMLElement} */ (img);
+			imgElement.style.transform = 'scale(1)';
+			imgElement.style.transformOrigin = 'center';
 		});
 	}
 </script>

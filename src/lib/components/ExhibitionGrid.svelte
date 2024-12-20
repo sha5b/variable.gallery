@@ -1,27 +1,25 @@
-<script lang="ts">
+<script>
 	import '$lib/styles/components/exhibition.css';
 
-	interface Media {
-		id: number;
-		source_url: string;
-	}
+	/**
+	 * @typedef {Object} Media
+	 * @property {number} id
+	 * @property {string} source_url
+	 */
 
-	interface Exhibition {
-		acf: {
-			virtual: boolean;
-			fingerprint: number;
-			artist?: string[];
-			location?: string;
-		};
-		title: {
-			rendered: string;
-		};
-		date: string;
-	}
+	/**
+	 * @typedef {Object} Exhibition
+	 * @property {{virtual: boolean, fingerprint: number, artist?: string[], location?: string}} acf
+	 * @property {{rendered: string}} title
+	 * @property {string} date
+	 */
 
-	export let exhibitions: Exhibition[] = [];
-	export let media: Media[] = [];
-	export let limit: number | null = null; // Limit the number of items displayed (null means no limit)
+	/** @type {Exhibition[]} */
+	export let exhibitions = [];
+	/** @type {Media[]} */
+	export let media = [];
+	/** @type {number|null} */
+	export let limit = null; // Limit the number of items displayed (null means no limit)
 
 	// Filter exhibitions to include only virtual exhibitions
 	const virtualExhibitions = exhibitions.filter((exhibition) => exhibition.acf.virtual === true);
@@ -29,14 +27,22 @@
 	// Apply limit if specified
 	const displayedExhibitions = limit ? virtualExhibitions.slice(0, limit) : virtualExhibitions;
 
-	// Function to get media URL by fingerprint ID
-	function getMediaUrlByFingerprint(fingerprintId: number): string {
+	/**
+	 * Function to get media URL by fingerprint ID
+	 * @param {number} fingerprintId
+	 * @returns {string}
+	 */
+	function getMediaUrlByFingerprint(fingerprintId) {
 		const mediaItem = media.find((item) => item.id === fingerprintId);
 		return mediaItem ? mediaItem.source_url : '';
 	}
 
-	// Function to generate URL-friendly title for routing
-	function getExhibitionUrl(title: string): string {
+	/**
+	 * Function to generate URL-friendly title for routing
+	 * @param {string} title
+	 * @returns {string}
+	 */
+	function getExhibitionUrl(title) {
 		return `/exhibitions/${title
 			.toLowerCase()
 			.replace(/[^a-z0-9]+/g, '-')

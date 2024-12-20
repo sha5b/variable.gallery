@@ -1,30 +1,52 @@
-<script lang="ts">
-  type MetaTag = {
-    name?: string;
-    property?: string;
-    content: any;
-  };
+<script>
+  /**
+   * @typedef {Object} MetaTag
+   * @property {string} [name]
+   * @property {string} [property]
+   * @property {any} content
+   */
 
-  type Product = {
-    id: number;
-    name: string;
-    price: string;
-    date_created: string;
-    tags: string[];
-    categories: Array<{
-      name: string;
-    }>;
-    description: string;
-  };
+  /**
+   * @typedef {Object} Image
+   * @property {string} src
+   */
+
+  /**
+   * @typedef {Object} Category
+   * @property {string} name
+   */
+
+  /**
+   * @typedef {Object} Tag
+   * @property {string} name
+   */
+
+  /**
+   * @typedef {Object} Attribute
+   * @property {string} name
+   * @property {string[]} options
+   */
+
+  /**
+   * @typedef {Object} Product
+   * @property {number} id
+   * @property {string} name
+   * @property {string} price
+   * @property {string} date_created
+   * @property {Tag[]} tags
+   * @property {Category[]} categories
+   * @property {string} description
+   * @property {Image[]} images
+   * @property {Attribute[]} attributes
+   */
 
   import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
   import { goto } from '$app/navigation';
   import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
-import ProductFilter from '$lib/components/ProductFilter.svelte';
+  import ProductFilter from '$lib/components/ProductFilter.svelte';
 
-  export let data: {
-    products: Product[];
-  };
+  /** @type {{products: Product[]}} */
+  export let data;
   const { products } = data;
 
   // Create page-specific SEO by extending defaultSEO
@@ -49,9 +71,11 @@ import ProductFilter from '$lib/components/ProductFilter.svelte';
     }
   };
 
+  /** @type {Array<{name?: string, property?: string, content: string}>} */
   $: metaTags = generateMetaTags(pageSEO);
 
-  let productsByCategory: { [key: string]: Product[] } = {};
+  /** @type {Record<string, Product[]>} */
+  let productsByCategory = {};
 
   // Organize products by category
   if (products) {
@@ -65,7 +89,10 @@ import ProductFilter from '$lib/components/ProductFilter.svelte';
     });
   }
 
-  function goToProduct(productId: number) {
+  /**
+   * @param {number} productId
+   */
+  function goToProduct(productId) {
     goto(`/shop/${productId}`);
   }
 </script>

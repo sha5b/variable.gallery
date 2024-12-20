@@ -1,26 +1,30 @@
-<script lang="ts">
+<script>
     import '$lib/styles/components/exhibition.css';
 
-    interface Media {
-        id: number;
-        source_url: string;
-    }
+    /**
+     * @typedef {Object} Media
+     * @property {number} id
+     * @property {string} source_url
+     */
 
-    interface Exhibition {
-        acf: {
-            fingerprint: number;
-        };
-        title: {
-            rendered: string;
-        };
-        description: string;
-    }
+    /**
+     * @typedef {Object} Exhibition
+     * @property {{fingerprint: number}} acf
+     * @property {{rendered: string}} title
+     * @property {string} description
+     */
 
-    export let exhibition: Exhibition | null = null;
-    export let media: Media[] = [];
+    /** @type {Exhibition | null} */
+    export let exhibition = null;
+    /** @type {Media[]} */
+    export let media = [];
 
-    // Function to get media URL by fingerprint ID
-    function getMediaUrlByFingerprint(fingerprintId: number): string {
+    /**
+     * Function to get media URL by fingerprint ID
+     * @param {number} fingerprintId
+     * @returns {string}
+     */
+    function getMediaUrlByFingerprint(fingerprintId) {
         const mediaItem = media.find(item => item.id === fingerprintId);
         return mediaItem ? mediaItem.source_url : '';
     }

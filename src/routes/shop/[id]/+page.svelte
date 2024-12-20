@@ -1,74 +1,74 @@
-<script lang="ts">
-	interface Image {
-		src: string;
-	}
+<script>
+	/**
+	 * @typedef {Object} Image
+	 * @property {string} src
+	 */
 
-	interface Category {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Category
+	 * @property {string} name
+	 */
 
-	interface Tag {
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Tag
+	 * @property {string} name
+	 */
 
-	interface Attribute {
-		name: string;
-		options: string[];
-	}
+	/**
+	 * @typedef {Object} Attribute
+	 * @property {string} name
+	 * @property {string[]} options
+	 */
 
-	interface Product {
-		id: number;
-		name: string;
-		type: string;
-		short_description?: string;
-		description?: string;
-		regular_price?: string;
-		sale_price?: string;
-		stock_quantity?: number;
-		stock_status?: string;
-		weight?: string;
-		dimensions?: {
-			length: string;
-			width: string;
-			height: string;
-		};
-		images: Image[];
-		categories: Category[];
-		tags: Tag[];
-		attributes: Attribute[];
-	}
+	/**
+	 * @typedef {Object} Product
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} type
+	 * @property {string} [short_description]
+	 * @property {string} [description]
+	 * @property {string} [regular_price]
+	 * @property {string} [sale_price]
+	 * @property {number} [stock_quantity]
+	 * @property {string} [stock_status]
+	 * @property {string} [weight]
+	 * @property {{length: string, width: string, height: string}} [dimensions]
+	 * @property {Image[]} images
+	 * @property {Category[]} categories
+	 * @property {Tag[]} tags
+	 * @property {Attribute[]} attributes
+	 */
 
-	interface Variation {
-		id: number;
-		name: string;
-		regular_price: string;
-		stock_quantity: number;
-		stock_status: string;
-	}
+	/**
+	 * @typedef {Object} Variation
+	 * @property {number} id
+	 * @property {string} name
+	 * @property {string} regular_price
+	 * @property {number} stock_quantity
+	 * @property {string} stock_status
+	 */
 
-	interface Artist {
-		title: {
-			rendered: string;
-		};
-		slug: string;
-		acf?: {
-			location?: string;
-			description?: string;
-		};
-	}
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
 
-	interface PageData {
-		product: Product;
-		variation: Variation | null;
-		products: Product[];
-		artists: Artist[];
-	}
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Product} product
+	 * @property {Variation|null} variation
+	 * @property {Product[]} products
+	 * @property {Artist[]} artists
+	 */
 
-	type MetaTag = {
-		name?: string;
-		property?: string;
-		content: string;
-	};
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
@@ -79,7 +79,8 @@
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { onMount } from 'svelte';
 
-	export let data: PageData;
+	/** @type {PageData} */
+	export let data;
 	const { product, variation, products, artists } = data;
 
 	// Create product-specific SEO
@@ -102,12 +103,15 @@
 		}
 	};
 
+	/** @type {Array<{name?: string, property?: string, content: string}>} */
 	$: metaTags = generateMetaTags(pageSEO);
 
 	let bioOpen = false;
 	let primaryCategory = '';
-	let gallery: string[] = [];
-	let artistInfo: Artist | null = null;
+	/** @type {string[]} */
+	let gallery = [];
+	/** @type {Artist|null} */
+	let artistInfo = null;
 	let artistName = '';
 
 	// Move the reactive statement to watch product changes
@@ -121,7 +125,7 @@
 		
 		artistInfo = artists.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
-		);
+		) || null;
 		artistName = artistInfo ? artistInfo.title.rendered : '';
 	}
 
@@ -312,7 +316,7 @@
 					{#if artistInfo}
 						<button 
 							class="button-primary mt-8 w-full"
-							on:click={() => goto(`/artist/${artistInfo.slug}`)}
+							on:click={() => goto(`/artist/${artistInfo?.slug || ''}`)}
 						>
 							View Profile
 						</button>

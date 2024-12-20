@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	import '../app.css';
 	import { navigating } from '$app/stores';
 	import { page } from '$app/stores';
@@ -11,24 +11,27 @@
 	import { isCartSliderOpen, closeCartSlider } from '$lib/stores/cartStore';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 
-	interface Artist {
-		id: number;
-		name: string;
-	}
+	/**
+	 * @typedef {Object} Artist
+	 * @property {{rendered: string}} title
+	 * @property {string} slug
+	 * @property {{location?: string, description?: string}} [acf]
+	 */
 
-	interface PageData {
-		artists: Artist[];
-	}
+	/**
+	 * @typedef {Object} PageData
+	 * @property {Artist[]} artists
+	 */
 
-	type MetaTag = {
-		name?: string;
-		property?: string;
-		content: string;
-	};
+	/**
+	 * @typedef {Object} MetaTag
+	 * @property {string} [name]
+	 * @property {string} [property]
+	 * @property {string} content
+	 */
 
-	type GeneratedMetaTag = MetaTag;
-
-	export let data: PageData;
+	/** @type {PageData} */
+	export let data;
 	const { artists } = data;
 	
 	$: isOpen = $isCartSliderOpen;
@@ -43,7 +46,8 @@
 		}
 	};
 	
-	$: metaTags = generateMetaTags(pageSEO) as GeneratedMetaTag[];
+	/** @type {Array<MetaTag>} */
+	$: metaTags = generateMetaTags(pageSEO);
 
 	function closeCart() {
 		closeCartSlider();
