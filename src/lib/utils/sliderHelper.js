@@ -81,13 +81,25 @@ export function handleProductClick(productId, navigationFunction) {
     navigationFunction(getProductUrl(productId));
 }
 
+/** @type {Map<HTMLElement, { startX: number, startScrollLeft: number, isDragging: boolean }>} */
+const touchState = new Map();
+
 /**
  * Handle touch start event
  * @param {TouchEvent} event - Touch event
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchStart(event, slider) {
-    // Let native scrolling handle touch events
+    const touch = event.touches[0];
+    touchState.set(slider, {
+        startX: touch.clientX,
+        startScrollLeft: slider.scrollLeft,
+        isDragging: true
+    });
+    
+    // Add grab cursor
+    slider.style.cursor = 'grabbing';
+    slider.style.userSelect = 'none';
 }
 
 /**
@@ -96,7 +108,13 @@ export function handleTouchStart(event, slider) {
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchMove(event, slider) {
-    // Let native scrolling handle touch events
+    const state = touchState.get(slider);
+    if (!state?.isDragging) return;
+
+    event.preventDefault();
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - state.startX;
+    slider.scrollLeft = state.startScrollLeft - deltaX;
 }
 
 /**
@@ -105,7 +123,33 @@ export function handleTouchMove(event, slider) {
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchEnd(event, slider) {
-    // Let native scrolling handle touch events
+    const state = touchState.get(slider);
+    if (!state) return;
+
+    state.isDragging = false;
+    slider.style.cursor = '';
+    slider.style.userSelect = '';
+
+    // Add momentum scrolling
+    const endTime = Date.now();
+    const velocity = state.startScrollLeft - slider.scrollLeft;
+    
+    if (Math.abs(velocity) > 10) {
+        const momentum = () => {
+            const deceleration = 0.95;
+            const newVelocity = velocity * deceleration;
+            
+            slider.scrollLeft -= newVelocity;
+            
+            if (Math.abs(newVelocity) > 0.5) {
+                requestAnimationFrame(momentum);
+            }
+        };
+        
+        requestAnimationFrame(momentum);
+    }
+
+    touchState.delete(slider);
 }
 
 /**
