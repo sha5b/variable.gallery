@@ -4,11 +4,11 @@
 	import { userInfo } from '$lib/stores/userInfoStore';
 	import { cart, addItem, removeItem } from '$lib/stores/cartStore';
 	import { get } from 'svelte/store';
-	import { fetchWooCommerceData } from '$lib/api';
 	import { goto } from '$app/navigation';
 	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
 	import { countries } from '$lib/data/countries';
 	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import { validateCheckoutForm, formatPrice, calculateCartTotals, createWooCommerceOrder } from '$lib/utils/checkoutUtils';
 
 	/**
 	 * @typedef {Object} PageData
@@ -105,10 +105,15 @@
 	$: metaTags = generateMetaTags(pageSEO);
 
 	onMount(async () => {
+		console.log('Initializing Stripe...');
 		stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-		if (!stripe) return;
+		if (!stripe) {
+			console.error('Failed to initialize Stripe');
+			return;
+		}
 
 		try {
+			console.log('Creating Stripe Elements...');
 			elements = stripe.elements({
 				mode: 'payment',
 				amount: Math.round((subtotal + shippingCost) * 100),
@@ -125,8 +130,12 @@
 				payment_method_types: ['card', 'paypal', 'wechat_pay', 'eps']
 			});
 
-			if (!elements) return;
+			if (!elements) {
+				console.error('Failed to create Stripe Elements');
+				return;
+			}
 
+			console.log('Creating payment element...');
 			const paymentElement = elements.create('payment', {
 				layout: {
 					type: 'tabs',
@@ -149,6 +158,7 @@
 			});
 
 			paymentElement.mount('#payment-element');
+			console.log('Payment element mounted successfully');
 		} catch (error) {
 			console.error('Payment Element Error:', error);
 			paymentError = 'Failed to load payment form. Please refresh the page.';
@@ -159,35 +169,20 @@
 	 * @returns {boolean}
 	 */
 	function validateForm() {
-		validationErrors = {};
-		/** @type {UserInfo} */
-		const user = get(userInfo);
-
-		if (!user.firstName) validationErrors.firstName = 'First name is required.';
-		if (!user.lastName) validationErrors.lastName = 'Last name is required.';
-		if (!user.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email))
-			validationErrors.email = 'Valid email is required.';
-		if (!user.address) validationErrors.address = 'Address is required.';
-		if (!user.city) validationErrors.city = 'City is required.';
-		if (!user.postalCode || user.postalCode.length < 3)
-			validationErrors.postalCode = 'Valid postal code required (minimum 3 characters)';
-		if (!user.phone || !/^\d{10,15}$/.test(user.phone))
-			validationErrors.phone = 'Valid phone number is required.';
-
-		return Object.keys(validationErrors).length === 0;
+		const { isValid, errors } = validateCheckoutForm(get(userInfo));
+		validationErrors = errors;
+		return isValid;
 	}
 
 	// Calculate totals
-	$: subtotal = cartItems.reduce((sum, item) => {
-		const itemPrice = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
-		return sum + itemPrice * item.quantity;
-	}, 0);
-
-	$: shippingCost = 15;
-	$: total = subtotal + shippingCost;
+	$: ({ subtotal, shippingCost, total } = calculateCartTotals(cartItems));
 
 	async function handlePayment() {
-		if (!stripe || !elements) return;
+		console.log('Starting payment process...');
+		if (!stripe || !elements) {
+			console.error('Stripe or Elements not initialized');
+			return;
+		}
 
 		paymentError = '';
 		showLoadingSpinner = true;
@@ -199,6 +194,7 @@
 		}
 
 		try {
+			console.log('Creating payment intent...');
 			const response = await fetch('/checkout', {
 				method: 'POST',
 				headers: {
@@ -215,7 +211,9 @@
 			}
 
 			const { clientSecret } = await response.json();
+			console.log('Payment intent created');
 
+			console.log('Submitting payment form...');
 			const { error: submitError } = await elements.submit();
 			if (submitError) {
 				throw new Error(submitError.message);
@@ -227,16 +225,16 @@
 				items: cartItems
 			};
 
-			const wooOrder = await createWooCommerceOrder(orderData);
-
-			sessionStorage.setItem('wooOrderId', wooOrder.id);
+			// Store order data in session storage for use after payment confirmation
+			console.log('Storing order data in session storage...');
 			sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
 
+			console.log('Confirming payment...');
 			const { error, paymentIntent } = await stripe.confirmPayment({
 				elements,
 				clientSecret,
 				confirmParams: {
-					return_url: `${window.location.origin}/order-confirmation/${wooOrder.id}`,
+					return_url: `${window.location.origin}/order-confirmation/create`,
 					payment_method_data: {
 						billing_details: {
 							name: `${$userInfo.firstName} ${$userInfo.lastName}`,
@@ -255,10 +253,32 @@
 			});
 
 			if (error) {
+				console.error('Payment confirmation error:', error);
 				throw new Error(error.message);
 			}
 
-			goto(`/order-confirmation/${wooOrder.id}`);
+			// For credit cards, we get immediate confirmation
+			if (paymentIntent && paymentIntent.status === 'succeeded') {
+				console.log('Credit card payment successful, creating order...');
+				try {
+					const wooOrder = await createWooCommerceOrder(orderData);
+					console.log('WooCommerce order created:', wooOrder);
+					
+					// Clear session storage and cart
+					sessionStorage.removeItem('pendingOrderData');
+					cart.set([]);
+
+					// Redirect to order confirmation
+					goto(`/order-confirmation/${wooOrder.id}`);
+					return;
+				} catch (error) {
+					console.error('Error creating order:', error);
+					throw new Error('Payment successful but failed to create order');
+				}
+			}
+
+			// For other payment methods, we'll be redirected
+			console.log('Payment requires redirect, storing order data...');
 		} catch (error) {
 			if (error instanceof Error) {
 				paymentError = error.message;
@@ -269,58 +289,6 @@
 		} finally {
 			showLoadingSpinner = false;
 		}
-	}
-
-	/**
-	 * @param {UserInfo & { items: CartItem[] }} orderData
-	 */
-	async function createWooCommerceOrder(orderData) {
-		const response = await fetchWooCommerceData('orders', {
-			method: 'POST',
-			body: JSON.stringify({
-				payment_method: 'stripe',
-				payment_method_title: 'Credit Card (Stripe)',
-				set_paid: true,
-				status: 'processing',
-				billing: {
-					first_name: orderData.firstName,
-					last_name: orderData.lastName,
-					address_1: orderData.address,
-					city: orderData.city,
-					postcode: orderData.postalCode,
-					country: orderData.country,
-					email: orderData.email,
-					phone: orderData.phone || ''
-				},
-				shipping: {
-					first_name: orderData.firstName,
-					last_name: orderData.lastName,
-					address_1: orderData.address,
-					city: orderData.city,
-					postcode: orderData.postalCode,
-					country: orderData.country
-				},
-				line_items: orderData.items.map((item) => ({
-					product_id: item.id,
-					quantity: item.quantity
-				}))
-			})
-		});
-
-		if (!response || !response.id) {
-			throw new Error('Failed to create order - no order ID received');
-		}
-
-		return response;
-	}
-
-	/**
-	 * @param {number|string} price
-	 * @returns {string}
-	 */
-	function formatPrice(price) {
-		const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-		return `€${numPrice.toFixed(2)}`;
 	}
 
 	/**
@@ -384,7 +352,7 @@
 <div class="page-container">
 	<div class="content-section space-y-md">
 		<section class="space-y-sm">
-			<h1 class="h1">Checkout</h1>
+			<h1 class="text-3xl font-normal mb-6 uppercase">CHECKOUT</h1>
 			<p>
 				Complete your purchase securely. Review your cart, provide shipping details, and process payment 
 				to receive your digital artworks and NFTs.
@@ -393,11 +361,11 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
 			<!-- Left Column: Shipping Information -->
-			<div class="card space-y-md">
-				<h2 class="section-title">Shipping Information</h2>
+			<div class="space-y-md">
+				<h2 class="text-xl font-normal uppercase mb-6">SHIPPING INFORMATION</h2>
 			<form class="form-group">
 				<div class="form-group">
-					<label for="firstName">First Name</label>
+					<label for="firstName" class="uppercase text-sm">FIRST NAME</label>
 					<input
 						type="text"
 						id="firstName"
@@ -411,7 +379,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="lastName">Last Name</label>
+					<label for="lastName" class="uppercase text-sm">LAST NAME</label>
 					<input
 						id="lastName"
 						type="text"
@@ -425,7 +393,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="email">Email</label>
+					<label for="email" class="uppercase text-sm">EMAIL</label>
 					<input
 						id="email"
 						type="email"
@@ -439,7 +407,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="address">Address</label>
+					<label for="address" class="uppercase text-sm">ADDRESS</label>
 					<textarea
 						id="address"
 						bind:value={$userInfo.address}
@@ -452,7 +420,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="city">City</label>
+					<label for="city" class="uppercase text-sm">CITY</label>
 					<input
 						id="city"
 						type="text"
@@ -466,7 +434,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="postalCode">Postal Code</label>
+					<label for="postalCode" class="uppercase text-sm">POSTAL CODE</label>
 					<input
 						id="postalCode"
 						type="text"
@@ -480,7 +448,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="country">Country</label>
+					<label for="country" class="uppercase text-sm">COUNTRY</label>
 					<select id="country" bind:value={$userInfo.country} class="input">
 						<option value="">Select a country</option>
 						<optgroup label="European Union">
@@ -510,7 +478,7 @@
 				</div>
 
 				<div class="form-group">
-					<label for="phone">Phone</label>
+					<label for="phone" class="uppercase text-sm">PHONE</label>
 					<div class="phone-input-group">
 						<select class="input" bind:value={$userInfo.phoneCountryCode}>
 							{#each countries as country}
@@ -536,21 +504,21 @@
 		</div>
 
 			<!-- Right Column: Cart Summary and Payment -->
-			<div class="card space-y-md">
+			<div class="space-y-md">
 				<section class="space-y-md">
-					<h2 class="section-title">Order Summary</h2>
+					<h2 class="text-xl font-normal uppercase mb-6">ORDER SUMMARY</h2>
 
 			<!-- Cart Items -->
 			{#if cartItems.length === 0}
 				<div class="flex flex-col items-center justify-center p-lg">
 					<p>Your cart is empty</p>
-					<button class="btn btn-primary mt-md" on:click={() => goto('/shop')}>
-						Continue Shopping
+					<button class="w-full mt-8 bg-black text-white py-2 text-sm uppercase" on:click={() => goto('/shop')}>
+						CONTINUE SHOPPING
 					</button>
 				</div>
 			{:else}
 				{#each cartItems as item}
-					<div class="flex justify-between items-start p-md border-b border-secondary">
+					<div class="flex justify-between items-start p-md">
 						<div class="flex gap-md">
 							<img
 								src={item.images[0]?.src || '/placeholder.jpg'}
@@ -570,9 +538,9 @@
 									<p>{formatPrice(item.price)}</p>
 								</div>
 								<div class="flex items-center gap-xs">
-									<button class="btn btn-sm" on:click={() => decreaseQuantity(item)}>−</button>
-									<span class="mx-3">{item.quantity}</span>
-									<button class="btn btn-sm" on:click={() => increaseQuantity(item)}>+</button>
+									<button class="px-3 py-1 bg-black text-white text-sm" on:click={() => decreaseQuantity(item)}>−</button>
+									<span class="mx-3 text-sm">{item.quantity}</span>
+									<button class="px-3 py-1 bg-black text-white text-sm" on:click={() => increaseQuantity(item)}>+</button>
 								</div>
 							</div>
 						</div>
@@ -580,32 +548,32 @@
 							<span class="text-lg font-semibold">
 								{formatPrice(item.quantity * (typeof item.price === 'string' ? parseFloat(item.price) : item.price))}
 							</span>
-							<button class="btn btn-sm btn-outline text-error" on:click={() => handleRemoveItem(item.id)}>
-								Remove
+							<button class="px-3 py-1 bg-black text-white text-sm uppercase" on:click={() => handleRemoveItem(item.id)}>
+								REMOVE
 							</button>
 						</div>
 					</div>
 				{/each}
 
 				<!-- Price Summary -->
-				<div class="space-y-sm border-t border-secondary pt-md">
+				<div class="space-y-sm pt-md">
 					<div class="flex justify-between">
-						<span>Subtotal</span>
+						<span class="uppercase">SUBTOTAL</span>
 						<span>{formatPrice(subtotal)}</span>
 					</div>
 					<div class="flex justify-between">
-						<span>Shipping</span>
+						<span class="uppercase">SHIPPING</span>
 						<span>{formatPrice(shippingCost)}</span>
 					</div>
 					<div class="flex justify-between font-bold">
-						<span>Total</span>
+						<span class="uppercase">TOTAL</span>
 						<span class="text-lg">{formatPrice(total)}</span>
 					</div>
 				</div>
 
 				<!-- Payment Section -->
-				<section class="border-t border-secondary pt-md space-y-md">
-					<h2 class="section-title">Payment Details</h2>
+				<section class="pt-md space-y-md">
+					<h2 class="text-xl font-normal uppercase mb-6">PAYMENT DETAILS</h2>
 
 					<div id="payment-request-button" class="mb-md"></div>
 
@@ -614,7 +582,7 @@
 						{#if paymentError}
 							<p class="error mb-sm">{paymentError}</p>
 						{/if}
-						<button class="btn btn-primary w-full" on:click={handlePayment}> Pay Now </button>
+						<button class="w-full mt-8 bg-black text-white py-2 text-sm uppercase" on:click={handlePayment}>PAY NOW</button>
 					</div>
 				</section>
 			{/if}

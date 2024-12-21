@@ -1,5 +1,5 @@
 <script>
-    import { handleMouseMove } from '$lib/utils/sliderHelper';
+    import { handleMouseMove, handleTouchStart, handleTouchMove, handleTouchEnd } from '$lib/utils/sliderHelper';
     import { goto } from '$app/navigation';
     import { handleImageLoad, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
 
@@ -18,17 +18,24 @@
 
     /** @type {HTMLElement|null} */
     let slider = null;
-    let scrollState = {
-        scrollTarget: 0,
-        isAnimating: false
-    };
 
     /**
      * @param {MouseEvent} event
      */
     function onHandleMouseMove(event) {
         if (slider) {
-            handleMouseMove(event, slider, scrollState);
+            handleMouseMove(event, slider);
+        }
+    }
+
+    /**
+     * Handle touch events with null checks
+     * @param {TouchEvent} event
+     * @param {(event: TouchEvent, slider: HTMLElement) => void} handler
+     */
+    function handleTouch(event, handler) {
+        if (slider) {
+            handler(event, slider);
         }
     }
 
@@ -51,7 +58,14 @@
         <h1 class="category-title text-6xl font-bold">{category}</h1>
     </div>
 
-    <div class="category-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
+    <div 
+        class="category-slider-container" 
+        bind:this={slider} 
+        on:mousemove={onHandleMouseMove}
+        on:touchstart={(e) => handleTouch(e, handleTouchStart)}
+        on:touchmove={(e) => handleTouch(e, handleTouchMove)}
+        on:touchend={(e) => handleTouch(e, handleTouchEnd)}
+    >
         <div class="category-slider gap-lg flex">
             {#each displayedProducts as product}
                 <div class="category-card" on:click={() => onProductClick(product)}>

@@ -1,5 +1,5 @@
 <script>
-    import { handleMouseMove } from '$lib/utils/sliderHelper';
+    import { handleMouseMove, handleTouchStart, handleTouchMove, handleTouchEnd } from '$lib/utils/sliderHelper';
     import { isCartSliderOpen } from '$lib/stores/cartStore';
     import { goto } from '$app/navigation';
     import { handleImageLoad, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
@@ -13,10 +13,6 @@
 
     /** @type {HTMLElement|null} */
     let slider = null;
-    let scrollState = {
-        scrollTarget: 0,
-        isAnimating: false
-    };
 
     let isCartOpen = false;
     $: isCartSliderOpen.subscribe((value) => {
@@ -28,7 +24,18 @@
      */
     function onHandleMouseMove(event) {
         if (slider) {
-            handleMouseMove(event, slider, scrollState);
+            handleMouseMove(event, slider);
+        }
+    }
+
+    /**
+     * Handle touch events with null checks
+     * @param {TouchEvent} event
+     * @param {(event: TouchEvent, slider: HTMLElement) => void} handler
+     */
+    function handleTouch(event, handler) {
+        if (slider) {
+            handler(event, slider);
         }
     }
 
@@ -46,7 +53,14 @@
     }));
 </script>
 
-<div class="featured-slider-container bg-background" bind:this={slider} on:mousemove={onHandleMouseMove}>
+<div 
+    class="featured-slider-container bg-background" 
+    bind:this={slider} 
+    on:mousemove={onHandleMouseMove}
+    on:touchstart={(e) => handleTouch(e, handleTouchStart)}
+    on:touchmove={(e) => handleTouch(e, handleTouchMove)}
+    on:touchend={(e) => handleTouch(e, handleTouchEnd)}
+>
     <div class="featured-slider gap-md">
         {#each limitedProducts as product}
             <div class="featured-card transition-default" on:click={() => onProductClick(product.id)}>

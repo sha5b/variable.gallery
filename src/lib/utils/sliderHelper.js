@@ -1,10 +1,16 @@
 import { getProductUrl } from './mediaUtils.js';
 
 /**
- * Store animation frame IDs for each slider
+ * Store animation frame IDs and touch data for each slider
  * @type {Map<HTMLElement, number>}
  */
 const animationFrameIds = new Map();
+
+/**
+ * Store touch data for sliders
+ * @type {Map<HTMLElement, { startX: number, startScroll: number, lastX: number, velocity: number }>}
+ */
+const touchData = new Map();
 
 /**
  * Handle mouse movement for slider scrolling
@@ -98,6 +104,71 @@ export function preloadImage(src, fallbackSrc) {
 }
 
 /**
+ * Handle touch start event
+ * @param {TouchEvent} event - Touch event
+ * @param {HTMLElement} slider - Slider container element
+ */
+export function handleTouchStart(event, slider) {
+    const touch = event.touches[0];
+    touchData.set(slider, {
+        startX: touch.clientX,
+        startScroll: slider.scrollLeft,
+        lastX: touch.clientX,
+        velocity: 0
+    });
+}
+
+/**
+ * Handle touch move event
+ * @param {TouchEvent} event - Touch event
+ * @param {HTMLElement} slider - Slider container element
+ */
+export function handleTouchMove(event, slider) {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const data = touchData.get(slider);
+    
+    if (data) {
+        const deltaX = touch.clientX - data.lastX;
+        slider.scrollLeft = slider.scrollLeft - deltaX;
+        
+        // Update velocity
+        data.velocity = deltaX;
+        data.lastX = touch.clientX;
+    }
+}
+
+/**
+ * Handle touch end event with momentum scrolling
+ * @param {TouchEvent} event - Touch event
+ * @param {HTMLElement} slider - Slider container element
+ */
+export function handleTouchEnd(event, slider) {
+    const data = touchData.get(slider);
+    if (data) {
+        const momentum = data.velocity * 8; // Adjust multiplier for momentum strength
+        let currentScroll = slider.scrollLeft;
+        
+        function momentumScroll() {
+            if (Math.abs(momentum) < 0.1) {
+                animationFrameIds.delete(slider);
+                return;
+            }
+            
+            currentScroll -= momentum;
+            slider.scrollLeft = currentScroll;
+            
+            const frameId = requestAnimationFrame(momentumScroll);
+            animationFrameIds.set(slider, frameId);
+        }
+        
+        const frameId = requestAnimationFrame(momentumScroll);
+        animationFrameIds.set(slider, frameId);
+        touchData.delete(slider);
+    }
+}
+
+/**
  * Clean up any ongoing animations for a slider
  * @param {HTMLElement} slider - Slider element to clean up
  */
@@ -107,4 +178,5 @@ export function cleanupSlider(slider) {
         cancelAnimationFrame(frameId);
         animationFrameIds.delete(slider);
     }
+    touchData.delete(slider);
 }

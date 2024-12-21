@@ -1,5 +1,5 @@
 <script>
-    import { handleMouseMove } from '$lib/utils/sliderHelper';
+    import { handleMouseMove, handleTouchStart, handleTouchMove, handleTouchEnd } from '$lib/utils/sliderHelper';
     import { goto } from '$app/navigation';
     import { handleImageLoad, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
 
@@ -14,17 +14,24 @@
 
     /** @type {HTMLElement|null} */
     let slider = null;
-    let scrollState = {
-        scrollTarget: 0,
-        isAnimating: false
-    };
 
     /**
      * @param {MouseEvent} event
      */
     function onHandleMouseMove(event) {
         if (slider) {
-            handleMouseMove(event, slider, scrollState);
+            handleMouseMove(event, slider);
+        }
+    }
+
+    /**
+     * Handle touch events with null checks
+     * @param {TouchEvent} event
+     * @param {(event: TouchEvent, slider: HTMLElement) => void} handler
+     */
+    function handleTouch(event, handler) {
+        if (slider) {
+            handler(event, slider);
         }
     }
 
@@ -43,7 +50,14 @@
 </script>
 
 <section class='artist-slider-section'>
-    <div class="artist-slider-container" bind:this={slider} on:mousemove={onHandleMouseMove}>
+    <div 
+        class="artist-slider-container" 
+        bind:this={slider} 
+        on:mousemove={onHandleMouseMove}
+        on:touchstart={(e) => handleTouch(e, handleTouchStart)}
+        on:touchmove={(e) => handleTouch(e, handleTouchMove)}
+        on:touchend={(e) => handleTouch(e, handleTouchEnd)}
+    >
         <div class="artist-slider gap-lg flex">
             {#each filteredProducts as product}
                 <div class="artist-card" on:click={() => onProductClick(product)}>

@@ -103,27 +103,27 @@
 <div class="page-container">
 	<div class="content-section space-y-md">
 		<section class="space-y-sm">
-			<h1 class="h1">Shopping Cart</h1>
-			<p>
+			<h1 class="text-3xl font-normal mb-6 uppercase">SHOPPING CART</h1>
+			<p class="text-sm">
 				Review your selected digital artworks and NFTs. Adjust quantities or remove items before proceeding to checkout.
 			</p>
 		</section>
 
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
 			<!-- Cart Items Section -->
-			<section class="card md:col-span-2 space-y-md">
-				<h2 class="section-title">Cart Items</h2>
+			<section class="md:col-span-2 space-y-md">
+				<h2 class="text-xl font-normal uppercase mb-6">CART ITEMS</h2>
 				
 				{#if $cart.length === 0}
 					<div class="flex flex-col items-center justify-center p-lg">
 						<p>Your cart is empty.</p>
-						<button class="btn btn-primary mt-md" on:click={() => goto('/shop')}>
-							Continue Shopping
+						<button class="w-full mt-8 bg-black text-white py-2 text-sm uppercase" on:click={() => goto('/shop')}>
+							CONTINUE SHOPPING
 						</button>
 					</div>
 				{:else}
 					{#each $cart as item}
-						<div class="flex justify-between items-start p-md border-b border-secondary">
+						<div class="flex justify-between items-start p-md">
 							<div class="flex gap-md">
 								<img 
 									src={item.images[0]?.src} 
@@ -139,16 +139,16 @@
 										<p>{formatPrice(item.price)}</p>
 									</div>
 									<div class="flex items-center gap-xs">
-										<button class="btn btn-sm" on:click={() => decreaseQuantity(item)}>−</button>
-										<span class="mx-3">{item.quantity}</span>
-										<button class="btn btn-sm" on:click={() => increaseQuantity(item)}>+</button>
+										<button class="px-3 py-1 bg-black text-white text-sm" on:click={() => decreaseQuantity(item)}>−</button>
+										<span class="mx-3 text-sm">{item.quantity}</span>
+										<button class="px-3 py-1 bg-black text-white text-sm" on:click={() => increaseQuantity(item)}>+</button>
 									</div>
 								</div>
 							</div>
 							<div class="flex flex-col items-end justify-between">
 								<span class="text-lg font-semibold">{formatPrice(item.quantity * item.price)}</span>
-								<button class="btn btn-sm btn-outline text-error" on:click={() => removeItem(item.id)}>
-									Remove
+								<button class="px-3 py-1 bg-black text-white text-sm uppercase" on:click={() => removeItem(item.id)}>
+									REMOVE
 								</button>
 							</div>
 						</div>
@@ -157,27 +157,27 @@
 			</section>
 
 			<!-- Cart Summary Section -->
-			<section class="card space-y-md">
-				<h2 class="section-title">Order Summary</h2>
+			<section class="space-y-md">
+				<h2 class="text-xl font-normal uppercase mb-6">ORDER SUMMARY</h2>
 				
 				<div class="space-y-sm">
-					<div class="flex justify-between p-md border-b border-secondary">
-						<span>Subtotal</span>
+					<div class="flex justify-between p-md">
+						<span class="uppercase">SUBTOTAL</span>
 						<span>{formatPrice(total)}</span>
 					</div>
 
 					<div class="flex justify-between p-md">
-						<span class="font-bold">Total</span>
-						<span class="text-lg font-bold">{formatPrice(total)}</span>
+						<span class="uppercase">TOTAL</span>
+						<span class="text-lg">{formatPrice(total)}</span>
 					</div>
 				</div>
 
 				<button 
-					class="btn btn-primary w-full" 
+					class="w-full mt-8 bg-black text-white py-2 text-sm uppercase" 
 					on:click={proceedToCheckout}
 					disabled={$cart.length === 0}
 				>
-					Proceed to Checkout
+					PROCEED TO CHECKOUT
 				</button>
 			</section>
 		</div>

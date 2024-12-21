@@ -1,13 +1,30 @@
 <script>
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { fetchWooCommerceData } from '$lib/api';
 	import { userInfo } from '$lib/stores/userInfoStore';
     import { cart } from '$lib/stores/cartStore';
-    import { get } from 'svelte/store'; // Import get to access store value
+    import { get } from 'svelte/store';
     import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
-	import { goto } from '$app/navigation'; // Add this import
+	import { goto } from '$app/navigation';
+	import { formatPrice, createWooCommerceOrder } from '$lib/utils/checkoutUtils';
+	import { fetchWooCommerceData } from '$lib/api';
 
+	/**
+	 * @typedef {Object} OrderLineItem
+	 * @property {string} name
+	 * @property {number} quantity
+	 * @property {number|string} price
+	 * @property {{src: string}=} image
+	 */
+
+	/**
+	 * @typedef {Object} Order
+	 * @property {string} id
+	 * @property {string} status
+	 * @property {OrderLineItem[]} line_items
+	 */
+
+	/** @type {Order|null} */
 	let orderData = null;
 	let paymentStatusMessage = 'Checking payment status...';
 
@@ -35,82 +52,86 @@
 	};
 	$: metaTags = generateMetaTags(pageSEO);
 
-	function formatPrice(price) {
-		return `€${(price / 1).toFixed(2)}`;
+	/**
+	 * @param {string} orderId
+	 */
+	async function loadOrderDetails(orderId) {
+		console.log('Loading order details:', orderId);
+		try {
+			const response = await fetchWooCommerceData(`orders/${orderId}`);
+			if (!response || !response.id) {
+				throw new Error('Failed to fetch order details');
+			}
+			orderData = response;
+			console.log('Order details loaded:', orderData);
+			paymentStatusMessage = 'Payment was successful!';
+			cart.set([]); // Clear cart after successful order
+		} catch (/** @type {unknown} */ error) {
+			console.error('Error loading order details:', error);
+			paymentStatusMessage = 'An error occurred while loading your order.';
+			if (error instanceof Error) {
+				throw error;
+			}
+			throw new Error('Unknown error occurred');
+		}
 	}
 
-	// Add this function at the top of your script
-	async function createWooCommerceOrder(orderData) {
-		const response = await fetchWooCommerceData('orders', {
-			method: 'POST',
-			body: JSON.stringify({
-				payment_method: 'stripe',
-				payment_method_title: 'Credit Card (Stripe)',
-				set_paid: true,
-				billing: {
-					first_name: orderData.firstName,
-					last_name: orderData.lastName,
-					address_1: orderData.address,
-					city: orderData.city,
-					postcode: orderData.postalCode,
-					country: orderData.country,
-					email: orderData.email,
-					phone: orderData.phone || ''
-				},
-				shipping: {
-					first_name: orderData.firstName,
-					last_name: orderData.lastName,
-					city: orderData.city,
-					postcode: orderData.postalCode,
-					country: orderData.country
-				},
-				line_items: orderData.items.map(item => ({
-					product_id: item.id,
-					quantity: item.quantity
-				}))
-			})
-		});
+	async function handleRedirectPayment() {
+		console.log('Processing redirect payment...');
+		const urlParams = new URLSearchParams(window.location.search);
+		const redirectStatus = urlParams.get('redirect_status');
+		const paymentIntentId = urlParams.get('payment_intent');
+		console.log('Payment status:', redirectStatus);
+		console.log('Payment intent ID:', paymentIntentId);
 
-		if (!response.id) {
-			throw new Error('Failed to create WooCommerce order');
+		if (redirectStatus === 'succeeded' && paymentIntentId) {
+			console.log('Payment successful, retrieving order data...');
+			const pendingOrderData = sessionStorage.getItem('pendingOrderData');
+			
+			if (!pendingOrderData) {
+				console.error('No pending order data found in session storage');
+				throw new Error('No pending order data found');
+			}
+
+			const orderData = JSON.parse(pendingOrderData);
+			console.log('Creating WooCommerce order with data:', orderData);
+			
+			const wooOrder = await createWooCommerceOrder(orderData);
+			console.log('WooCommerce order created:', wooOrder);
+			
+			// Clear session storage
+			sessionStorage.removeItem('pendingOrderData');
+
+			// Redirect to the actual order confirmation page
+			console.log('Redirecting to order confirmation:', wooOrder.id);
+			goto(`/order-confirmation/${wooOrder.id}`);
+		} else {
+			console.error('Payment not successful:', redirectStatus);
+			throw new Error('Payment was not successful');
 		}
-
-		return response;
 	}
 
 	onMount(async () => {
-    const orderId = $page.params.id;
-    console.log('Order ID from params:', orderId);
+		const orderId = $page.params.id;
+		console.log('Order confirmation page loaded with ID:', orderId);
 
-    if (!orderId) {
-        return;
-    }
-
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectStatus = urlParams.get('redirect_status');
-        console.log('Redirect Status:', redirectStatus);
-
-        if (redirectStatus === 'succeeded' || !redirectStatus) {
-            // Fetch the existing order details
-            const response = await fetchWooCommerceData(`orders/${orderId}`);
-            if (response && response.id) {
-                // Clear session storage and cart
-                sessionStorage.removeItem('pendingOrderData');
-                sessionStorage.removeItem('wooOrderId');
-                cart.set([]);
-                paymentStatusMessage = 'Payment was successful!';
-                orderData = response;
-            }
-        } else {
-            paymentStatusMessage = 'Payment was not successful. Please try again.';
-            // Optionally, you could delete the WooCommerce order here if payment failed
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        paymentStatusMessage = 'An error occurred while processing your order. Please try again.';
-    }
-});
+		try {
+			if (orderId === 'create') {
+				await handleRedirectPayment();
+			} else if (orderId) {
+				await loadOrderDetails(orderId);
+			}
+		} catch (/** @type {unknown} */ error) {
+			console.error('Error:', error);
+			paymentStatusMessage = error instanceof Error ? error.message : 'An error occurred while processing your order.';
+			if (orderId === 'create') {
+				setTimeout(() => {
+					console.log('Redirecting back to checkout...');
+					goto('/checkout');
+				}, 3000);
+			}
+		}
+	});
 </script>
 
 <svelte:head>
@@ -124,103 +145,78 @@
 	{/each}
 </svelte:head>
 
-<div class="px-page">
-	{#if orderData}
-		<div class="order-container">
-			<div class="bg-background rounded-lg">
-				<h1 class="text-xlarge font-heading text-primary mb-lg">Thank you for your order!</h1>
-				
-				<!-- Order Details -->
-				<div class="detail-row clean">
-					<span class="detail-label">Order ID</span>
-					<span class="detail-value">{orderData.id}</span>
-				</div>
-				
-				<div class="detail-row clean">
-					<span class="detail-label">Status</span>
-					<span class="detail-value capitalize">{orderData.status}</span>
-				</div>
-				
-				<div class="detail-row clean">
-					<span class="detail-label">Payment Status</span>
-					<span class="detail-value {orderData.status === 'completed' || orderData.status === 'processing' ? 'text-success' : 'text-error'}">
-						{paymentStatusMessage}
-					</span>
-				</div>
-
-				<!-- Order Summary -->
-				<h2 class="text-large font-heading text-primary mt-xl mb-lg">Order Summary</h2>
-				<div class="order-items space-y-md">
-					{#each orderData.line_items as item}
-						<div class="detail-row clean">
-							<div class="flex gap-md">
-								<img
-									src={item.image?.src || '/placeholder.jpg'}
-									alt={item.name}
-									class="w-20 h-20 object-cover"
-								/>
-								<div>
-									<h3 class="text-base font-heading text-primary">{item.name}</h3>
-									<p class="text-sm text-secondary">Quantity: {item.quantity}</p>
-									<p class="text-base">{formatPrice(item.price)}</p>
-								</div>
+<div class="page-container">
+	<div class="content-section">
+		{#if orderData}
+			<div class="container container-lg">
+				<div class="space-y-lg p-xl bg-background">
+					<h1 class="text-3xl font-normal uppercase">Thank you for your order!</h1>
+					
+					<!-- Order Details -->
+					<section class="space-y-md">
+						<h2 class="text-xl font-normal uppercase">Order Details</h2>
+						<div class="grid grid-cols-1 gap-md">
+							<div class="flex justify-between items-center p-md">
+								<span class="text-secondary uppercase">Order ID</span>
+								<span>{orderData.id}</span>
+							</div>
+							
+							<div class="flex justify-between items-center p-md">
+								<span class="text-secondary uppercase">Status</span>
+								<span class="uppercase">{orderData.status}</span>
+							</div>
+							
+							<div class="flex justify-between items-center p-md">
+								<span class="text-secondary uppercase">Payment Status</span>
+								<span class="{orderData.status === 'completed' || orderData.status === 'processing' ? 'text-success' : 'text-error'}">
+									{paymentStatusMessage}
+								</span>
 							</div>
 						</div>
-					{/each}
+					</section>
+
+					<!-- Order Summary -->
+					<section class="space-y-md">
+						<h2 class="text-xl font-normal uppercase">Order Summary</h2>
+						<div class="space-y-md">
+							{#each orderData.line_items as item}
+								<div class="flex justify-between items-start p-md">
+									<div class="flex gap-md">
+										<img
+											src={item.image?.src || '/placeholder.jpg'}
+											alt={item.name}
+											class="h-24 w-24 object-cover"
+										/>
+										<div class="flex flex-col justify-between">
+											<div class="space-y-xs">
+												<h3 class="text-base font-semibold">{item.name}</h3>
+												<p class="text-sm text-secondary">Quantity: {item.quantity}</p>
+												<p class="text-base">{formatPrice(Number(item.price))}</p>
+											</div>
+										</div>
+									</div>
+									<span class="text-lg font-semibold">{formatPrice(item.quantity * Number(item.price))}</span>
+								</div>
+							{/each}
+						</div>
+					</section>
 				</div>
 			</div>
-		</div>
-	{:else if paymentStatusMessage.includes('not successful')}
-		<div class="error-container bg-background rounded-lg">
-			<h1 class="text-xlarge font-heading text-primary mb-lg">Payment Failed</h1>
-			<p class="text-error mb-md">{paymentStatusMessage}</p>
-			<p class="mb-xl">The order could not be created because the payment was not successful.</p>
-			<a href="/checkout" class="btn-primary">
-				Return to Checkout
-			</a>
-		</div>
-	{:else}
-		<div class="flex justify-center items-center min-h-[400px]">
-			<p class="text-secondary">Loading order details...</p>
-		</div>
-	{/if}
+		{:else if paymentStatusMessage.includes('not successful')}
+			<div class="container container-md">
+				<div class="p-xl text-center space-y-md bg-background">
+					<h1 class="text-3xl font-normal uppercase">Payment Failed</h1>
+					<p class="text-error">{paymentStatusMessage}</p>
+					<p>The order could not be created because the payment was not successful.</p>
+					<a href="/checkout" class="btn btn-primary">
+						Return to Checkout
+					</a>
+				</div>
+			</div>
+		{:else}
+			<div class="flex justify-center items-center min-h-[400px]">
+				<p class="text-secondary">Loading order details...</p>
+			</div>
+		{/if}
+	</div>
 </div>
-
-<style>
-	.order-container {
-		max-width: var(--max-width-lg);
-		margin: 0 auto;
-	}
-
-	.detail-row {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		padding: var(--spacing-md) 0;
-		border-bottom: 1px solid var(--border-color);
-	}
-
-	.detail-row.clean {
-		border-bottom: 1px solid var(--secondary-bg-color);
-	}
-
-	.detail-label {
-		color: var(--secondary-color);
-	}
-
-	.text-success {
-		color: var(--success-color);
-	}
-
-	.text-error {
-		color: var(--error-color);
-	}
-
-	.error-container {
-		max-width: var(--max-width-md);
-		margin: 2rem auto;
-		padding: var(--spacing-xl);
-		text-align: center;
-	}
-</style>
-
