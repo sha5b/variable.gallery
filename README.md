@@ -1,112 +1,121 @@
 # Store.shahabned.xyz - Digital Art Gallery & E-commerce Platform
 
-A sophisticated digital art gallery and e-commerce platform built with SvelteKit, featuring virtual exhibitions, 3D art experiences, and integrated e-commerce capabilities. This platform bridges traditional art galleries with digital commerce through immersive virtual experiences.
+A sophisticated digital art gallery and e-commerce platform built with SvelteKit, featuring seamless integration with WooCommerce and Stripe for a robust shopping experience.
 
 ## Core Features
 
-### 🎨 Artist & Exhibition Platform
+### 🎨 Gallery & Exhibition Features
+- **Interactive Image Gallery**
+  - Touch-friendly navigation
+  - Zoom functionality on hover
+  - Modal view for detailed inspection
+  - Lazy loading with fallback images
+  - Mobile-responsive design
 - **Artist Showcases**
-  - Dynamic artist portfolio pages (`/artist/[title]`)
-  - Exhibition history and biography
-  - Contact integration via modal forms
-  - Image galleries with high-resolution support
-- **Virtual Exhibitions**
-  - Interactive 3D Fauna exhibition
-  - Custom terrain generation system
-  - Dynamic lighting and atmospheric effects
-  - Optimized Three.js integration
-  - Mobile-responsive 3D rendering
-
-### 🛍️ E-commerce Features
-- **Shop System**
-  - Product catalog with filtering
+  - Dynamic artist portfolio pages
+  - Latest exhibition highlights
   - Category-based navigation
-  - Featured products slider
-  - Detailed product pages
-  - High-resolution image galleries
+  - Featured artist sliders
+
+### 🛍️ E-commerce Integration
+- **WooCommerce Integration**
+  - Automated order processing
+  - Order status management
+  - Product variation support
+  - Inventory tracking
 - **Shopping Cart**
+  - Persistent local storage
+  - Real-time price updates
   - Sliding cart interface
-  - Persistent storage
-  - Real-time updates
-  - Product variations support
-  - Quantity management
+  - Product quantity management
+- **Secure Checkout**
+  - Stripe payment integration
+  - Form validation
+  - Order confirmation system
+  - Shipping calculation
 
 ### 🔧 Technical Features
-- **Performance Optimizations**
-  - Lazy-loaded components
-  - Optimized image loading
-  - Dynamic imports
-  - Mobile-first responsive design
-- **SEO & Accessibility**
+- **SEO Optimization**
+  - Schema.org implementation
   - Dynamic meta tags
   - OpenGraph integration
+  - Canonical URL management
   - Automated sitemap generation
-  - Structured data implementation
-- **User Experience**
-  - Loading indicators
-  - Smooth transitions
-  - Responsive layouts
-  - Interactive sliders
+- **Performance**
+  - Image lazy loading
+  - Touch event optimization
+  - Persistent state management
+  - Mobile-first responsive design
 
 ## Tech Stack
 
 ### Frontend
-- **Framework**: SvelteKit 2.0
+- **Framework**: SvelteKit
 - **Styling**: 
-  - Tailwind CSS with custom plugins
+  - Tailwind CSS with plugins:
+    - @tailwindcss/aspect-ratio
+    - @tailwindcss/container-queries
+    - @tailwindcss/forms
+    - @tailwindcss/typography
   - Custom component styles
-  - Responsive design system
-- **3D Graphics**: 
-  - Three.js
-  - Custom terrain generation
-  - Optimized 3D rendering
 - **UI Components**:
   - Custom Svelte components
   - Svelte-Heros icons
   - Modal system
-  - Slider components
+  - Interactive sliders
 
-### Backend & Integration
-- **Payment Processing**: Stripe
-- **State Management**: Svelte stores
+### Backend Integration
+- **E-commerce**: 
+  - WooCommerce REST API with caching
+  - Stripe Payment Processing
+  - CreativeHub API integration
+- **Data Management**: 
+  - Tiered caching system:
+    - Products: 5 minutes
+    - Variations: 5 minutes
+    - Artists: 30 minutes
+    - Exhibitions: 1 hour
+    - Media: 24 hours
+  - Optimized preview fetching
+  - Error handling with retries
+- **State Management**: 
+  - Svelte stores
+  - Local storage persistence
 - **Build Tools**: 
   - Vite
   - PostCSS
-  - TypeScript
   - ESLint & Prettier
 
 ## Project Structure
 
 ```
 src/
-├── lib/                      # Library code
+├── lib/
 │   ├── components/           # Reusable components
-│   │   ├── base/            # Base components
+│   │   ├── base/            # Base UI components
+│   │   ├── forms/           # Form components
 │   │   ├── modal/           # Modal system
 │   │   ├── navigation/      # Navigation components
 │   │   └── slider/          # Slider components
-│   ├── exhbitions/          # Exhibition features
-│   │   └── fauna/           # Fauna 3D exhibition
-│   │       ├── 3d/          # Three.js components
-│   │       └── utils/       # Exhibition utilities
 │   ├── stores/              # State management
-│   ├── styles/              # CSS styles
-│   │   ├── components/      # Component styles
-│   │   └── pages/          # Page-specific styles
-│   └── utils/               # Utility functions
+│   │   ├── cartStore.js     # Shopping cart logic
+│   │   └── userInfoStore.js # User information
+│   ├── utils/               # Utility functions
+│   │   ├── checkoutUtils.js # Checkout logic
+│   │   ├── mediaUtils.js    # Media handling
+│   │   ├── seoUnified.js    # SEO management
+│   │   └── sliderHelper.js  # Slider interactions
+│   └── styles/              # CSS styles
 └── routes/                  # SvelteKit routes
-    ├── artist/              # Artist pages
-    ├── exhibitions/         # Exhibition pages
-    ├── shop/                # Shop pages
-    └── checkout/            # Checkout process
 ```
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js 20 or higher
-- npm (Node Package Manager)
-- Stripe account for payments
+- npm
+- Stripe account
+- WooCommerce installation with REST API access
 
 ### Installation
 
@@ -121,11 +130,21 @@ cd store.shahabned.xyz
 npm install
 ```
 
-3. Set up environment variables:
-Create a `.env` file:
+3. Configure environment variables:
 ```env
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+# WordPress/WooCommerce
+VITE_WP_API_URL=your_wordpress_url
+VITE_WOOCOMMERCE_CONSUMER_KEY=your_consumer_key
+VITE_WOOCOMMERCE_CONSUMER_SECRET=your_consumer_secret
+
+# Payment Processing
+VITE_STRIPE_SECRET_KEY=your_stripe_secret_key
+VITE_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+
+# CreativeHub Integration
+VITE_CREATIVEHUB_API_KEY=your_creativehub_api_key
+
+# Site Configuration
 PUBLIC_URL=your_public_url
 ```
 
@@ -135,84 +154,131 @@ Start the development server:
 ```bash
 npm run dev
 ```
-Access the site at `http://localhost:5173`
 
 ### Available Scripts
-- `npm run dev` - Development server with hot reloading
-- `npm run build` - Production build
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
 - `npm run preview` - Preview production build
-- `npm run check` - TypeScript checks
-- `npm run lint` - Code linting
-- `npm run format` - Code formatting
+- `npm run lint` - Lint code
+- `npm run format` - Format code
 
-## Key Components
+## Key Features Implementation
 
-### Virtual Exhibition System
-The Fauna exhibition (`/lib/exhibitions/fauna/`) features:
-- Interactive 3D environment
-- Custom terrain generation
-- Dynamic lighting
-- Atmospheric effects
-- Performance-optimized rendering
-- Mobile responsiveness
+### Media Management System
+The media system features multiple components working together:
+
+**Image Gallery** (`ImageGallery.svelte`):
+- Touch event handling for mobile
+- Zoom functionality on hover
+- Modal view for detailed inspection
+- Lazy loading with fallback images
+- Responsive grid layout
+
+**Slider System** (`sliderHelper.js`):
+- Smooth scrolling animation
+- Mouse-based navigation
+- Touch event handling
+- Performance-optimized animation frames
+- Automatic cleanup
+
+**Media Utilities** (`mediaUtils.js`):
+- Smart image loading with fallbacks
+- URL generation for products/artists/exhibitions
+- Media fingerprint handling
+- SEO-friendly slug generation
+- Consistent URL structure
 
 ### Cart System
-Implemented in `/lib/stores/cartStore.js`:
-- Persistent localStorage storage
-- Real-time updates
-- Product variation handling
+Implemented in `cartStore.js`:
+- Persistent local storage
+- Real-time price updates
+- Product variation support
 - Quantity management
 - Sliding cart interface
 
-### Product Management
-Features include:
-- Advanced filtering
-- Category organization
-- Image galleries
-- Variation support
-- Price management
-- Inventory tracking
+### Checkout Process
+Managed by `checkoutUtils.js`:
+- Form validation
+- WooCommerce order creation
+- Stripe payment processing
+- Order confirmation handling
+- Shipping calculation
 
-## Deployment
+### SEO Implementation
+Unified SEO system (`seoUnified.js`):
+- Dynamic meta tag generation
+- Schema.org data structure
+- OpenGraph integration
+- Canonical URL management
+- Page-specific optimization
 
-1. Build the application:
-```bash
-npm run build
+### Product Filtering System
+Implemented in `ProductFilter.svelte`:
+- Multi-criteria filtering:
+  - Categories
+  - Tags
+  - Artists
+  - Price ranges
+- Advanced sorting options:
+  - Newest first
+  - Price: Low to High
+  - Price: High to Low
+- Pagination features:
+  - Configurable items per page (12/24/48/96)
+  - Dynamic page navigation
+- Real-time filtering:
+  - Instant updates
+  - Active filter indicators
+  - Price range sliders
+- Responsive grid layout
+- Animated transitions
+
+## Deployment & Performance
+
+### Nixpack Deployment
+The application uses Nixpack for standardized deployment:
+```toml
+[phases.install]
+cmd = "npm install"
+
+[phases.build]
+cmd = "npm run build"
+
+[phases.start]
+cmd = "vite preview"
 ```
 
-2. Preview the build:
-```bash
-npm run preview
-```
+### API Performance
+The API layer implements a sophisticated caching strategy:
+- **Tiered Caching**:
+  - Products and variations: 5-minute cache
+  - Artists: 30-minute cache
+  - Exhibitions: 1-hour cache
+  - Media: 24-hour cache
+- **Error Handling**:
+  - Automatic retries
+  - Fallback responses
+  - Detailed error logging
+- **Performance Optimizations**:
+  - Batch requests
+  - Preview data fetching
+  - Response compression
 
 ### Deployment Checklist
 - Configure environment variables
 - Set up SSL certificates
-- Configure Stripe webhooks
-- Set up monitoring
-- Configure CDN (recommended)
-- Set up backup systems
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-### Development Guidelines
-- Follow TypeScript standards
-- Use component-based architecture
-- Implement responsive design
-- Follow SEO best practices
-- Write clear documentation
-
-## Support
-
-For support:
-- Email: support@shahabned.xyz
-- GitHub Issues: [Create an issue](https://github.com/yourusername/store.shahabned.xyz/issues)
+- Configure webhooks:
+  - WooCommerce order webhooks
+  - Stripe payment webhooks
+  - CreativeHub integration webhooks
+- Set up monitoring:
+  - Server health checks
+  - API performance metrics
+  - Error tracking
+- Configure CDN:
+  - Static asset caching
+  - Image optimization
+  - Geographic distribution
 
 ## License
 
