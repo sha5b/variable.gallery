@@ -1,25 +1,28 @@
 /* Slider Styles */
 
-/* Artist Slider */
-.artist-slider-container {
-    width: 100%;
-    overflow: hidden;
-}
-
-/* Featured Slider */
+/* Base slider styles */
+.artist-slider-container,
+.category-slider-container,
 .featured-slider-container {
     width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.featured-slider {
+.featured-slider,
+.artist-slider,
+.category-slider {
     display: flex;
     gap: var(--spacing-md);
+    padding: 0 var(--spacing-md);
 }
 
-.featured-card {
+.featured-card,
+.artist-card,
+.category-card {
     position: relative;
     overflow: hidden;
+    cursor: pointer;
     transition: flex var(--transition-base) var(--transition-timing);
 }
 
@@ -32,33 +35,28 @@
     z-index: 10;
 }
 
-.artist-slider-header {
+.artist-slider-header,
+.category-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-lg);
+    padding: var(--spacing-md);
 }
 
-.artist-slider-title {
+.artist-slider-title,
+.category-title {
     color: var(--primary-color);
     padding: var(--spacing-sm) 0;
-}
-
-.artist-slider {
-    display: flex;
-    gap: var(--spacing-md);
 }
 
 .artist-card {
     flex: 0 0 300px;
     height: 300px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: flex var(--transition-base) var(--transition-timing);
 }
 
-.artist-card:hover {
-    flex: 0 0 600px;
+.category-card {
+    flex: 0 0 250px;
+    height: 600px;
 }
 
 .product-image {
@@ -77,82 +75,12 @@
     z-index: 10;
 }
 
-/* Category Slider */
-.category-slider-container {
-    width: 100%;
-    overflow: hidden;
-    padding-left: var(--spacing-md);
-    padding-bottom: var(--spacing-lg);
-}
-
-.category-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-lg);
-}
-
-.category-title {
-    color: var(--primary-color);
-    padding: var(--spacing-sm) 0;
-}
-
-.category-slider {
-    display: flex;
-    gap: var(--spacing-md);
-}
-
-.category-card {
-    flex: 0 0 250px;
-    height: 600px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: flex var(--transition-base) var(--transition-timing);
-}
-
-.category-card:hover {
-    flex: 0 0 500px;
-}
-
-/* Tablet Styles */
-@media (max-width: 1024px) {
-    .artist-card,
-    .category-card,
-    .featured-card {
-        flex: 0 0 45%;
-        height: 400px;
-    }
-}
-
 /* Mobile Styles */
 @media (max-width: 767px) {
-    .artist-slider-container,
-    .category-slider-container,
-    .featured-slider-container {
-        overflow-x: auto;
-        scroll-snap-type: x proximity;
-        -webkit-overflow-scrolling: touch;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: pan-x;
-        user-select: none;
-        padding: 0 var(--spacing-sm);
-        margin: 0 -var(--spacing-sm);
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-    .artist-slider-container::-webkit-scrollbar,
-    .category-slider-container::-webkit-scrollbar,
-    .featured-slider-container::-webkit-scrollbar {
-        display: none;
-    }
-
+    .featured-slider,
     .artist-slider,
-    .category-slider,
-    .featured-slider {
-        gap: var(--spacing-sm);
-        padding: var(--spacing-sm) 0;
-        margin-bottom: var(--spacing-sm);
+    .category-slider {
+        padding: 0 var(--spacing-sm);
     }
 
     .artist-card,
@@ -160,17 +88,16 @@
     .featured-card {
         flex: 0 0 85%;
         height: 350px;
-        scroll-snap-align: center;
-        scroll-snap-stop: always;
+        margin-right: var(--spacing-sm);
     }
 
+    .artist-slider-header,
     .category-header {
         padding: var(--spacing-sm);
     }
 
     .category-title {
         font-size: 2rem;
-        padding: var(--spacing-xs) 0;
     }
 
     .product-tag-container {
@@ -197,11 +124,17 @@
     .featured-card {
         flex: 0 0 300px;
         height: 50vh;
-        cursor: pointer;
-        transition: flex var(--transition-base) var(--transition-timing);
     }
 
     .featured-card:hover {
         flex: 0 0 600px;
+    }
+
+    .artist-card:hover {
+        flex: 0 0 600px;
+    }
+
+    .category-card:hover {
+        flex: 0 0 500px;
     }
 }

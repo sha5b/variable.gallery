@@ -1,16 +1,10 @@
 import { getProductUrl } from './mediaUtils.js';
 
 /**
- * Store animation frame IDs and touch data for each slider
+ * Store animation frame IDs for each slider
  * @type {Map<HTMLElement, number>}
  */
 const animationFrameIds = new Map();
-
-/**
- * Store touch data for sliders
- * @type {Map<HTMLElement, { startX: number, startScroll: number, lastX: number, velocity: number }>}
- */
-const touchData = new Map();
 
 /**
  * Handle mouse movement for slider scrolling
@@ -88,34 +82,12 @@ export function handleProductClick(productId, navigationFunction) {
 }
 
 /**
- * Preload images with fallback for error handling (SSR compatible)
- * @param {string} src - Primary image source
- * @param {string} fallbackSrc - Fallback image source
- * @returns {string} The resolved image source
- */
-export function preloadImage(src, fallbackSrc) {
-    if (typeof window !== 'undefined') {
-        const img = new Image();
-        img.src = src;
-        img.onerror = () => (img.src = fallbackSrc);
-        return img.src;
-    }
-    return fallbackSrc;
-}
-
-/**
  * Handle touch start event
  * @param {TouchEvent} event - Touch event
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchStart(event, slider) {
-    const touch = event.touches[0];
-    touchData.set(slider, {
-        startX: touch.clientX,
-        startScroll: slider.scrollLeft,
-        lastX: touch.clientX,
-        velocity: 0
-    });
+    // Let native scrolling handle touch events
 }
 
 /**
@@ -124,48 +96,16 @@ export function handleTouchStart(event, slider) {
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchMove(event, slider) {
-    event.preventDefault();
-    const touch = event.touches[0];
-    const data = touchData.get(slider);
-    
-    if (data) {
-        const deltaX = touch.clientX - data.lastX;
-        slider.scrollLeft = slider.scrollLeft - deltaX;
-        
-        // Update velocity
-        data.velocity = deltaX;
-        data.lastX = touch.clientX;
-    }
+    // Let native scrolling handle touch events
 }
 
 /**
- * Handle touch end event with momentum scrolling
+ * Handle touch end event
  * @param {TouchEvent} event - Touch event
  * @param {HTMLElement} slider - Slider container element
  */
 export function handleTouchEnd(event, slider) {
-    const data = touchData.get(slider);
-    if (data) {
-        const momentum = data.velocity * 8; // Adjust multiplier for momentum strength
-        let currentScroll = slider.scrollLeft;
-        
-        function momentumScroll() {
-            if (Math.abs(momentum) < 0.1) {
-                animationFrameIds.delete(slider);
-                return;
-            }
-            
-            currentScroll -= momentum;
-            slider.scrollLeft = currentScroll;
-            
-            const frameId = requestAnimationFrame(momentumScroll);
-            animationFrameIds.set(slider, frameId);
-        }
-        
-        const frameId = requestAnimationFrame(momentumScroll);
-        animationFrameIds.set(slider, frameId);
-        touchData.delete(slider);
-    }
+    // Let native scrolling handle touch events
 }
 
 /**
@@ -178,5 +118,4 @@ export function cleanupSlider(slider) {
         cancelAnimationFrame(frameId);
         animationFrameIds.delete(slider);
     }
-    touchData.delete(slider);
 }

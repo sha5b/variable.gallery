@@ -1,6 +1,7 @@
 <script>
 	import Modal from '$lib/components/modal/Modal.svelte';
 	import { handleImageLoad } from '$lib/utils/mediaUtils';
+	import { handleTouchStart, handleTouchMove, handleTouchEnd } from '$lib/utils/sliderHelper';
 	import '$lib/styles/components/gallery.css';
 
 	/** @type {string[]} */
@@ -16,6 +17,8 @@
 	let hoveredImageIndex = null;
 	/** @type {string[]} */
 	let loadedImages = [];
+	/** @type {HTMLElement|null} */
+	let galleryContainer = null;
 
 	// Load and validate all images
 	$: {
@@ -77,7 +80,13 @@
 <!-- Modal for larger view of the images -->
 <Modal images={images} bind:open={modalOpen} bind:currentIndex={currentImageIndex} />
 
-<div class="image-gallery">
+<div 
+	class="image-gallery"
+	bind:this={galleryContainer}
+	on:touchstart={(e) => galleryContainer && handleTouchStart(e, galleryContainer)}
+	on:touchmove={(e) => galleryContainer && handleTouchMove(e, galleryContainer)}
+	on:touchend={(e) => galleryContainer && handleTouchEnd(e, galleryContainer)}
+>
 	{#each loadedImages as image, index}
 		<div
 			class="gallery-card group"
