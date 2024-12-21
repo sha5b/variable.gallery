@@ -1,5 +1,5 @@
 <script>
-	import { organizeProductsByCategory, getRandomTypeAndThumbnail } from '$lib/utils/productUtils';
+	import { organizeProductsByCategory } from '$lib/utils/productUtils';
 	import FeaturedSlider from '$lib/components/slider/FeaturedSlider.svelte';
 	import ContactForm from '$lib/components/ContactForm.svelte';
 	import ProductFilter from '$lib/components/ProductFilter.svelte';
@@ -10,9 +10,6 @@
 	/** @type {import('$lib/utils/types').PageData} */
 	export let data;
 	const { products = [], artists = [], exhibitions = [], media = [] } = data;
-
-	// Get random type and thumbnail using utility function
-	const { randomType, thumbnail } = getRandomTypeAndThumbnail(products);
 
 	// Organize products by category using utility function
 	const productsByCategory = organizeProductsByCategory(products);

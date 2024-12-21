@@ -20,22 +20,3 @@ export function organizeProductsByCategory(products) {
 
     return productsByCategory;
 }
-
-/**
- * Gets a random product type and its latest product thumbnail
- * @param {import('./types').Product[]} products
- * @returns {{ randomType: string, thumbnail: string }}
- */
-export function getRandomTypeAndThumbnail(products) {
-    let randomType = '';
-    let thumbnail = '';
-
-    const uniqueTypes = [...new Set(products.map((product) => product.type || ''))];
-    if (uniqueTypes.length > 0) {
-        randomType = uniqueTypes[Math.floor(Math.random() * uniqueTypes.length)];
-        const latestProductWithType = products.find((product) => product.type === randomType);
-        thumbnail = latestProductWithType?.images[0]?.src || '';
-    }
-
-    return { randomType, thumbnail };
-}

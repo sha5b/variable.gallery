@@ -28,16 +28,16 @@
  */
 
 /**
+ * @typedef {Object} Tag
+ * @property {string} name
+ * @property {string} [slug]
+ */
+
+/**
  * @typedef {Object} Category
  * @property {string} name
  * @property {string} [slug]
  * @property {string} [description]
- */
-
-/**
- * @typedef {Object} Tag
- * @property {string} name
- * @property {string} [slug]
  */
 
 /**
@@ -52,6 +52,7 @@
  * @property {number} id
  * @property {string} name
  * @property {string} type
+ * @property {string} price
  * @property {string} [short_description]
  * @property {string} [description]
  * @property {string} [regular_price]

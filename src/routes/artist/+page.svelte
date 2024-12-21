@@ -3,8 +3,7 @@
     import LatestArtistExhibition from '$lib/components/LatestArtistExhibition.svelte';
     import PageSEO from '$lib/components/base/PageSEO.svelte';
     import { page } from '$app/stores';
-    import { getLatestVirtualExhibitionForArtist } from '$lib/utils/exhibitionUtils';
-
+    
     /** @type {import('$lib/utils/types').PageData} */
     export let data;
     const { artists = [], products = [], exhibitions = [], media = [] } = data;

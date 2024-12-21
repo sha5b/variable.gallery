@@ -2,42 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { getProductUrl, getProductImageUrl, handleImageLoad } from '$lib/utils/mediaUtils';
 	import '$lib/styles/components/filter.css';
 
-	/**
-	 * @typedef {Object} Tag
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Category
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Attribute
-	 * @property {string} name
-	 * @property {string[]} options
-	 */
-
-	/**
-	 * @typedef {Object} Image
-	 * @property {string} src
-	 */
-
-	/**
-	 * @typedef {Object} Product
-	 * @property {number} id
-	 * @property {string} name
-	 * @property {string} price
-	 * @property {string} date_created
-	 * @property {Tag[]} tags
-	 * @property {Category[]} categories
-	 * @property {Attribute[]} attributes
-	 * @property {Image[]} images
-	 */
-
-	/** @type {Product[]} */
+	/** @type {import('$lib/utils/types').Product[]} */
 	export let products = [];
 	/** @type {string|null} */
 	let selectedTag = null;
@@ -147,6 +115,13 @@
 		if (page >= 1 && page <= totalPages) {
 			currentPage = page;
 		}
+	}
+
+	/**
+	 * @param {import('$lib/utils/types').Product} product
+	 */
+	function navigateToProduct(product) {
+		goto(getProductUrl(product.id));
 	}
 </script>
 
@@ -293,14 +268,16 @@
 							in:fly={{ y: 20, duration: 400, delay: 200, easing: quintOut }}
 							out:fade={{ duration: 200 }}
 							class="product-card"
-							on:click={() => goto(`/shop/${product.id}`)}
+							on:click={() => navigateToProduct(product)}
 						>
 							<div class="product-image-container">
-								<img 
-									src={product.images[0]?.src} 
-									alt={product.name} 
-									class="product-image"
-								/>
+								{#await handleImageLoad(getProductImageUrl(product)) then imageSrc}
+									<img 
+										src={imageSrc}
+										alt={product.name} 
+										class="product-image"
+									/>
+								{/await}
 								<div class="product-overlay">
 										<div class="tag-container">
 											{#each product.tags as tag}
