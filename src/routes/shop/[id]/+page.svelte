@@ -1,75 +1,5 @@
 <script>
-	/**
-	 * @typedef {Object} Image
-	 * @property {string} src
-	 */
-
-	/**
-	 * @typedef {Object} Category
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Tag
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Attribute
-	 * @property {string} name
-	 * @property {string[]} options
-	 */
-
-	/**
-	 * @typedef {Object} Product
-	 * @property {number} id
-	 * @property {string} name
-	 * @property {string} type
-	 * @property {string} [short_description]
-	 * @property {string} [description]
-	 * @property {string} [regular_price]
-	 * @property {string} [sale_price]
-	 * @property {number} [stock_quantity]
-	 * @property {string} [stock_status]
-	 * @property {string} [weight]
-	 * @property {{length: string, width: string, height: string}} [dimensions]
-	 * @property {Image[]} images
-	 * @property {Category[]} categories
-	 * @property {Tag[]} tags
-	 * @property {Attribute[]} attributes
-	 */
-
-	/**
-	 * @typedef {Object} Variation
-	 * @property {number} id
-	 * @property {string} name
-	 * @property {string} regular_price
-	 * @property {number} stock_quantity
-	 * @property {string} stock_status
-	 */
-
-	/**
-	 * @typedef {Object} Artist
-	 * @property {{rendered: string}} title
-	 * @property {string} slug
-	 * @property {{location?: string, description?: string}} [acf]
-	 */
-
-	/**
-	 * @typedef {Object} PageData
-	 * @property {Product} product
-	 * @property {Variation|null} variation
-	 * @property {Product[]} products
-	 * @property {Artist[]} artists
-	 */
-
-	/**
-	 * @typedef {Object} MetaTag
-	 * @property {string} [name]
-	 * @property {string} [property]
-	 * @property {string} content
-	 */
-	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+	import PageSEO from '$lib/components/base/PageSEO.svelte';
 	import { slide } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -79,32 +9,24 @@
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { onMount } from 'svelte';
 
-	/** @type {PageData} */
+	/** @typedef {import('$lib/utils/types').Artist} Artist */
+	/** @type {import('$lib/utils/types').PageData} */
 	export let data;
-	const { product, variation, products, artists } = data;
+	const { product, variation, products, artists = [] } = data;
 
-	// Create product-specific SEO
-	const pageSEO = {
-		...defaultSEO,
+	// Create product-specific SEO customization with simplified structure
+	$: customSEO = product ? {
 		title: `${product.name} | variable.gallery`,
 		description: product.short_description || product.description || 'Explore this unique digital artwork.',
 		keywords: [
-			...defaultSEO.keywords,
 			product.name,
-			product.categories.map(c => c.name).join(', '),
-			product.tags.map(t => t.name).join(', ')
+			...(product.categories?.map(c => c.name) || []),
+			...(product.tags?.map(t => t.name) || [])
 		],
 		openGraph: {
-			...defaultSEO.openGraph,
-			title: `${product.name} | variable.gallery`,
-			description: product.short_description || product.description || 'Explore this unique digital artwork.',
-			url: `https://variable.gallery/shop/${product.id}`,
-			image: product.images?.[0]?.src || defaultSEO.openGraph.image
+			image: product.images?.[0]?.src
 		}
-	};
-
-	/** @type {Array<{name?: string, property?: string, content: string}>} */
-	$: metaTags = generateMetaTags(pageSEO);
+	} : {};
 
 	let bioOpen = false;
 	let primaryCategory = '';
@@ -123,7 +45,7 @@
 			(attr) => attr.name.toLowerCase() === 'artist'
 		)?.options[0];
 		
-		artistInfo = artists.find(
+		artistInfo = artists?.find(
 			(artist) => artist.title.rendered.toLowerCase() === artistAttr?.toLowerCase()
 		) || null;
 		artistName = artistInfo ? artistInfo.title.rendered : '';
@@ -148,37 +70,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{pageSEO.title}</title>
-	{#each metaTags as tag}
-		{#if tag.name}
-			<meta name={tag.name} content={tag.content}>
-		{:else if tag.property}
-			<meta property={tag.property} content={tag.content}>
-		{/if}
-	{/each}
-	<!-- Add structured data for the product -->
-	<script type="application/ld+json">
-		{
-			"@context": "https://schema.org",
-			"@type": "Product",
-			"name": "{product.name}",
-			"description": "{pageSEO.description}",
-			"image": "{pageSEO.openGraph.image}",
-			"brand": {
-				"@type": "Brand",
-				"name": "variable.gallery"
-			},
-			"offers": {
-				"@type": "Offer",
-				"url": "https://variable.gallery/shop/{product.id}",
-				"priceCurrency": "EUR",
-				"price": "{variation?.regular_price || product.regular_price}",
-				"availability": "{variation?.stock_status || product.stock_status}"
-			}
-		}
-	</script>
-</svelte:head>
+<PageSEO pageType="PRODUCT" {data} {customSEO} />
 
 <div class='px-page'>
 {#if product}

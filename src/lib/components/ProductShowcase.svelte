@@ -1,58 +1,7 @@
 <script>
-	/**
-	 * @typedef {Object} Image
-	 * @property {string} src
-	 */
-
-	/**
-	 * @typedef {Object} Category
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Tag
-	 * @property {string} name
-	 */
-
-	/**
-	 * @typedef {Object} Attribute
-	 * @property {string} name
-	 * @property {string[]} options
-	 */
-
-	/**
-	 * @typedef {Object} Product
-	 * @property {number} id
-	 * @property {string} name
-	 * @property {string} type
-	 * @property {string} [short_description]
-	 * @property {string} [description]
-	 * @property {string} [regular_price]
-	 * @property {number} [stock_quantity]
-	 * @property {string} [stock_status]
-	 * @property {string} [weight]
-	 * @property {{length: string, width: string, height: string}} [dimensions]
-	 * @property {Image[]} images
-	 * @property {Category[]} categories
-	 * @property {Tag[]} tags
-	 * @property {Attribute[]} attributes
-	 */
-
-	/**
-	 * @typedef {Object} Variation
-	 * @property {number} id
-	 * @property {string} name
-	 * @property {string} regular_price
-	 * @property {number} stock_quantity
-	 * @property {string} stock_status
-	 */
-
-	/**
-	 * @typedef {Object} Artist
-	 * @property {{rendered: string}} title
-	 * @property {string} slug
-	 * @property {{location?: string, description?: string}} [acf]
-	 */
+	/** @typedef {import('$lib/utils/types').Product} Product */
+	/** @typedef {import('$lib/utils/types').Artist} Artist */
+	/** @typedef {import('$lib/utils/types').Variation} Variation */
 	import ImageGallery from '$lib/components/ImageGallery.svelte';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import CategorySlider from '$lib/components/slider/CategorySlider.svelte';
@@ -99,7 +48,7 @@
 		if (product) {
 			const cartItem = {
 				...product,
-				price: variation?.regular_price || product.regular_price,
+				regular_price: variation?.regular_price || product.regular_price,
 				variation: variation ? {
 					id: variation.id,
 					name: variation.name,

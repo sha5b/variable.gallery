@@ -3,56 +3,19 @@
 	import { slide } from 'svelte/transition';
 	import ArtistSlider from '$lib/components/slider/ArtistSlider.svelte';
 	import { goto } from '$app/navigation';
-	import { defaultSEO, generateMetaTags } from '$lib/utils/seo';
+	import PageSEO from '$lib/components/base/PageSEO.svelte';
 
-	/** @typedef {{
-	*   id: number,
-	*   title: { rendered: string },
-	*   acf?: {
-	*     location?: string,
-	*     yearsActive?: string,
-	*     specialties?: string,
-	*     description?: string,
-	*     profileImage?: string,
-	*     socialMedia?: Array<{ platform: string, url: string }>
-	*   }
-	* }} Artist */
-
-	/** @typedef {{
-	*   attributes: Array<{
-	*     name: string,
-	*     options: string[]
-	*   }>
-	* }} Product */
-
-	/** @typedef {{
-	*   title: { rendered: string },
-	*   acf?: {
-	*     date?: string,
-	*     location?: string,
-	*     virtual?: boolean,
-	*     link?: { url: string },
-	*     artist?: number[]
-	*   }
-	* }} Exhibition */
-
-	/** @typedef {{
-	*   name?: string,
-	*   property?: string,
-	*   content: string
-	* }} MetaTag */
-
-	/** @type {{ products: Product[], artists: Artist[], exhibitions: Exhibition[] }} */
+	/** @type {import('$lib/utils/types').PageData} */
 	export let data;
 
-	let { products, artists, exhibitions } = data;
+	let { products = [], artists = [], exhibitions = [] } = data;
 	let bioOpen = false;
 
-	/** @type {Artist|null} */
+	/** @type {import('$lib/utils/types').Artist|null} */
 	let filteredArtist = null;
-	/** @type {Product[]} */
+	/** @type {import('$lib/utils/types').Product[]} */
 	let artistProducts = [];
-	/** @type {Exhibition[]} */
+	/** @type {import('$lib/utils/types').Exhibition[]} */
 	let artistExhibitions = [];
 
 	let currentPage = 1;
@@ -77,10 +40,10 @@
 			artistExhibitions = exhibitions
 				.filter((exhibition) => {
 					const artistIds = exhibition.acf?.artist || [];
-					return artistIds.includes(foundArtist.id);
+					return artistIds.includes(String(foundArtist.id));
 				})
 				.sort((a, b) => {
-					/** @param {Exhibition} exhibition */
+					/** @param {import('$lib/utils/types').Exhibition} exhibition */
 					const getDate = (exhibition) => {
 						const dateStr = exhibition.acf?.date;
 						return dateStr ? new Date(dateStr.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')) : new Date(0);
@@ -93,12 +56,9 @@
 		}
 	}
 
+
 	/**
-	 * @param {string} dateString
-	 * @returns {string}
-	 */
-	/** 
-	 * @param {string|undefined} dateString 
+	 * @param {string|undefined} dateString
 	 * @returns {string}
 	 */
 	function formatDate(dateString) {
@@ -127,7 +87,7 @@
 	}
 
 	/**
-	 * @param {Exhibition} exhibition
+	 * @param {import('$lib/utils/types').Exhibition} exhibition
 	 */
 	function handleExhibitionClick(exhibition) {
 		if (exhibition.acf?.link?.url) {
@@ -135,13 +95,11 @@
 		}
 	}
 
-	// Create artist-specific SEO
-	$: pageSEO = filteredArtist ? {
-		...defaultSEO,
+	// Create artist-specific SEO customization with simplified structure
+	$: customSEO = filteredArtist ? {
 		title: `${filteredArtist.title.rendered} | variable.gallery`,
 		description: filteredArtist.acf?.description || `Explore the digital artworks and exhibitions of ${filteredArtist.title.rendered} at variable.gallery.`,
 		keywords: [
-			...defaultSEO.keywords,
 			filteredArtist.title.rendered,
 			'digital artist',
 			'NFT artist',
@@ -150,27 +108,12 @@
 			filteredArtist.acf?.location || ''
 		].filter(Boolean),
 		openGraph: {
-			...defaultSEO.openGraph,
-			title: `${filteredArtist.title.rendered} | variable.gallery`,
-			description: filteredArtist.acf?.description || `Explore the digital artworks and exhibitions of ${filteredArtist.title.rendered} at variable.gallery.`,
-			url: `https://variable.gallery/artist/${$page.params.title}`,
-			image: filteredArtist.acf?.profileImage || defaultSEO.openGraph.image
+			image: filteredArtist.acf?.profileImage
 		}
-	} : defaultSEO;
-
-	$: metaTags = generateMetaTags(pageSEO);
+	} : {};
 </script>
 
-<svelte:head>
-	<title>{pageSEO.title}</title>
-	{#each metaTags as tag}
-		{#if tag.name}
-			<meta name={tag.name} content={tag.content}>
-		{:else if tag.property}
-			<meta property={tag.property} content={tag.content}>
-		{/if}
-	{/each}
-</svelte:head>
+<PageSEO pageType="ARTIST" {data} {customSEO} />
 
 <div class="page-container">
 	{#if filteredArtist}
