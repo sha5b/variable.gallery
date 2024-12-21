@@ -98,7 +98,8 @@
 	}
 </script>
 
-<div class="product-layout">
+<div class="page-content">
+    <div class="product-layout">
 	<!-- Product Details -->
 	<div class="product-details">
 		<!-- Title and Description -->
@@ -202,11 +203,11 @@
 			Add to Cart
 		</button>
 	</div>
-</div>
+    </div>
 
-<!-- Artist Details Section -->
-{#if artistInfo}
-	<div class="artist-container">
+    <!-- Artist Details Section -->
+    {#if artistInfo}
+        <div class="artist-container">
 		<div class="artist-info">
 			<div class="artist-details space-y-md">
 				<h3 class="section-title">About the Artist</h3>
@@ -257,3 +258,4 @@
 {/if}
 
 <!-- <CategorySlider {products} category={primaryCategory} /> -->
+</div>
