@@ -1,9 +1,12 @@
 <script>
 	import Modal from '$lib/components/modal/Modal.svelte';
+	import { handleImageLoad } from '$lib/utils/mediaUtils';
 	import '$lib/styles/components/gallery.css';
 
 	/** @type {string[]} */
 	export let images = [];
+	/** @type {string} */
+	export let fallbackImage = '/placeholder.jpg';
 
 	/** @type {boolean} */
 	let modalOpen = false;
@@ -11,6 +14,16 @@
 	let currentImageIndex = 0;
 	/** @type {number|null} */
 	let hoveredImageIndex = null;
+	/** @type {string[]} */
+	let loadedImages = [];
+
+	// Load and validate all images
+	$: {
+		Promise.all(images.map(src => handleImageLoad(src, fallbackImage)))
+			.then(validatedImages => {
+				loadedImages = validatedImages;
+			});
+	}
 
 	/**
 	 * @param {number} index
@@ -65,7 +78,7 @@
 <Modal images={images} bind:open={modalOpen} bind:currentIndex={currentImageIndex} />
 
 <div class="image-gallery">
-	{#each images as image, index}
+	{#each loadedImages as image, index}
 		<div
 			class="gallery-card group"
 			on:mouseenter={() => handleMouseEnter(index)}

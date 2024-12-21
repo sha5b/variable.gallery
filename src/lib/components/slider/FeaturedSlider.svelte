@@ -1,16 +1,18 @@
 <script>
-    import { handleMouseMove, handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
+    import { handleMouseMove } from '$lib/utils/sliderHelper';
     import { isCartSliderOpen } from '$lib/stores/cartStore';
     import { goto } from '$app/navigation';
+    import { handleImageLoad, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
 
+    /** @type {import('$lib/utils/types').Product[]} */
     export let products;
 
     let limitedProducts = products
         .slice()
-        .sort(() => Math.random() - 0.5)
-        
+        .sort(() => Math.random() - 0.5);
 
-    let slider;
+    /** @type {HTMLElement|null} */
+    let slider = null;
     let scrollState = {
         scrollTarget: 0,
         isAnimating: false
@@ -21,36 +23,26 @@
         isCartOpen = value;
     });
 
+    /**
+     * @param {MouseEvent} event
+     */
     function onHandleMouseMove(event) {
-        handleMouseMove(event, slider, scrollState);
-    }
-
-    function onProductClick(productId) {
-        handleProductClick(productId, goto);
-    }
-
-    async function getImageSrc(src) {
-        if (!src) return '/placeholder.jpg';
-        
-        try {
-            // Create a promise to load the image
-            await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = src;
-            });
-            return src;
-        } catch (error) {
-            console.error('Error loading image:', error);
-            return '/placeholder.jpg';
+        if (slider) {
+            handleMouseMove(event, slider, scrollState);
         }
+    }
+
+    /**
+     * @param {number} productId
+     */
+    function onProductClick(productId) {
+        goto(getProductUrl(productId));
     }
 
     // Add this to handle reactive loading of images
     $: imagePromises = limitedProducts.map(product => ({
         ...product,
-        loadedSrc: getImageSrc(product.images[0]?.src)
+        loadedSrc: handleImageLoad(getProductImageUrl(product))
     }));
 </script>
 
@@ -63,7 +55,7 @@
                         <span class="pill pill-primary pill-sm">{tag.name}</span>
                     {/each}
                 </div>
-                {#await getImageSrc(product.images[0]?.src)}
+                {#await imagePromises.find(p => p.id === product.id)?.loadedSrc || handleImageLoad(getProductImageUrl(product))}
                     <img src="/placeholder.jpg" alt="Loading..." class="product-image" />
                 {:then src}
                     <img {src} alt={product.name} class="product-image" />

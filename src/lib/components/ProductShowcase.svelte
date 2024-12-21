@@ -59,6 +59,7 @@
 	import { addItem, toggleCartSlider } from '$lib/stores/cartStore';
 	import { slide } from 'svelte/transition';
 	import { goto } from '$app/navigation';
+	import { getArtistUrl, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
 
 	/** @type {Product[]} */
 	export let products;
@@ -234,7 +235,7 @@
 		<!-- View Details Button -->
 		{#if product}
 			<button 
-				on:click={() => window.location.href = `/shop/${product.id}`} 
+				on:click={() => goto(getProductUrl(product.id))}
 				class="button-primary w-full mt-8"
 			>
 				View Details
@@ -290,7 +291,7 @@
 				{#if artistInfo}
 					<button 
 						class="button-primary mt-8 w-full"
-						on:click={() => goto(`/artist/${artistInfo?.slug || ''}`)}
+						on:click={() => artistInfo && goto(getArtistUrl(artistInfo.title.rendered))}
 					>
 						View Profile
 					</button>

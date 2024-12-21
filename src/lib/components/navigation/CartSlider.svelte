@@ -1,10 +1,14 @@
 <script>
-  import { handleProductClick, preloadImage } from '$lib/utils/sliderHelper';
-  import { cart, removeItem, addItem , isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
+  import { cart, removeItem, addItem, isCartSliderOpen, toggleCartSlider } from '$lib/stores/cartStore';
   import { goto } from '$app/navigation';
+  import { handleImageLoad, getProductUrl, getProductImageUrl } from '$lib/utils/mediaUtils';
 
-  let isOpen;
+  /** @type {boolean} */
+  let isOpen = false;
+  /** @type {number} */
   let total = 0;
+
+  /** @typedef {import('$lib/utils/types').Product & { quantity: number, price: number }} CartItem */
 
   // Subscribe to the store's value and calculate total
   $: {
@@ -12,7 +16,7 @@
           isOpen = value;
       });
       
-      total = $cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      total = $cart.reduce((/** @type {number} */ sum, /** @type {CartItem} */ item) => sum + (item.price * item.quantity), 0);
       console.log('Current cart items:', $cart);
   }
 
@@ -20,17 +24,23 @@
       toggleCartSlider();
   }
 
+  /**
+   * @param {CartItem} item
+   */
   function increaseQuantity(item) {
       addItem(item);
   }
 
+  /**
+   * @param {CartItem} item
+   */
   function decreaseQuantity(item) {
-      cart.update((items) => {
-          const existingItem = items.find((i) => i.id === item.id);
-          if (existingItem.quantity > 1) {
+      cart.update((/** @type {CartItem[]} */ items) => {
+          const existingItem = items.find((/** @type {CartItem} */ i) => i.id === item.id);
+          if (existingItem && existingItem.quantity > 1) {
               existingItem.quantity -= 1;
           } else {
-              return items.filter((i) => i.id !== item.id);
+              return items.filter((/** @type {CartItem} */ i) => i.id !== item.id);
           }
           return [...items];
       });
@@ -46,15 +56,18 @@
       goto('/cart');
   }
 
-  // Redirect to product page on image click
+  /**
+   * @param {number} productId
+   */
   function onImageClick(productId) {
-      window.location.href = `/shop/${productId}`;
+      goto(getProductUrl(productId));
   }
 
-  // Preload images with fallback
-  function getImageSrc(src) {
-      return preloadImage(src, '/path/to/placeholder.jpg');
-  }
+  // Handle image loading for cart items
+  $: imagePromises = $cart.map((/** @type {CartItem} */ item) => ({
+      ...item,
+      loadedSrc: handleImageLoad(getProductImageUrl(item))
+  }));
 </script>
 
 <!-- Cart Slider -->
@@ -90,12 +103,20 @@
     <ul class="space-y-4">
       {#each $cart as item (item.id)}
         <li class="flex gap-4 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-          <img 
-            src={getImageSrc(item.images?.[0]?.src)} 
-            alt={item.name}
-            class="w-20 h-20 object-cover rounded-md cursor-pointer"
-            on:click={() => onImageClick(item.id)}
-          />
+          {#await imagePromises.find((/** @type {CartItem & { loadedSrc: Promise<string> }} */ p) => p.id === item.id)?.loadedSrc || handleImageLoad(getProductImageUrl(item))}
+            <img 
+              src="/placeholder.jpg"
+              alt="Loading..."
+              class="w-20 h-20 object-cover rounded-md cursor-pointer"
+            />
+          {:then src}
+            <img 
+              {src}
+              alt={item.name}
+              class="w-20 h-20 object-cover rounded-md cursor-pointer"
+              on:click={() => onImageClick(item.id)}
+            />
+          {/await}
           
           <div class="flex-1">
             <h3 class="font-medium text-primary">{item.name}</h3>
