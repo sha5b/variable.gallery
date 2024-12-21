@@ -1,43 +1,85 @@
-export const defaultSEO = {
-  title: 'variable.gallery | Digital Art Gallery',
-  description: 'Explore digital art, NFTs, and experimental media formats in our virtual gallery space.',
-  keywords: ['digital art', 'NFT', 'art gallery', 'virtual gallery', 'experimental art'],
-  openGraph: {
-    type: 'website',
-    siteName: 'variable.gallery',
-    url: 'https://variable.gallery',
-    image: 'https://variable.gallery/og-image.jpg'
-  }
-};
+import { GALLERY_INFO, DEFAULT_META, PAGE_CONFIGS, PAGE_TYPES } from './constants.js';
 
-export function generateMetaTags(seo) {
-  const tags = [
-    { name: 'description', content: seo.description },
-    { name: 'keywords', content: seo.keywords?.join(', ') || '' }
-  ];
+/**
+ * @typedef {import('./types').SeoConfig} SeoConfig
+ * @typedef {import('./types').PageConfig} PageConfig
+ * @typedef {import('./types').MetaTag} MetaTag
+ */
 
-  if (seo.noindex || seo.nofollow) {
-    tags.push({
-      name: 'robots',
-      content: `${seo.noindex ? 'noindex' : 'index'}, ${seo.nofollow ? 'nofollow' : 'follow'}`
-    });
-  }
+export const defaultSEO = DEFAULT_META;
 
-  if (seo.openGraph) {
-    const og = seo.openGraph;
-    tags.push(
-      { property: 'og:title', content: seo.title },
-      { property: 'og:description', content: seo.description },
-      { property: 'og:type', content: og.type },
-      { property: 'og:site_name', content: og.siteName },
-      { property: 'og:url', content: og.url },
-      { property: 'og:image', content: og.image }
-    );
-  }
+/**
+ * Generate SEO configuration for a specific page type
+ * @param {keyof typeof PAGE_TYPES} pageType - Type of the page
+ * @param {Partial<SeoConfig>} [customConfig] - Optional custom configuration to override defaults
+ * @returns {SeoConfig} Complete SEO configuration for the page
+ */
+export function generateSeoConfig(pageType, customConfig = {}) {
+    const pageDefaults = PAGE_CONFIGS[pageType] || PAGE_CONFIGS[PAGE_TYPES.HOME];
+    
+    // Merge keywords from all sources, removing duplicates
+    const keywords = Array.from(new Set([
+        ...defaultSEO.keywords,
+        ...pageDefaults.keywords,
+        ...(customConfig.keywords || [])
+    ]));
 
-  if (seo.additionalMetaTags) {
-    tags.push(...seo.additionalMetaTags);
-  }
+    // Merge OpenGraph data with proper fallbacks
+    const openGraph = {
+        ...defaultSEO.openGraph,
+        ...pageDefaults.openGraph,
+        ...(customConfig.openGraph || {}),
+        title: customConfig.openGraph?.title || customConfig.title || pageDefaults.title,
+        description: customConfig.openGraph?.description || customConfig.description || pageDefaults.description,
+        type: customConfig.openGraph?.type || pageDefaults.openGraph.type || defaultSEO.openGraph.type
+    };
 
-  return tags;
-} 
+    // Return merged configuration
+    return {
+        ...defaultSEO,
+        ...pageDefaults,
+        ...customConfig,
+        keywords,
+        openGraph
+    };
+}
+
+/**
+ * Generate meta tags from SEO configuration
+ * @param {SeoConfig} seoConfig - SEO configuration object
+ * @returns {MetaTag[]} Array of meta tags
+ */
+export function generateMetaTags(seoConfig) {
+    /** @type {MetaTag[]} */
+    const tags = [
+        // Basic meta tags
+        { name: 'description', content: seoConfig.description },
+        { name: 'keywords', content: seoConfig.keywords.join(', ') },
+        
+        // Open Graph tags
+        { property: 'og:title', content: seoConfig.openGraph.title || seoConfig.title },
+        { property: 'og:description', content: seoConfig.openGraph.description || seoConfig.description },
+        { property: 'og:image', content: seoConfig.openGraph.image || '' },
+        { property: 'og:url', content: seoConfig.openGraph.url || '' },
+        { property: 'og:type', content: seoConfig.openGraph.type || 'website' },
+        
+        // Twitter Card tags
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:site', content: '@variablegallery' },
+        { name: 'twitter:title', content: seoConfig.openGraph.title || seoConfig.title },
+        { name: 'twitter:description', content: seoConfig.openGraph.description || seoConfig.description },
+        { name: 'twitter:image', content: seoConfig.openGraph.image || '' }
+    ];
+
+    return tags.filter(tag => tag.content); // Remove tags with empty content
+}
+
+/**
+ * Generate canonical URL for a given path
+ * @param {string} path - URL path (e.g., '/shop', '/artist/name')
+ * @returns {string} Full canonical URL
+ */
+export function generateCanonicalUrl(path) {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${GALLERY_INFO.baseUrl}${cleanPath}`;
+}
