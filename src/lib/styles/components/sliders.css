@@ -1,10 +1,17 @@
 /* Slider Styles */
 
+.artist-slider-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Base slider styles */
 .artist-slider-container,
 .category-slider-container,
 .featured-slider-container {
     width: 100%;
+    height: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -13,6 +20,7 @@
 .artist-slider,
 .category-slider {
     display: flex;
+    height: 100%;
     gap: var(--spacing-md);
     padding: 0 var(--spacing-md);
 }
@@ -51,7 +59,7 @@
 
 .artist-card {
     flex: 0 0 300px;
-    height: 300px;
+    height: 100%;
 }
 
 .category-card {
@@ -87,7 +95,6 @@
     .category-card,
     .featured-card {
         flex: 0 0 85%;
-        height: 350px;
         margin-right: var(--spacing-sm);
     }
 
@@ -115,7 +122,6 @@
     .category-card,
     .featured-card {
         flex: 0 0 90%;
-        height: 300px;
     }
 }
 
